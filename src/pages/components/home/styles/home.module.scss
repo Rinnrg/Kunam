@@ -26,6 +26,35 @@
       inset 0 calc(var(--layout-columns-gap) * -1.04 * 2) 0 0 var(--white),
       inset calc(var(--layout-margin) * 1.1001) 0 0 0 var(--white);
   }
+  .centerContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: left;
+    flex: 1 1 auto;
+    width: 100%;
+    padding: var(--layout-columns-gap) 0px;
+    background-color: var(--white);
+    box-shadow: 0 0 0 1vw var(--white);
+    border-radius: var(--layout-columns-gap);
+    position: relative;
+    z-index: 2;
+
+    @include mobile {
+      box-shadow: 0 0 0 2vw var(--white);
+      border-radius: calc(var(--layout-columns-gap) * 0.5);
+    }
+
+    h2 {
+      width: 100%;
+      max-width: 60%;
+      @include mobile {
+        max-width: 100%;
+      }
+    }
+  }
+
   .topContainer {
     padding: var(--layout-columns-gap) 0px;
     flex: 0 1 auto;

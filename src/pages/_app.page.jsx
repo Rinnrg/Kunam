@@ -8,6 +8,7 @@ import * as THREE from 'three';
 import { useMemo, useRef } from 'react';
 
 import { Analytics } from '@vercel/analytics/react';
+import Background from '@src/components/canvas/background/Index';
 import { Canvas } from '@react-three/fiber';
 import Layout from '@src/components/dom/Layout';
 import Lenis from 'lenis';
@@ -86,6 +87,9 @@ function MyApp({ Component, pageProps, router }) {
     () => (
       <>
         <Loader />
+        <div className={styles.background}>
+          <Background />
+        </div>
         <Scrollbar />
         <Navbar />
         <Analytics />
