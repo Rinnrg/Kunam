@@ -17,14 +17,7 @@ function MenuButton({ isScrolled = false }) {
 
   if (isScrolled) {
     return (
-      <button 
-        type="button" 
-        onClick={handleClick} 
-        aria-label="Open Menu" 
-        aria-expanded={false} 
-        aria-controls="menu" 
-        className={clsx(styles.hamburger)}
-      >
+      <button type="button" onClick={handleClick} aria-label="Open Menu" aria-expanded={false} aria-controls="menu" className={clsx(styles.hamburger)}>
         <span className={styles.line} />
         <span className={styles.line} />
       </button>
