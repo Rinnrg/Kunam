@@ -5,7 +5,7 @@ import { useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 
-function MenuButton() {
+function MenuButton({ isScrolled = false }) {
   const [setIsMenuOpen, lenis, isLoading] = useStore(useShallow((state) => [state.setIsMenuOpen, state.lenis, state.isLoading]));
 
   const handleClick = useCallback(() => {
@@ -14,6 +14,22 @@ function MenuButton() {
       lenis.stop();
     }
   }, [isLoading, setIsMenuOpen, lenis]);
+
+  if (isScrolled) {
+    return (
+      <button 
+        type="button" 
+        onClick={handleClick} 
+        aria-label="Open Menu" 
+        aria-expanded={false} 
+        aria-controls="menu" 
+        className={clsx(styles.hamburger)}
+      >
+        <span className={styles.line} />
+        <span className={styles.line} />
+      </button>
+    );
+  }
 
   return (
     <button type="button" onClick={handleClick} aria-label="Open Menu" aria-expanded={false} aria-controls="menu" className={clsx('p-xs', styles.button)}>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import MenuButton from '@src/components/dom/navbar/components/MenuButton';
 import MenuLinks from '@src/components/dom/navbar/components/MenuLinks';
 import styles from '@src/components/dom/navbar/styles/index.module.scss';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import useIsMobile from '@src/hooks/useIsMobile';
 import { useRouter } from 'next/router';
 import { useShallow } from 'zustand/react/shallow';
@@ -14,6 +14,7 @@ function Navbar() {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [lenis] = useStore(useShallow((state) => [state.lenis]));
+  const [isScrolled, setIsScrolled] = useState(false);
 
   const scrollToPosition = useCallback(
     (position, duration = 1.5) => {
@@ -37,19 +38,40 @@ function Navbar() {
     }
   }, [router.pathname, scrollToPosition]);
 
+  useEffect(() => {
+    if (!lenis) return undefined;
+
+    const handleScroll = (e) => {
+      const scrollPosition = e.scroll || 0;
+      setIsScrolled(scrollPosition > 100);
+    };
+
+    lenis.on('scroll', handleScroll);
+
+    return () => {
+      lenis.off('scroll', handleScroll);
+    };
+  }, [lenis]);
+
   return (
     <>
       <MenuLinks />
 
-      <header className={styles.root} role="banner">
+      <header className={`${styles.root} ${isScrolled ? styles.scrolled : ''}`} role="banner">
         <div className={styles.innerHeader}>
-          <Link onClick={goToTop} aria-label="Go home" scroll={false} href="/">
-            <Image src="/logo/logo 1 black.svg" alt="Kunam" width={120} height={40} priority />
+          <Link onClick={goToTop} aria-label="Go home" scroll={false} href="/" className={styles.logoLink}>
+            <Image 
+              src={isScrolled ? "/logo/logo 2 black.svg" : "/logo/logo 1 black.svg"} 
+              alt="Kunam" 
+              width={isScrolled ? (isMobile ? 50 : 60) : (isMobile ? 60 : 100)} 
+              height={isScrolled ? (isMobile ? 50 : 60) : (isMobile ? 20 : 33)} 
+              priority 
+            />
           </Link>
 
           <div className={styles.rightContainer}>
-            {!isMobile && <ButtonLink href="mailto:vaggelisgiats@gmail.com" label="GET IN TOUCH" />}
-            <MenuButton />
+            {!isMobile && !isScrolled && <ButtonLink href="mailto:vaggelisgiats@gmail.com" label="GET IN TOUCH" />}
+            <MenuButton isScrolled={isScrolled} />
           </div>
         </div>
       </header>
