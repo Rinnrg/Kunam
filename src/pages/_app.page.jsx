@@ -113,21 +113,19 @@ function MyApp({ Component, pageProps, router }) {
   );
 
   return (
-    <>
-      <div className={styles.root}>
-        {domElements}
-        <div ref={layoutRef} id="layout" className={styles.layout}>
-          {canvasElements}
-          <main ref={mainRef} className={styles.main}>
-            <div ref={mainContainerRef} id="mainContainer" className={styles.mainContainer}>
-              <Layout layoutRef={layoutRef} mainRef={mainRef} router={router}>
-                <Component {...pageProps} />
-              </Layout>
-            </div>
-          </main>
-        </div>
+    <div className={styles.root}>
+      {domElements}
+      <div ref={layoutRef} id="layout" className={styles.layout}>
+        {canvasElements}
+        <main ref={mainRef} className={styles.main}>
+          <div ref={mainContainerRef} id="mainContainer" className={styles.mainContainer}>
+            <Layout layoutRef={layoutRef} mainRef={mainRef} router={router}>
+              <Component {...pageProps} />
+            </Layout>
+          </div>
+        </main>
       </div>
-    </>
+    </div>
   );
 }
 
