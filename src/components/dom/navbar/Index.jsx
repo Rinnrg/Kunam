@@ -70,13 +70,7 @@ function Navbar() {
       <header className={`${styles.root} ${isScrolled ? styles.scrolled : ''}`} role="banner">
         <div className={styles.innerHeader}>
           <Link onClick={goToTop} aria-label="Go home" scroll={false} href="/" className={styles.logoLink}>
-            <Image
-              src={isScrolled ? '/logo/logo 2 black.svg' : '/logo/logo 1 black.svg'}
-              alt="Kunam"
-              width={getLogoWidth()}
-              height={getLogoHeight()}
-              priority
-            />
+            <Image src={isScrolled ? '/logo/logo 2 black.svg' : '/logo/logo 1 black.svg'} alt="Kunam" width={getLogoWidth()} height={getLogoHeight()} priority />
           </Link>
 
           <div className={styles.rightContainer}>
