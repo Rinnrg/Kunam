@@ -4,11 +4,9 @@ import InfiniteText from '@src/components/animationComponents/infiniteText/Index
 import clsx from 'clsx';
 import { gsap } from 'gsap';
 import styles from '@src/pages/components/home/styles/home.module.scss';
-import useIsMobile from '@src/hooks/useIsMobile';
 import { useIsomorphicLayoutEffect } from '@src/hooks/useIsomorphicLayoutEffect';
 
 function Home() {
-  const isMobile = useIsMobile();
   const rootRef = useRef();
   const infiniteTextRef = useRef();
 
