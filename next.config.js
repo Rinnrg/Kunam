@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   pageExtensions: ['page.jsx'],
+  trailingSlash: false,
   experimental: {
     // optimizeCss: true,
     // nextScriptWorkers: true,
