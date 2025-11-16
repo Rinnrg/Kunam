@@ -53,6 +53,16 @@ function Navbar() {
     };
   }, [lenis]);
 
+  const getLogoWidth = () => {
+    if (isScrolled) return 60;
+    return isMobile ? 60 : 100;
+  };
+
+  const getLogoHeight = () => {
+    if (isScrolled) return 60;
+    return isMobile ? 20 : 33;
+  };
+
   return (
     <>
       <MenuLinks />
@@ -63,8 +73,8 @@ function Navbar() {
             <Image
               src={isScrolled ? '/logo/logo 2 black.svg' : '/logo/logo 1 black.svg'}
               alt="Kunam"
-              width={isScrolled ? 60 : isMobile ? 60 : 100}
-              height={isScrolled ? 60 : isMobile ? 20 : 33}
+              width={getLogoWidth()}
+              height={getLogoHeight()}
               priority
             />
           </Link>
