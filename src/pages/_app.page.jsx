@@ -8,7 +8,6 @@ import * as THREE from 'three';
 import { useMemo, useRef } from 'react';
 
 import { Analytics } from '@vercel/analytics/react';
-import Background from '@src/components/canvas/background/Index';
 import { Canvas } from '@react-three/fiber';
 import Layout from '@src/components/dom/Layout';
 import Lenis from 'lenis';
@@ -16,7 +15,6 @@ import Loader from '@src/components/dom/Loader';
 import Navbar from '@src/components/dom/navbar/Index';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Scrollbar from '@src/components/dom/Scrollbar';
-import Stats from '@src/components/stats/Index';
 import Tempus from '@darkroom.engineering/tempus';
 import { View } from '@react-three/drei';
 import { gsap } from 'gsap';
@@ -88,9 +86,6 @@ function MyApp({ Component, pageProps, router }) {
     () => (
       <>
         <Loader />
-        <div className={styles.background}>
-          <Background />
-        </div>
         <Scrollbar />
         <Navbar />
         <Analytics />
@@ -119,7 +114,6 @@ function MyApp({ Component, pageProps, router }) {
 
   return (
     <>
-      <Stats />
       <div className={styles.root}>
         {domElements}
         <div ref={layoutRef} id="layout" className={styles.layout}>
