@@ -5,7 +5,7 @@ export default class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
-          <link rel="icon" type="image/svg+xml" href="/logo/logo 1 white.svg" />
+          <link rel="icon" type="image/svg+xml" href="/logo/icon.svg" />
           <link href="/fonts/NeueHaasDisplayBold.woff2" as="font" type="font/woff2" />
           <link href="/fonts/NeueHaasDisplayLight.woff2" as="font" type="font/woff2" />
           <link href="/fonts/NeueHaasDisplayLightItalic.woff2" as="font" type="font/woff2" />

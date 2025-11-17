@@ -35,12 +35,17 @@ function Home() {
   return (
     <section ref={rootRef} className={clsx(styles.root)}>
       <div className={clsx(styles.centerContainer)}>
-        <h2 className="h2">Remarkable</h2>
-        <h2 className={clsx('h2', 'bold')}>Virtual Experiences</h2>
+        <h2 className="h2">Elevate Your</h2>
+        <h2 className={clsx('h2', 'bold')}>Style Statement</h2>
+        <p className={styles.subtitle}>Discover premium clothing that defines your unique identity</p>
+        <div className={styles.ctaContainer}>
+          <button type="button" className={styles.primaryButton}>Shop Collection</button>
+          <button type="button" className={styles.secondaryButton}>View Lookbook</button>
+        </div>
       </div>
 
       <div ref={infiniteTextRef} className={styles.infiniteContainer}>
-        <InfiniteText text="Scroll Down" length={5} />
+        <InfiniteText text="New Arrivals — Limited Edition" length={5} />
       </div>
     </section>
   );
