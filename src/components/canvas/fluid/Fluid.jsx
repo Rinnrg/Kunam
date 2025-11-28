@@ -23,7 +23,7 @@ function Fluid({ mainRef, fluidColor }) {
   const FBOs = useFBOs();
   const materials = useMaterials();
   const splatStack = usePointerEvents(mainRef, size, force);
-  
+
   // Reuse vectors to prevent memory allocation in useFrame
   const pointerVector = useRef(new Vector2());
   const colorVector = useRef(new Vector3());
