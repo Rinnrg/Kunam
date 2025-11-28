@@ -1,23 +1,17 @@
-import Background from '@src/components/canvas/background/Background';
-import { Canvas } from '@react-three/fiber';
-
+// Simple black background - no complex rendering needed
 function Index() {
-  const devicePixelRatio = typeof window !== 'undefined' ? Math.min(1, window.devicePixelRatio) : 1;
-
   return (
-    <Canvas
-      flat
-      linear
-      dpr={[devicePixelRatio, 1]}
-      gl={{
-        antialias: false,
-        stencil: false,
-        depth: false,
-        pixelRatio: 0.5,
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: '#000000',
+        zIndex: -1,
       }}
-    >
-      <Background />
-    </Canvas>
+    />
   );
 }
 export default Index;

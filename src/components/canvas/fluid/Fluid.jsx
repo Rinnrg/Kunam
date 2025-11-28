@@ -23,6 +23,10 @@ function Fluid({ mainRef, fluidColor }) {
   const FBOs = useFBOs();
   const materials = useMaterials();
   const splatStack = usePointerEvents(mainRef, size, force);
+  
+  // Reuse vectors to prevent memory allocation in useFrame
+  const pointerVector = useRef(new Vector2());
+  const colorVector = useRef(new Vector3());
 
   const setShaderMaterial = useCallback(
     (name) => {
@@ -68,8 +72,10 @@ function Fluid({ mainRef, fluidColor }) {
 
       setShaderMaterial('splat');
       setUniforms('splat', 'uTarget', FBOs.velocity.read.texture);
-      setUniforms('splat', 'uPointer', new Vector2(mouseX, mouseY));
-      setUniforms('splat', 'uColor', new Vector3(velocityX, velocityY, 10.0));
+      pointerVector.current.set(mouseX, mouseY);
+      setUniforms('splat', 'uPointer', pointerVector.current);
+      colorVector.current.set(velocityX, velocityY, 10.0);
+      setUniforms('splat', 'uColor', colorVector.current);
       setUniforms('splat', 'uRadius', radius / 100.0);
       setRenderTarget('velocity');
       setUniforms('splat', 'uTarget', FBOs.density.read.texture);

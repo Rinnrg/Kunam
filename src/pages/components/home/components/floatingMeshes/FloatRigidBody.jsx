@@ -25,6 +25,14 @@ export default function FloatRigidBody({ totalCount, transparentCount }) {
 
   const normalCount = totalCount - transparentCount;
 
+  // Reuse vectors and colors to prevent memory allocation in useFrame
+  const targetPosition = useRef(new THREE.Vector3());
+  const currentPosition = useRef(new THREE.Vector3());
+  const direction = useRef(new THREE.Vector3());
+  const force = useRef(new THREE.Vector3());
+  const newColor = useRef(new THREE.Color());
+  const currentColor = useRef(new THREE.Color());
+
   const { factors, xFactors, yFactors, zFactors, normalInstances, transparentInstances, colors } = useMemo(() => {
     const factors = [];
 
@@ -78,29 +86,29 @@ export default function FloatRigidBody({ totalCount, transparentCount }) {
         if (apiNormal.current && body) {
           const t = factors[i] + state.clock.elapsedTime * 0.25;
 
-          const targetPosition = new THREE.Vector3(
+          targetPosition.current.set(
             Math.cos(t) + Math.sin(t * 1) / 10 + xFactors[i] + Math.cos((t / 10) * factors[i]) + (Math.sin(t * 1) * factors[i]) / 10,
             Math.sin(t) + Math.cos(t * 2) / 10 + yFactors[i] + Math.sin((t / 10) * factors[i]) + (Math.cos(t * 2) * factors[i]) / 10,
             Math.sin(t) + Math.cos(t * 2) / 10 + zFactors[i] + Math.cos((t / 10) * factors[i]) + (Math.sin(t * 3) * factors[i]) / 4,
           );
 
           const apiTranslation = body.translation();
-          const currentPosition = new THREE.Vector3(apiTranslation.x, apiTranslation.y, apiTranslation.z);
+          currentPosition.current.set(apiTranslation.x, apiTranslation.y, apiTranslation.z);
 
-          const direction = new THREE.Vector3().subVectors(targetPosition, currentPosition);
+          direction.current.subVectors(targetPosition.current, currentPosition.current);
 
           const forceMagnitude = 0.5;
-          const force = direction.normalize().multiplyScalar(forceMagnitude);
+          force.current.copy(direction.current).normalize().multiplyScalar(forceMagnitude);
 
-          body.applyImpulse(force, true);
+          body.applyImpulse(force.current, true);
         }
       });
 
-      const newColor = new THREE.Color(accents[currentAccentIndex]);
+      newColor.current.set(accents[currentAccentIndex]);
       for (let i = !isMobile ? 7 : 4; i < normalCount; i++) {
-        const currentColor = new THREE.Color().fromArray(colors.slice(i * 3, (i + 1) * 3));
-        easing.dampC(currentColor, newColor, 0.1, state.delta);
-        colors.set(currentColor.toArray(), i * 3);
+        currentColor.current.fromArray(colors.slice(i * 3, (i + 1) * 3));
+        easing.dampC(currentColor.current, newColor.current, 0.1, state.delta);
+        colors.set(currentColor.current.toArray(), i * 3);
       }
 
       if (sphereRef.current && sphereRef.current.geometry.attributes.color) {
@@ -113,21 +121,21 @@ export default function FloatRigidBody({ totalCount, transparentCount }) {
         if (apiTransparent.current && body) {
           const t = factors[normalCount + i] + state.clock.elapsedTime * 0.25;
 
-          const targetPosition = new THREE.Vector3(
+          targetPosition.current.set(
             Math.cos(t) + Math.sin(t * 1) / 10 + xFactors[normalCount + i] + Math.cos((t / 10) * factors[normalCount + i]) + (Math.sin(t * 1) * factors[normalCount + i]) / 10,
             Math.sin(t) + Math.cos(t * 2) / 10 + yFactors[normalCount + i] + Math.sin((t / 10) * factors[normalCount + i]) + (Math.cos(t * 2) * factors[normalCount + i]) / 10,
             Math.sin(t) + Math.cos(t * 2) / 10 + zFactors[normalCount + i] + Math.cos((t / 10) * factors[normalCount + i]) + (Math.sin(t * 3) * factors[normalCount + i]) / 4,
           );
 
           const apiTranslation = body.translation();
-          const currentPosition = new THREE.Vector3(apiTranslation.x, apiTranslation.y, apiTranslation.z);
+          currentPosition.current.set(apiTranslation.x, apiTranslation.y, apiTranslation.z);
 
-          const direction = new THREE.Vector3().subVectors(targetPosition, currentPosition);
+          direction.current.subVectors(targetPosition.current, currentPosition.current);
 
           const forceMagnitude = 0.5;
-          const force = direction.normalize().multiplyScalar(forceMagnitude);
+          force.current.copy(direction.current).normalize().multiplyScalar(forceMagnitude);
 
-          body.applyImpulse(force, true);
+          body.applyImpulse(force.current, true);
         }
       });
     }

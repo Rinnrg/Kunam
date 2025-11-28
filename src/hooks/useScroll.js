@@ -13,6 +13,6 @@ function useScroll(callback, deps = []) {
     return () => {
       lenis.off('scroll', callback);
     };
-  }, [lenis, callback, [...deps]]);
+  }, [lenis, callback, ...deps]);
 }
 export default useScroll;

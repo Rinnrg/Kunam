@@ -104,6 +104,8 @@ function MyApp({ Component, pageProps, router }) {
         gl={{
           pixelRatio: 0.5,
           outputColorSpace: isAbout === false ? THREE.LinearSRGBColorSpace : THREE.SRGBColorSpace,
+          antialias: false,
+          powerPreference: 'high-performance',
         }}
         style={{ zIndex: 0 }}
         resize={{ debounce: { resize: 0, scroll: 0 }, polyfill: undefined }}

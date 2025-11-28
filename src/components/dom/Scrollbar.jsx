@@ -9,8 +9,8 @@ import { useStore } from '@src/store';
 function Scrollbar() {
   const progressBar = useRef();
   const scrollbarRef = useRef();
+  const fadeTimeout = useRef(null);
   const [isLoading, isMenuOpen, introOut] = useStore(useShallow((state) => [state.isLoading, state.isMenuOpen, state.introOut]));
-  let fadeTimeout;
 
   const updateScrollbar = (scroll, limit) => {
     const progress = scroll / limit;
@@ -25,8 +25,10 @@ function Scrollbar() {
       gsap.to(scrollbarRef.current, { opacity: 1, duration: 0.3 });
       updateScrollbar(scroll, limit);
 
-      clearTimeout(fadeTimeout);
-      fadeTimeout = setTimeout(() => {
+      if (fadeTimeout.current) {
+        clearTimeout(fadeTimeout.current);
+      }
+      fadeTimeout.current = setTimeout(() => {
         if (scrollbarRef?.current) {
           gsap.to(scrollbarRef.current, { opacity: 0, duration: 0.5 });
         }
@@ -36,9 +38,11 @@ function Scrollbar() {
 
   useEffect(
     () => () => {
-      clearTimeout(fadeTimeout);
+      if (fadeTimeout.current) {
+        clearTimeout(fadeTimeout.current);
+      }
     },
-    [fadeTimeout],
+    [],
   );
 
   if (isLoading && introOut) {
