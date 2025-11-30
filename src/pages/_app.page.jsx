@@ -16,6 +16,7 @@ import Loader from '@src/components/dom/Loader';
 import Navbar from '@src/components/dom/navbar/Index';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Scrollbar from '@src/components/dom/Scrollbar';
+import { SessionProvider } from 'next-auth/react';
 import Tempus from '@darkroom.engineering/tempus';
 import { View } from '@react-three/drei';
 import { gsap } from 'gsap';
@@ -49,17 +50,32 @@ function MyApp({ Component, pageProps, router }) {
   const mainContainerRef = useRef();
   const layoutRef = useRef();
 
+  // Check if current page is admin page
+  const isAdminPage = router.pathname.startsWith('/admin');
+
   useFoucFix();
-  useScroll(() => ScrollTrigger.update());
+  useScroll(() => {
+    if (!isAdminPage) {
+      ScrollTrigger.update();
+    }
+  });
 
   useIsomorphicLayoutEffect(() => {
+    // Skip Lenis for admin pages
+    if (isAdminPage) return undefined;
+    
     // eslint-disable-next-line no-shadow
     const lenis = new Lenis({
       smoothWheel: true,
-      smoothTouch: true,
-      syncTouch: true,
+      smoothTouch: false,
+      syncTouch: false,
+      lerp: 0.1,
+      duration: 1.2,
       wrapper: mainRef.current || undefined,
       content: mainContainerRef.current || undefined,
+      wheelMultiplier: 1,
+      touchMultiplier: 2,
+      infinite: false,
     });
 
     setLenis(lenis);
@@ -69,7 +85,7 @@ function MyApp({ Component, pageProps, router }) {
       lenis.destroy();
       setLenis(null);
     };
-  }, []);
+  }, [isAdminPage]);
 
   useIsomorphicLayoutEffect(() => {
     if (lenis) {
@@ -86,52 +102,69 @@ function MyApp({ Component, pageProps, router }) {
   const domElements = useMemo(
     () => (
       <>
-        <Loader />
-        <div className={styles.background}>
-          <Background />
-        </div>
-        <Scrollbar />
-        <Navbar />
+        {!isAdminPage && <Loader />}
+        {!isAdminPage && (
+          <div className={styles.background}>
+            <Background />
+          </div>
+        )}
+        {!isAdminPage && <Scrollbar />}
+        {!isAdminPage && <Navbar />}
         <Analytics />
       </>
     ),
-    [],
+    [isAdminPage],
   );
 
-  const canvasElements = useMemo(
-    () => (
+  const canvasElements = useMemo(() => {
+    if (isAdminPage) return null;
+
+    return (
       <Canvas
         gl={{
-          pixelRatio: 0.5,
+          pixelRatio: typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, 1.5) : 1,
           outputColorSpace: isAbout === false ? THREE.LinearSRGBColorSpace : THREE.SRGBColorSpace,
           antialias: false,
           powerPreference: 'high-performance',
+          alpha: false,
+          stencil: false,
+          depth: true,
         }}
         style={{ zIndex: 0 }}
-        resize={{ debounce: { resize: 0, scroll: 0 }, polyfill: undefined }}
+        resize={{ debounce: { resize: 50, scroll: 50 }, polyfill: undefined }}
         className={styles.canvasContainer}
-        dpr={[0.5, 1.5]}
+        dpr={[1, 1.5]}
       >
         <View.Port />
       </Canvas>
-    ),
-    [isAbout],
-  );
+    );
+  }, [isAbout, isAdminPage]);
+
+  // Render admin pages with minimal wrapper
+  if (isAdminPage) {
+    return (
+      <SessionProvider session={pageProps.session}>
+        <Component {...pageProps} />
+      </SessionProvider>
+    );
+  }
 
   return (
-    <div className={styles.root}>
-      {domElements}
-      <div ref={layoutRef} id="layout" className={styles.layout}>
-        {canvasElements}
-        <main ref={mainRef} className={styles.main}>
-          <div ref={mainContainerRef} id="mainContainer" className={styles.mainContainer}>
-            <Layout layoutRef={layoutRef} mainRef={mainRef} router={router}>
-              <Component {...pageProps} />
-            </Layout>
-          </div>
-        </main>
+    <SessionProvider session={pageProps.session}>
+      <div className={styles.root}>
+        {domElements}
+        <div ref={layoutRef} id="layout" className={styles.layout}>
+          {canvasElements}
+          <main ref={mainRef} className={styles.main}>
+            <div ref={mainContainerRef} id="mainContainer" className={styles.mainContainer}>
+              <Layout layoutRef={layoutRef} mainRef={mainRef} router={router}>
+                <Component {...pageProps} />
+              </Layout>
+            </div>
+          </main>
+        </div>
       </div>
-    </div>
+    </SessionProvider>
   );
 }
 

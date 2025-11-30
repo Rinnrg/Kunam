@@ -19,6 +19,9 @@ function Layout({ children, layoutRef, mainRef, router }) {
   const [isEntering, setIsEntering] = useState(false);
 
   const menuTime = useMemo(() => (isMenuOpen ? 0.8 : 0), [isMenuOpen]);
+  
+  // Check if current page is admin page (login or dashboard)
+  const isAdminPage = useMemo(() => router.asPath.startsWith('/admin'), [router.asPath]);
 
   const handleEnter = useCallback(
     () => {
@@ -47,23 +50,25 @@ function Layout({ children, layoutRef, mainRef, router }) {
               setIsEntering(false);
             },
           },
-          2.5,
+          0.3,
         )
           .to(
             '#loader',
             {
               x: '-100%',
               ease: 'power2.inOut',
+              duration: 0.4,
             },
-            2.5,
+            0.3,
           )
           .to(
             mainRef.current,
             {
               ease: 'power2.inOut',
               x: '0px',
+              duration: 0.4,
             },
-            2.5,
+            0.3,
           )
           .to(
             mainRef.current,
@@ -71,8 +76,9 @@ function Layout({ children, layoutRef, mainRef, router }) {
               ease: 'power2.inOut',
               borderRadius: 0,
               scale: 1,
+              duration: 0.3,
             },
-            3,
+            0.5,
           )
           .to(
             layoutRef.current,
@@ -80,16 +86,18 @@ function Layout({ children, layoutRef, mainRef, router }) {
               ease: 'power2.inOut',
               height: '100%',
               opacity: 1,
+              duration: 0.3,
             },
-            3,
+            0.5,
           )
           .to(
             'header',
             {
               ease: 'power2.inOut',
               autoAlpha: 1,
+              duration: 0.3,
             },
-            3.3,
+            0.6,
           )
           .to(
             mainRef.current,
@@ -98,8 +106,9 @@ function Layout({ children, layoutRef, mainRef, router }) {
               height: 'auto',
               border: 'none',
               pointerEvents: 'auto',
+              duration: 0.2,
             },
-            3.3,
+            0.6,
           );
       }
     },
@@ -132,7 +141,7 @@ function Layout({ children, layoutRef, mainRef, router }) {
               {
                 ease: 'power2.inOut',
                 autoAlpha: 0,
-                duration: 0.5,
+                duration: 0.3,
               },
               menuTime,
             );
@@ -143,7 +152,7 @@ function Layout({ children, layoutRef, mainRef, router }) {
             {
               ease: 'power2.inOut',
               autoAlpha: 0,
-              duration: 0.5,
+              duration: 0.3,
               onComplete: () => {
                 gsap.set('#loader', {
                   scale: 0.9,
@@ -167,7 +176,7 @@ function Layout({ children, layoutRef, mainRef, router }) {
                 ease: 'power2.inOut',
                 height: '90svh',
                 opacity: 1,
-                duration: 0.5,
+                duration: 0.3,
               },
               menuTime,
             )
@@ -179,7 +188,7 @@ function Layout({ children, layoutRef, mainRef, router }) {
                 opacity: 1,
                 border: '2px solid #f0f4f1',
                 borderRadius: '1.3888888889vw',
-                duration: 0.5,
+                duration: 0.3,
               },
               menuTime,
             )
@@ -188,18 +197,18 @@ function Layout({ children, layoutRef, mainRef, router }) {
               {
                 ease: 'power2.inOut',
                 x: '-100%',
-                duration: 0.5,
+                duration: 0.3,
               },
-              0.5 + menuTime,
+              0.3 + menuTime,
             )
             .to(
               '#loader',
               {
                 ease: 'power2.inOut',
                 x: '0px',
-                duration: 0.5,
+                duration: 0.3,
               },
-              0.5 + menuTime,
+              0.3 + menuTime,
             )
             .set(mainRef.current, {
               x: '100%',
@@ -211,6 +220,11 @@ function Layout({ children, layoutRef, mainRef, router }) {
     [introOut, menuTime, isEntering],
   );
 
+  // If admin page, render without layout animations and footer
+  if (isAdminPage) {
+    return <>{children}</>;
+  }
+
   return (
     <>
       <SwitchTransition>
@@ -219,8 +233,8 @@ function Layout({ children, layoutRef, mainRef, router }) {
           in={false}
           unmountOnExit
           timeout={{
-            enter: introOut ? 4500 : 0,
-            exit: introOut ? 2550 : 0,
+            enter: introOut ? 900 : 0,
+            exit: introOut ? 700 : 0,
           }}
           onEnter={handleEnter}
           onExit={handleExit}

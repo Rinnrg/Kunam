@@ -1,0 +1,128 @@
+.root {
+  width: 100%;
+  min-height: 100vh;
+  padding: 150px 5% 3rem;
+  background-color: var(--white, #f0f4f1);
+  
+  @media (max-width: 768px) {
+    padding: 120px 5% 2rem;
+  }
+}
+
+.gridContainer {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0;
+  background-color: var(--white, #f0f4f1);
+  
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
+  
+  @media (min-width: 1200px) {
+    gap: 3rem;
+  }
+}
+
+.projectCard {
+  display: flex;
+  flex-direction: column;
+  border: 2px solid #000000;
+  border-radius: 0;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  background-color: var(--white, #f0f4f1);
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    
+    .projectImage {
+      transform: scale(1.05);
+    }
+    
+    .viewButton {
+      background-color: #000000;
+      color: #ffffff;
+      
+      svg {
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+.cardHeader {
+  padding: 2rem 2rem 1.5rem;
+  border-bottom: 2px solid #000000;
+  background-color: var(--white, #f0f4f1);
+}
+
+.projectTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0;
+  color: #000000;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  background-color: var(--white, #f0f4f1);
+}
+
+.projectImage {
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.cardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  border-top: 2px solid #000000;
+  background-color: var(--white, #f0f4f1);
+}
+
+.devLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #000000;
+}
+
+.viewButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  border: 2px solid #000000;
+  background-color: transparent;
+  color: #000000;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  svg {
+    transition: transform 0.3s ease;
+  }
+  
+  &:hover {
+    background-color: #000000;
+    color: #ffffff;
+  }
+}

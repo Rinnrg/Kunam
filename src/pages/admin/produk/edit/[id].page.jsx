@@ -1,0 +1,610 @@
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
+import { useState, useEffect } from 'react';
+import styles from '../form.module.scss';
+
+export default function EditProduk() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+  const { id } = router.query;
+  const [formData, setFormData] = useState({
+    nama: '',
+    deskripsi: '',
+    kategori: '',
+    harga: '',
+    diskon: '0',
+    stok: '0',
+    ukuran: [],
+    warna: [],
+    images: [],
+    videos: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [existingImages, setExistingImages] = useState([]);
+  const [videoFiles, setVideoFiles] = useState([]);
+  const [videoPreviews, setVideoPreviews] = useState([]);
+  const [existingVideos, setExistingVideos] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [ukuranInputs, setUkuranInputs] = useState([{ size: '', qty: '' }]);
+
+  const fetchProduk = async () => {
+    try {
+      const response = await fetch(`/api/produk/${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Fetched product data:', data);
+        console.log('Images from API:', data.gambar || data.images);
+        
+        setFormData({
+          nama: data.nama,
+          deskripsi: data.deskripsi || '',
+          kategori: data.kategori,
+          harga: data.harga.toString(),
+          diskon: data.diskon ? data.diskon.toString() : '0',
+          stok: data.stok.toString(),
+          ukuran: data.ukuran || [],
+          warna: data.warna || [],
+          images: data.gambar || data.images || [],
+          videos: data.video || data.videos || [],
+        });
+        const imagesArray = data.gambar || data.images || [];
+        const videosArray = data.video || data.videos || [];
+        
+        console.log('Setting existingImages:', imagesArray);
+        console.log('Setting existingVideos:', videosArray);
+        
+        setExistingImages(imagesArray);
+        setExistingVideos(videosArray);
+        
+        // Parse existing ukuran data (format: "S:3", "M:4")
+        if (data.ukuran && data.ukuran.length > 0) {
+          const parsedUkuran = data.ukuran.map((item) => {
+            const [size, qty] = item.split(':');
+            return { size: size || '', qty: qty || '' };
+          });
+          setUkuranInputs(parsedUkuran);
+        }
+      } else {
+        setError('Produk tidak ditemukan');
+      }
+    } catch (err) {
+      setError('Error loading produk');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/admin/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (id && session) {
+      fetchProduk();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, session]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
+  };
+
+  const handleArrayChange = (e, field) => {
+    const { value } = e.target;
+    const array = value.split('\n').filter((item) => item.trim() !== '');
+    setFormData((prev) => ({
+      ...prev,
+      [field]: array,
+    }));
+  };
+
+  const handleUkuranChange = (index, field, value) => {
+    const newUkuran = [...ukuranInputs];
+    newUkuran[index][field] = value;
+    setUkuranInputs(newUkuran);
+    
+    // Update formData with size format: "S:3, M:4, L:5"
+    const ukuranArray = newUkuran
+      .filter((item) => item.size && item.qty)
+      .map((item) => `${item.size}:${item.qty}`);
+    
+    setFormData((prev) => ({
+      ...prev,
+      ukuran: ukuranArray,
+    }));
+  };
+
+  const addUkuranInput = () => {
+    setUkuranInputs([...ukuranInputs, { size: '', qty: '' }]);
+  };
+
+  const removeUkuranInput = (index) => {
+    const newUkuran = ukuranInputs.filter((_, i) => i !== index);
+    setUkuranInputs(newUkuran);
+    
+    // Update formData
+    const ukuranArray = newUkuran
+      .filter((item) => item.size && item.qty)
+      .map((item) => `${item.size}:${item.qty}`);
+    
+    setFormData((prev) => ({
+      ...prev,
+      ukuran: ukuranArray,
+    }));
+  };
+
+  const getTotalUkuran = () => {
+    return ukuranInputs.reduce((total, item) => {
+      return total + (parseInt(item.qty, 10) || 0);
+    }, 0);
+  };
+
+  const getRemainingStock = () => {
+    const stok = parseInt(formData.stok, 10) || 0;
+    const totalUkuran = getTotalUkuran();
+    return stok - totalUkuran;
+  };
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageFiles(files);
+
+    // Create preview URLs
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setImagePreviews(previews);
+  };
+
+  const removeNewImage = (index) => {
+    const newFiles = imageFiles.filter((_, i) => i !== index);
+    const newPreviews = imagePreviews.filter((_, i) => i !== index);
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+    
+    // Revoke the URL to free memory
+    URL.revokeObjectURL(imagePreviews[index]);
+  };
+
+  const removeExistingImage = (index) => {
+    const newExisting = existingImages.filter((_, i) => i !== index);
+    setExistingImages(newExisting);
+  };
+
+  const handleVideoChange = (e) => {
+    const files = Array.from(e.target.files);
+    setVideoFiles(files);
+
+    // Create preview URLs
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setVideoPreviews(previews);
+  };
+
+  const removeNewVideo = (index) => {
+    const newFiles = videoFiles.filter((_, i) => i !== index);
+    const newPreviews = videoPreviews.filter((_, i) => i !== index);
+    setVideoFiles(newFiles);
+    setVideoPreviews(newPreviews);
+    
+    // Revoke the URL to free memory
+    URL.revokeObjectURL(videoPreviews[index]);
+  };
+
+  const removeExistingVideo = (index) => {
+    const newExisting = existingVideos.filter((_, i) => i !== index);
+    setExistingVideos(newExisting);
+  };
+
+  const uploadImages = async () => {
+    if (imageFiles.length === 0) return [];
+
+    setIsUploading(true);
+
+    try {
+      const uploadPromises = imageFiles.map(async (file) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.url;
+        }
+        throw new Error('Failed to upload image');
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      return uploadedUrls;
+    } catch (err) {
+      throw new Error('Error uploading images');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const uploadVideos = async () => {
+    if (videoFiles.length === 0) return [];
+
+    try {
+      const uploadPromises = videoFiles.map(async (file) => {
+        const uploadFormData = new FormData();
+        uploadFormData.append('file', file);
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          return data.url;
+        }
+        throw new Error('Failed to upload video');
+      });
+
+      const uploadedUrls = await Promise.all(uploadPromises);
+      return uploadedUrls;
+    } catch (err) {
+      throw new Error('Error uploading videos');
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    // Validate total ukuran
+    if (getTotalUkuran() > parseInt(formData.stok, 10)) {
+      setError('Total ukuran melebihi stok yang tersedia!');
+      return;
+    }
+    
+    if (getTotalUkuran() < parseInt(formData.stok, 10)) {
+      setError('Total ukuran harus sama dengan stok!');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Upload new images and videos if any
+      const uploadedImageUrls = await uploadImages();
+      const uploadedVideoUrls = await uploadVideos();
+
+      // Combine existing with newly uploaded ones
+      const allImages = [...existingImages, ...uploadedImageUrls];
+      const allVideos = [...existingVideos, ...uploadedVideoUrls];
+
+      // Prepare form data with all media
+      const dataToSubmit = {
+        ...formData,
+        images: allImages,
+        videos: allVideos,
+      };
+
+      const response = await fetch(`/api/produk/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSubmit),
+      });
+
+      if (response.ok) {
+        router.push('/admin');
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Error updating produk');
+      }
+    } catch (err) {
+      setError(err.message || 'Error updating produk');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  if (status === 'loading' || isLoading) {
+    return <div className={styles.loader}>Loading...</div>;
+  }
+
+  if (!session) {
+    return null;
+  }
+
+  return (
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h1 className={styles.title}>Edit Produk</h1>
+        <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
+          Kembali ke Dashboard
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className={styles.form}>
+        {error && <div className={styles.error}>{error}</div>}
+
+        <div className={styles.formGroup}>
+          <label htmlFor="nama" className={styles.label}>
+            Nama Produk *
+            <input id="nama" name="nama" type="text" value={formData.nama} onChange={handleChange} className={styles.input} required />
+          </label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="kategori" className={styles.label}>
+            Kategori *
+            <select id="kategori" name="kategori" value={formData.kategori} onChange={handleChange} className={styles.input} required>
+              <option value="">Pilih Kategori</option>
+              <option value="T-Shirt">T-Shirt</option>
+              <option value="Hoodie">Hoodie</option>
+              <option value="Jacket">Jacket</option>
+              <option value="Pants">Pants</option>
+              <option value="Shorts">Shorts</option>
+              <option value="Accessories">Accessories</option>
+            </select>
+          </label>
+        </div>
+
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label htmlFor="harga" className={styles.label}>
+              Harga (Rp) *
+              <input 
+                id="harga" 
+                name="harga" 
+                type="number" 
+                step="1" 
+                value={formData.harga} 
+                onChange={handleChange} 
+                className={styles.input} 
+                placeholder="Contoh: 200000"
+                required 
+              />
+            </label>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="diskon" className={styles.label}>
+              Diskon (%)
+              <input 
+                id="diskon" 
+                name="diskon" 
+                type="number" 
+                step="1" 
+                min="0" 
+                max="100" 
+                value={formData.diskon} 
+                onChange={handleChange} 
+                className={styles.input} 
+                placeholder="Contoh: 20"
+              />
+            </label>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="stok" className={styles.label}>
+              Stok *
+              <input id="stok" name="stok" type="number" value={formData.stok} onChange={handleChange} className={styles.input} required />
+            </label>
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="deskripsi" className={styles.label}>
+            Deskripsi
+            <textarea id="deskripsi" name="deskripsi" value={formData.deskripsi} onChange={handleChange} className={styles.textarea} rows={4} />
+          </label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Ukuran & Jumlah per Ukuran *
+            <span className={styles.stockInfo}>
+              (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
+            </span>
+          </label>
+          
+          {ukuranInputs.map((ukuran, index) => (
+            <div key={`ukuran-${index}`} className={styles.ukuranRow}>
+              <select
+                value={ukuran.size}
+                onChange={(e) => handleUkuranChange(index, 'size', e.target.value)}
+                className={styles.ukuranSelect}
+              >
+                <option value="">Pilih Ukuran</option>
+                <option value="XXS">XXS</option>
+                <option value="XS">XS</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+                <option value="XXXL">XXXL</option>
+              </select>
+              
+              <input
+                type="number"
+                min="1"
+                max={getRemainingStock() + (parseInt(ukuran.qty, 10) || 0)}
+                value={ukuran.qty}
+                onChange={(e) => handleUkuranChange(index, 'qty', e.target.value)}
+                className={styles.ukuranQty}
+                placeholder="Jumlah"
+              />
+              
+              {ukuranInputs.length > 1 && (
+                <button type="button" onClick={() => removeUkuranInput(index)} className={styles.removeUkuranButton}>
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+          
+          {getTotalUkuran() < parseInt(formData.stok, 10) && (
+            <button type="button" onClick={addUkuranInput} className={styles.addUkuranButton}>
+              + Tambah Ukuran
+            </button>
+          )}
+          
+          {getTotalUkuran() > parseInt(formData.stok, 10) && (
+            <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label htmlFor="warna" className={styles.label}>
+            Warna (satu per baris)
+            <textarea
+              id="warna"
+              name="warna"
+              value={formData.warna.join('\n')}
+              onChange={(e) => handleArrayChange(e, 'warna')}
+              className={styles.textarea}
+              rows={3}
+              placeholder="Hitam&#10;Putih&#10;Merah&#10;Biru"
+            />
+          </label>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Gambar Produk
+          </label>
+          
+          {/* Debug Info */}
+          {!isLoading && (
+            <p className={styles.sectionLabel} style={{ fontSize: '12px', color: '#666' }}>
+              Debug: {existingImages.length} gambar existing
+            </p>
+          )}
+          
+          {/* Existing Images */}
+          {existingImages.length > 0 ? (
+            <>
+              <p className={styles.sectionLabel}>Gambar Saat Ini ({existingImages.length}):</p>
+              <div className={styles.imagePreviewContainer}>
+                {existingImages.map((image, index) => (
+                  <div key={`existing-${image}-${index}`} className={styles.imagePreview}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img 
+                      src={image} 
+                      alt={`Existing ${index + 1}`} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                      onError={(e) => {
+                        console.error('Image load error:', image);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                    <button type="button" onClick={() => removeExistingImage(index)} className={styles.removeImageButton}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            !isLoading && (
+              <p className={styles.sectionLabel} style={{ color: '#999', fontStyle: 'italic' }}>
+                Belum ada gambar. Upload gambar baru di bawah.
+              </p>
+            )
+          )}
+
+          {/* Add New Images */}
+          <label htmlFor="images" className={styles.label} style={{ marginTop: '16px' }}>
+            Tambah Gambar Baru
+            <input id="images" name="images" type="file" accept="image/*" multiple onChange={handleImageChange} className={styles.fileInput} />
+          </label>
+          
+          {/* New Image Previews */}
+          {imagePreviews.length > 0 && (
+            <>
+              <p className={styles.sectionLabel}>Preview Gambar Baru:</p>
+              <div className={styles.imagePreviewContainer}>
+                {imagePreviews.map((preview, index) => (
+                  <div key={`new-${preview}-${index}`} className={styles.imagePreview}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={preview} alt={`Preview ${index + 1}`} />
+                    <button type="button" onClick={() => removeNewImage(index)} className={styles.removeImageButton}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Video Produk
+          </label>
+          
+          {/* Existing Videos */}
+          {existingVideos.length > 0 && (
+            <>
+              <p className={styles.sectionLabel}>Video Saat Ini:</p>
+              <div className={styles.videoPreviewContainer}>
+                {existingVideos.map((video, index) => (
+                  <div key={`existing-video-${video}`} className={styles.videoPreview}>
+                    <video src={video} controls className={styles.videoElement} />
+                    <button type="button" onClick={() => removeExistingVideo(index)} className={styles.removeVideoButton}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {/* Add New Videos */}
+          <label htmlFor="videos" className={styles.label} style={{ marginTop: '16px' }}>
+            Tambah Video Baru (opsional)
+            <input id="videos" name="videos" type="file" accept="video/*" multiple onChange={handleVideoChange} className={styles.fileInput} />
+          </label>
+          
+          {/* New Video Previews */}
+          {videoPreviews.length > 0 && (
+            <>
+              <p className={styles.sectionLabel}>Preview Video Baru:</p>
+              <div className={styles.videoPreviewContainer}>
+                {videoPreviews.map((preview, index) => (
+                  <div key={`new-video-${index}`} className={styles.videoPreview}>
+                    <video src={preview} controls className={styles.videoElement} />
+                    <button type="button" onClick={() => removeNewVideo(index)} className={styles.removeVideoButton}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div className={styles.formActions}>
+          <button type="button" onClick={() => router.push('/admin')} className={styles.cancelButton} disabled={isSubmitting}>
+            Batal
+          </button>
+          <button type="submit" className={styles.submitButton} disabled={isSubmitting || isUploading}>
+            {(() => {
+              if (isUploading) return 'Mengupload Gambar...';
+              if (isSubmitting) return 'Mengupdate...';
+              return 'Update Produk';
+            })()}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}

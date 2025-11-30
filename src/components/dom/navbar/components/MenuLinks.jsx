@@ -5,7 +5,7 @@ import clsx from 'clsx';
 import footerLinks from '@src/components/dom/navbar/constants/footerLinks';
 import gsap from 'gsap';
 import menuLinks from '@src/components/dom/navbar/constants/menuLinks';
-import projectsLinks from '@src/components/dom/navbar/constants/projectsLinks';
+import produkLinks from '@src/components/dom/navbar/constants/produkLinks';
 import styles from '@src/components/dom/navbar/styles/menuLinks.module.scss';
 import useIsMobile from '@src/hooks/useIsMobile';
 import { useRouter } from 'next/router';
@@ -125,34 +125,14 @@ function MenuLinks() {
         </div>
         <div
           ref={(el) => {
-            menuLinksItemsRef.current[menuLinks.length + 2] = el;
-          }}
-          className={styles.menuList}
-        >
-          {projectsLinks.map((link, index) => (
-            <div
-              ref={(el) => {
-                menuLinksItemsRef.current[menuLinks.length + index + 2] = el;
-              }}
-              key={link.title}
-              className={styles.menuListItem}
-            >
-              <Link aria-label={`Go ${link.title}`} scroll={false} href={link.href}>
-                <span>{link.title}</span>
-              </Link>
-            </div>
-          ))}
-        </div>
-        <div
-          ref={(el) => {
-            menuLinksItemsRef.current[menuLinks.length + projectsLinks.length + 3] = el;
+            menuLinksItemsRef.current[menuLinks.length + 1] = el;
           }}
           className={styles.menuList}
         >
           <div
             role="presentation"
             ref={(el) => {
-              menuLinksItemsRef.current[menuLinks.length + projectsLinks.length + 3] = el;
+              menuLinksItemsRef.current[menuLinks.length + 1] = el;
             }}
             className={styles.menuListItem}
           >
@@ -163,14 +143,14 @@ function MenuLinks() {
         </div>
         <div
           ref={(el) => {
-            menuLinksItemsRef.current[menuLinks.length + projectsLinks.length + 4] = el;
+            menuLinksItemsRef.current[menuLinks.length + 2] = el;
           }}
           className={styles.menuList}
         >
           {footerLinks.map((link, index) => (
             <div
               ref={(el) => {
-                menuLinksItemsRef.current[menuLinks.length + projectsLinks.length + index + 4] = el;
+                menuLinksItemsRef.current[menuLinks.length + index + 2] = el;
               }}
               key={link.title}
               className={styles.menuListItem}

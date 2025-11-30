@@ -84,21 +84,12 @@
   }
 
   &:nth-child(2) {
-    counter-reset: menulist2 4;
-    &::before {
-      font-weight: 700;
-      content: 'Selected Projects';
-
-      margin-bottom: var(--layout-columns-gap);
-    }
-  }
-  &:nth-child(3) {
     display: none;
     @include mobile {
       display: block;
     }
   }
-  &:nth-child(4) {
+  &:nth-child(3) {
     &::before {
       font-weight: 700;
       content: 'Follow Us';

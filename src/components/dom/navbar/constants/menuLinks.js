@@ -8,8 +8,8 @@ const menuLinks = [
     href: '/about',
   },
   {
-    title: 'Projects',
-    href: '/projects',
+    title: 'Produk',
+    href: '/produk',
   },
   {
     title: 'Contact',

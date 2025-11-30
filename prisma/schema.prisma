@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Produk {
+  id              String   @id @default(cuid())
+  nama            String   // Nama produk
+  kategori        String   // Kategori: T-Shirt, Hoodie, Jacket, Pants, Shorts, Accessories
+  harga           Float    // Harga dalam Rupiah
+  diskon          Float    @default(0) // Diskon dalam persen (0-100)
+  stok            Int      @default(0) // Total stok tersedia
+  deskripsi       String?  @db.Text // Deskripsi produk (opsional)
+  ukuran          String[] // Array format: ["S:3", "M:5", "L:4"] (ukuran:jumlah)
+  warna           String[] // Array warna: ["Hitam", "Putih", "Merah"]
+  gambar          String[] // Array URL gambar produk
+  video           String[] // Array URL video produk (opsional)
+  produkUnggulan  Boolean  @default(false) // Produk unggulan untuk homepage
+  urutanTampilan  Int      @default(0) // Urutan tampilan produk
+  tanggalDibuat   DateTime @default(now())
+  tanggalDiubah   DateTime @updatedAt
+
+  @@index([urutanTampilan])
+  @@index([produkUnggulan])
+  @@index([kategori])
+  @@map("produk")
+}

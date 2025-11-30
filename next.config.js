@@ -1,18 +1,17 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  pageExtensions: ['page.jsx'],
+  pageExtensions: ['page.jsx', 'page.js'],
   trailingSlash: false,
-  experimental: {
-    // optimizeCss: true,
-    // nextScriptWorkers: true,
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
-  // uncomment the following snippet if using styled components
-  // compiler: {
-  //   styledComponents: true,
-  // },
   reactStrictMode: false, // Recommended for the `pages` directory, default in `app`.
 
-  images: {},
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    unoptimized: process.env.NODE_ENV === 'development',
+  },
   webpack(config, { isServer }) {
     // config.resolve.alias = {
     //   ...config.resolve.alias,

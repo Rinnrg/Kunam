@@ -81,7 +81,7 @@ function Footer() {
       </div>
       <div style={{ gridColumn: isMobile ? '3 / 7' : '5 / 9' }} className={styles.linksContainer}>
         <AppearTitle isFooter>
-          <h6 className={clsx(styles.title, 'h6')}>Follow me</h6>
+          <h6 className={clsx(styles.title, 'h6')}>Follow Us</h6>
           {footerLinks.map((link) => (
             <div key={link.title} className={styles.linkTextContainer}>
               <LinkText target className={styles.linkText} title={link.title} href={link.href}>
@@ -91,26 +91,8 @@ function Footer() {
           ))}
         </AppearTitle>
       </div>
-      <div className={styles.emailContaineer}>
-        <AppearTitle isFooter>
-          <h4 className={clsx(styles.workWithMe, 'h4')}>Work With Me:</h4>
-          <div>
-            <div className={styles.link}>
-              <Link aria-label="Send email" scroll={false} href="mailto:vaggelisgiats@gmail.com">
-                <h4 className={clsx(styles.email, 'h4')}>vaggelisgiats@gmail.com</h4>
-              </Link>
-              {/* class="link__graphic link__graphic--slide" */}
-              <svg className={clsx(styles.linkGraphic)} width="300%" height="100%" viewBox="0 0 1200 60" preserveAspectRatio="none">
-                <path d="M0,56.5c0,0,298.666,0,399.333,0C448.336,56.5,513.994,46,597,46c77.327,0,135,10.5,200.999,10.5c95.996,0,402.001,0,402.001,0" />
-              </svg>
-            </div>
-          </div>
-        </AppearTitle>
-      </div>
-
       <div className={styles.middleContainer} style={{ gridColumn: '1 / 9' }}>
         <AppearTitle isFooter>
-          <div className="p-x">Based in Thessaloniki, Greece</div>
           <div className={clsx('p-x', styles.middleText)}>
             Current Time: <Time />
           </div>
@@ -125,13 +107,13 @@ function Footer() {
       </div>
       <div className={styles.middleContainer} style={{ gridColumn: '13 / 17', textAlign: isMobile ? 'left' : 'right' }}>
         <AppearTitle isFooter>
-          <div className="p-x">© 2025 · Evangelos Giatsidis</div>
+          <div className="p-x">© 2025 · Kunam</div>
           <div className={clsx('p-x', styles.middleText)}>All Rights Reserved</div>
         </AppearTitle>
       </div>
 
       <div className={styles.giats}>
-        <span>GIATS</span>
+        <span className={styles.kunamText}>KUNAM</span>
       </div>
       <div className={styles.goToTop}>
         <GoTop />

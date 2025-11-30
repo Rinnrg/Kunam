@@ -3,6 +3,7 @@ module.exports = {
   plugins: ['eslint-plugin-prettier', 'react', 'jsx-a11y', '@react-three'],
   rules: {
     'react/prop-types': 'off',
+    'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.tsx'] }],
     // 'import-helpers/order-imports': [
     //   'warn',
     //   {
@@ -32,6 +33,7 @@ module.exports = {
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
     'import/no-unresolved': 'error',
+    'import/extensions': ['error', 'ignorePackages', { ts: 'never', tsx: 'never', js: 'never', jsx: 'never' }],
     // Since React 17 and typescript 4.1 you can safely disable the rule
     'react/react-in-jsx-scope': 'off',
   },
@@ -45,7 +47,10 @@ module.exports = {
   settings: {
     'import/resolver': {
       alias: {
-        map: [['@src', './src']],
+        map: [
+          ['@src', './src'],
+          ['@', './catalog'],
+        ],
         extensions: ['.js', '.jsx', '.ts', '.tsx'],
       },
     },
