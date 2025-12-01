@@ -46,16 +46,30 @@ function Page({ produk }) {
 
 export async function getServerSideProps() {
   try {
-    const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${baseUrl}/api/produk`);
-    const produk = await res.json();
+    const { PrismaClient } = await import('@prisma/client');
+    const prisma = new PrismaClient();
+
+    const produk = await prisma.produk.findMany({
+      orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
+    });
+
+    await prisma.$disconnect();
+
+    // Serialize dates
+    const serializedProduk = produk.map((item) => ({
+      ...item,
+      tanggalDibuat: item.tanggalDibuat.toISOString(),
+      tanggalDiupdate: item.tanggalDiupdate.toISOString(),
+    }));
 
     return {
       props: {
-        produk: produk || [],
+        produk: serializedProduk,
       },
     };
   } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Error fetching produk:', error);
     return {
       props: {
         produk: [],
