@@ -1,4 +1,4 @@
-import AppearByWords from '@src/components/animationComponents/appearBywords/Index';
+import AppearByWords from '@src/components/animationComponents/appearByWords/Index';
 import ButtonLink from '@src/components/animationComponents/buttonLink/Index';
 import ProdukGrid from '@src/pages/produk/components/produkGrid/ProdukGrid';
 import clsx from 'clsx';

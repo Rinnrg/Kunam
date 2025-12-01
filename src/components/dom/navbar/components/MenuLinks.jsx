@@ -5,7 +5,6 @@ import clsx from 'clsx';
 import footerLinks from '@src/components/dom/navbar/constants/footerLinks';
 import gsap from 'gsap';
 import menuLinks from '@src/components/dom/navbar/constants/menuLinks';
-import produkLinks from '@src/components/dom/navbar/constants/produkLinks';
 import styles from '@src/components/dom/navbar/styles/menuLinks.module.scss';
 import useIsMobile from '@src/hooks/useIsMobile';
 import { useRouter } from 'next/router';

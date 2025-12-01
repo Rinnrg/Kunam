@@ -7,28 +7,14 @@ function ProdukGrid({ produk }) {
   return (
     <section className={styles.root}>
       <div className={styles.gridContainer}>
-        {produk.map((item, index) => (
-          <Link 
-            key={item.id} 
-            href={`/produk/${item.id}`}
-            className={styles.projectCard}
-            scroll={false}
-            aria-label={`View ${item.nama}`}
-          >
+        {produk.map((item) => (
+          <Link key={item.id} href={`/produk/${item.id}`} className={styles.projectCard} scroll={false} aria-label={`View ${item.nama}`}>
             <div className={styles.cardHeader}>
               <h2 className={clsx(styles.projectTitle, 'h2')}>{item.nama}</h2>
             </div>
-            
+
             <div className={styles.imageContainer}>
-              {item.gambar && item.gambar.length > 0 && (
-                <Image 
-                  src={item.gambar[0]} 
-                  alt={item.nama}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  className={styles.projectImage}
-                />
-              )}
+              {item.gambar && item.gambar.length > 0 && <Image src={item.gambar[0]} alt={item.nama} fill sizes="(max-width: 768px) 100vw, 50vw" className={styles.projectImage} />}
             </div>
 
             <div className={styles.cardFooter}>
@@ -39,7 +25,7 @@ function ProdukGrid({ produk }) {
               <button type="button" className={styles.viewButton}>
                 <span>LIHAT</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M4 10H16M16 10L10 4M16 10L10 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
               </button>
             </div>

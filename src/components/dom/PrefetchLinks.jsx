@@ -1,13 +1,13 @@
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
-const PrefetchLinks = () => {
+function PrefetchLinks() {
   const router = useRouter();
 
   useEffect(() => {
     // Prefetch important pages
     const pagesToPrefetch = ['/', '/about', '/projects'];
-    
+
     pagesToPrefetch.forEach((page) => {
       if (router.pathname !== page) {
         router.prefetch(page);
@@ -16,6 +16,6 @@ const PrefetchLinks = () => {
   }, [router]);
 
   return null;
-};
+}
 
 export default PrefetchLinks;

@@ -40,9 +40,7 @@ function Page({ produk }) {
         {/* Hero Product Images */}
         <div className={styles.heroMockup}>
           <div className={styles.mockupContainer}>
-            {currentProduk.gambar && currentProduk.gambar.length > 0 && (
-              <Image src={currentProduk.gambar[0]} alt={currentProduk.nama} fill priority className={styles.mockupImage} />
-            )}
+            {currentProduk.gambar && currentProduk.gambar.length > 0 && <Image src={currentProduk.gambar[0]} alt={currentProduk.nama} fill priority className={styles.mockupImage} />}
           </div>
         </div>
 
@@ -54,7 +52,9 @@ function Page({ produk }) {
 
             {/* Product Info */}
             <div className={styles.descriptionSection}>
-              <h2 className={styles.descriptionTitle}>{currentProduk.nama} - {currentProduk.kategori}</h2>
+              <h2 className={styles.descriptionTitle}>
+                {currentProduk.nama} - {currentProduk.kategori}
+              </h2>
               <div className={styles.priceSection}>
                 <div className={styles.priceWrapper}>
                   {currentProduk.diskon > 0 ? (
@@ -75,21 +75,29 @@ function Page({ produk }) {
                   <p className={styles.description}>{currentProduk.deskripsi}</p>
                 </div>
               )}
-              
+
               {currentProduk.ukuran && currentProduk.ukuran.length > 0 && (
                 <div className={styles.sizeSection}>
                   <p className={styles.label}>Ukuran tersedia:</p>
                   <div className={styles.sizes}>
-                    {currentProduk.ukuran.map((size) => <span key={size} className={styles.sizeTag}>{size}</span>)}
+                    {currentProduk.ukuran.map((size) => (
+                      <span key={size} className={styles.sizeTag}>
+                        {size}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
-              
+
               {currentProduk.warna && currentProduk.warna.length > 0 && (
                 <div className={styles.colorSection}>
                   <p className={styles.label}>Warna tersedia:</p>
                   <div className={styles.colors}>
-                    {currentProduk.warna.map((color) => <span key={color} className={styles.colorTag}>{color}</span>)}
+                    {currentProduk.warna.map((color) => (
+                      <span key={color} className={styles.colorTag}>
+                        {color}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -132,18 +140,18 @@ export async function getStaticPaths() {
 export async function getStaticProps(context) {
   const { params } = context;
   const prisma = new PrismaClient();
-  
+
   try {
     const produk = await prisma.produk.findUnique({
       where: { id: params.id },
     });
-    
+
     await prisma.$disconnect();
-    
+
     if (!produk) {
       return { notFound: true };
     }
-    
+
     return {
       props: {
         produk: JSON.parse(JSON.stringify(produk)),

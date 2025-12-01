@@ -48,7 +48,7 @@ export default async function handler(req, res) {
 
       // Handle both single file and array of files
       const uploadedFile = Array.isArray(file) ? file[0] : file;
-      
+
       // Get the relative path for the URL
       const filename = path.basename(uploadedFile.filepath);
       const url = `/uploads/${filename}`;

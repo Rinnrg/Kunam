@@ -19,7 +19,7 @@ function Layout({ children, layoutRef, mainRef, router }) {
   const [isEntering, setIsEntering] = useState(false);
 
   const menuTime = useMemo(() => (isMenuOpen ? 0.8 : 0), [isMenuOpen]);
-  
+
   // Check if current page is admin page (login or dashboard)
   const isAdminPage = useMemo(() => router.asPath.startsWith('/admin'), [router.asPath]);
 
@@ -222,7 +222,7 @@ function Layout({ children, layoutRef, mainRef, router }) {
 
   // If admin page, render without layout animations and footer
   if (isAdminPage) {
-    return <>{children}</>;
+    return children;
   }
 
   return (

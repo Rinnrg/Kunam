@@ -38,7 +38,7 @@ export default function EditProduk() {
         const data = await response.json();
         console.log('Fetched product data:', data);
         console.log('Images from API:', data.gambar || data.images);
-        
+
         setFormData({
           nama: data.nama,
           deskripsi: data.deskripsi || '',
@@ -53,13 +53,13 @@ export default function EditProduk() {
         });
         const imagesArray = data.gambar || data.images || [];
         const videosArray = data.video || data.videos || [];
-        
+
         console.log('Setting existingImages:', imagesArray);
         console.log('Setting existingVideos:', videosArray);
-        
+
         setExistingImages(imagesArray);
         setExistingVideos(videosArray);
-        
+
         // Parse existing ukuran data (format: "S:3", "M:4")
         if (data.ukuran && data.ukuran.length > 0) {
           const parsedUkuran = data.ukuran.map((item) => {
@@ -112,12 +112,10 @@ export default function EditProduk() {
     const newUkuran = [...ukuranInputs];
     newUkuran[index][field] = value;
     setUkuranInputs(newUkuran);
-    
+
     // Update formData with size format: "S:3, M:4, L:5"
-    const ukuranArray = newUkuran
-      .filter((item) => item.size && item.qty)
-      .map((item) => `${item.size}:${item.qty}`);
-    
+    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+
     setFormData((prev) => ({
       ...prev,
       ukuran: ukuranArray,
@@ -131,23 +129,17 @@ export default function EditProduk() {
   const removeUkuranInput = (index) => {
     const newUkuran = ukuranInputs.filter((_, i) => i !== index);
     setUkuranInputs(newUkuran);
-    
+
     // Update formData
-    const ukuranArray = newUkuran
-      .filter((item) => item.size && item.qty)
-      .map((item) => `${item.size}:${item.qty}`);
-    
+    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+
     setFormData((prev) => ({
       ...prev,
       ukuran: ukuranArray,
     }));
   };
 
-  const getTotalUkuran = () => {
-    return ukuranInputs.reduce((total, item) => {
-      return total + (parseInt(item.qty, 10) || 0);
-    }, 0);
-  };
+  const getTotalUkuran = () => ukuranInputs.reduce((total, item) => total + (parseInt(item.qty, 10) || 0), 0);
 
   const getRemainingStock = () => {
     const stok = parseInt(formData.stok, 10) || 0;
@@ -169,7 +161,7 @@ export default function EditProduk() {
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
-    
+
     // Revoke the URL to free memory
     URL.revokeObjectURL(imagePreviews[index]);
   };
@@ -193,7 +185,7 @@ export default function EditProduk() {
     const newPreviews = videoPreviews.filter((_, i) => i !== index);
     setVideoFiles(newFiles);
     setVideoPreviews(newPreviews);
-    
+
     // Revoke the URL to free memory
     URL.revokeObjectURL(videoPreviews[index]);
   };
@@ -264,13 +256,13 @@ export default function EditProduk() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     // Validate total ukuran
     if (getTotalUkuran() > parseInt(formData.stok, 10)) {
       setError('Total ukuran melebihi stok yang tersedia!');
       return;
     }
-    
+
     if (getTotalUkuran() < parseInt(formData.stok, 10)) {
       setError('Total ukuran harus sama dengan stok!');
       return;
@@ -361,34 +353,13 @@ export default function EditProduk() {
           <div className={styles.formGroup}>
             <label htmlFor="harga" className={styles.label}>
               Harga (Rp) *
-              <input 
-                id="harga" 
-                name="harga" 
-                type="number" 
-                step="1" 
-                value={formData.harga} 
-                onChange={handleChange} 
-                className={styles.input} 
-                placeholder="Contoh: 200000"
-                required 
-              />
+              <input id="harga" name="harga" type="number" step="1" value={formData.harga} onChange={handleChange} className={styles.input} placeholder="Contoh: 200000" required />
             </label>
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="diskon" className={styles.label}>
               Diskon (%)
-              <input 
-                id="diskon" 
-                name="diskon" 
-                type="number" 
-                step="1" 
-                min="0" 
-                max="100" 
-                value={formData.diskon} 
-                onChange={handleChange} 
-                className={styles.input} 
-                placeholder="Contoh: 20"
-              />
+              <input id="diskon" name="diskon" type="number" step="1" min="0" max="100" value={formData.diskon} onChange={handleChange} className={styles.input} placeholder="Contoh: 20" />
             </label>
           </div>
 
@@ -414,14 +385,10 @@ export default function EditProduk() {
               (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
             </span>
           </label>
-          
+
           {ukuranInputs.map((ukuran, index) => (
             <div key={`ukuran-${index}`} className={styles.ukuranRow}>
-              <select
-                value={ukuran.size}
-                onChange={(e) => handleUkuranChange(index, 'size', e.target.value)}
-                className={styles.ukuranSelect}
-              >
+              <select value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
                 <option value="XXS">XXS</option>
                 <option value="XS">XS</option>
@@ -432,7 +399,7 @@ export default function EditProduk() {
                 <option value="XXL">XXL</option>
                 <option value="XXXL">XXXL</option>
               </select>
-              
+
               <input
                 type="number"
                 min="1"
@@ -442,7 +409,7 @@ export default function EditProduk() {
                 className={styles.ukuranQty}
                 placeholder="Jumlah"
               />
-              
+
               {ukuranInputs.length > 1 && (
                 <button type="button" onClick={() => removeUkuranInput(index)} className={styles.removeUkuranButton}>
                   ×
@@ -450,16 +417,14 @@ export default function EditProduk() {
               )}
             </div>
           ))}
-          
+
           {getTotalUkuran() < parseInt(formData.stok, 10) && (
             <button type="button" onClick={addUkuranInput} className={styles.addUkuranButton}>
               + Tambah Ukuran
             </button>
           )}
-          
-          {getTotalUkuran() > parseInt(formData.stok, 10) && (
-            <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>
-          )}
+
+          {getTotalUkuran() > parseInt(formData.stok, 10) && <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>}
         </div>
 
         <div className={styles.formGroup}>
@@ -478,17 +443,15 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Gambar Produk
-          </label>
-          
+          <label className={styles.label}>Gambar Produk</label>
+
           {/* Debug Info */}
           {!isLoading && (
             <p className={styles.sectionLabel} style={{ fontSize: '12px', color: '#666' }}>
               Debug: {existingImages.length} gambar existing
             </p>
           )}
-          
+
           {/* Existing Images */}
           {existingImages.length > 0 ? (
             <>
@@ -497,9 +460,9 @@ export default function EditProduk() {
                 {existingImages.map((image, index) => (
                   <div key={`existing-${image}-${index}`} className={styles.imagePreview}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img 
-                      src={image} 
-                      alt={`Existing ${index + 1}`} 
+                    <img
+                      src={image}
+                      alt={`Existing ${index + 1}`}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => {
                         console.error('Image load error:', image);
@@ -526,7 +489,7 @@ export default function EditProduk() {
             Tambah Gambar Baru
             <input id="images" name="images" type="file" accept="image/*" multiple onChange={handleImageChange} className={styles.fileInput} />
           </label>
-          
+
           {/* New Image Previews */}
           {imagePreviews.length > 0 && (
             <>
@@ -547,10 +510,8 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
-            Video Produk
-          </label>
-          
+          <label className={styles.label}>Video Produk</label>
+
           {/* Existing Videos */}
           {existingVideos.length > 0 && (
             <>
@@ -573,7 +534,7 @@ export default function EditProduk() {
             Tambah Video Baru (opsional)
             <input id="videos" name="videos" type="file" accept="video/*" multiple onChange={handleVideoChange} className={styles.fileInput} />
           </label>
-          
+
           {/* New Video Previews */}
           {videoPreviews.length > 0 && (
             <>

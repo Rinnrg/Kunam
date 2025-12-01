@@ -5,11 +5,7 @@ import { prisma } from '../../../lib/db';
 async function getProduk(req, res) {
   try {
     const produk = await prisma.produk.findMany({
-      orderBy: [
-        { produkUnggulan: 'desc' },
-        { urutanTampilan: 'asc' },
-        { tanggalDibuat: 'desc' },
-      ],
+      orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
 
     return res.status(200).json(produk);

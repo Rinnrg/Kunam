@@ -1,0 +1,11 @@
+# *
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api
+
+# Host
+Host: https://giats.me
+
+# Sitemaps
+Sitemap: https://giats.me/sitemap.xml

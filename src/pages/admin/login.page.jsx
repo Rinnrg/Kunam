@@ -58,7 +58,7 @@ export default function AdminLogin() {
         <h1 className={styles.title}>Admin Login</h1>
         <form onSubmit={handleSubmit} className={styles.form}>
           {error && <div className={styles.error}>{error}</div>}
-          
+
           <div className={styles.formGroup}>
             <label htmlFor="email" className={styles.label}>
               Email

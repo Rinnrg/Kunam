@@ -54,12 +54,10 @@ export default function CreateProduk() {
     const newUkuran = [...ukuranInputs];
     newUkuran[index][field] = value;
     setUkuranInputs(newUkuran);
-    
+
     // Update formData with size format: "S:3, M:4, L:5"
-    const ukuranArray = newUkuran
-      .filter((item) => item.size && item.qty)
-      .map((item) => `${item.size}:${item.qty}`);
-    
+    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+
     setFormData((prev) => ({
       ...prev,
       ukuran: ukuranArray,
@@ -73,23 +71,17 @@ export default function CreateProduk() {
   const removeUkuranInput = (index) => {
     const newUkuran = ukuranInputs.filter((_, i) => i !== index);
     setUkuranInputs(newUkuran);
-    
+
     // Update formData
-    const ukuranArray = newUkuran
-      .filter((item) => item.size && item.qty)
-      .map((item) => `${item.size}:${item.qty}`);
-    
+    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+
     setFormData((prev) => ({
       ...prev,
       ukuran: ukuranArray,
     }));
   };
 
-  const getTotalUkuran = () => {
-    return ukuranInputs.reduce((total, item) => {
-      return total + (parseInt(item.qty, 10) || 0);
-    }, 0);
-  };
+  const getTotalUkuran = () => ukuranInputs.reduce((total, item) => total + (parseInt(item.qty, 10) || 0), 0);
 
   const getRemainingStock = () => {
     const stok = parseInt(formData.stok, 10) || 0;
@@ -111,7 +103,7 @@ export default function CreateProduk() {
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
     setImageFiles(newFiles);
     setImagePreviews(newPreviews);
-    
+
     // Revoke the URL to free memory
     URL.revokeObjectURL(imagePreviews[index]);
   };
@@ -130,7 +122,7 @@ export default function CreateProduk() {
     const newPreviews = videoPreviews.filter((_, i) => i !== index);
     setVideoFiles(newFiles);
     setVideoPreviews(newPreviews);
-    
+
     // Revoke the URL to free memory
     URL.revokeObjectURL(videoPreviews[index]);
   };
@@ -196,13 +188,13 @@ export default function CreateProduk() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
+
     // Validate total ukuran
     if (getTotalUkuran() > parseInt(formData.stok, 10)) {
       setError('Total ukuran melebihi stok yang tersedia!');
       return;
     }
-    
+
     if (getTotalUkuran() < parseInt(formData.stok, 10)) {
       setError('Total ukuran harus sama dengan stok!');
       return;
@@ -295,34 +287,13 @@ export default function CreateProduk() {
           <div className={styles.formGroup}>
             <label htmlFor="harga" className={styles.label}>
               Harga (Rp) *
-              <input 
-                id="harga" 
-                name="harga" 
-                type="number" 
-                step="1" 
-                value={formData.harga} 
-                onChange={handleChange} 
-                className={styles.input} 
-                placeholder="Contoh: 200000"
-                required 
-              />
+              <input id="harga" name="harga" type="number" step="1" value={formData.harga} onChange={handleChange} className={styles.input} placeholder="Contoh: 200000" required />
             </label>
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="diskon" className={styles.label}>
-              Diskon (%) 
-              <input 
-                id="diskon" 
-                name="diskon" 
-                type="number" 
-                step="1" 
-                min="0" 
-                max="100" 
-                value={formData.diskon} 
-                onChange={handleChange} 
-                className={styles.input} 
-                placeholder="Contoh: 20"
-              />
+              Diskon (%)
+              <input id="diskon" name="diskon" type="number" step="1" min="0" max="100" value={formData.diskon} onChange={handleChange} className={styles.input} placeholder="Contoh: 20" />
             </label>
           </div>
 
@@ -348,14 +319,10 @@ export default function CreateProduk() {
               (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
             </span>
           </label>
-          
+
           {ukuranInputs.map((ukuran, index) => (
             <div key={index} className={styles.ukuranRow}>
-              <select
-                value={ukuran.size}
-                onChange={(e) => handleUkuranChange(index, 'size', e.target.value)}
-                className={styles.ukuranSelect}
-              >
+              <select value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
                 <option value="XXS">XXS</option>
                 <option value="XS">XS</option>
@@ -366,7 +333,7 @@ export default function CreateProduk() {
                 <option value="XXL">XXL</option>
                 <option value="XXXL">XXXL</option>
               </select>
-              
+
               <input
                 type="number"
                 min="1"
@@ -376,7 +343,7 @@ export default function CreateProduk() {
                 className={styles.ukuranQty}
                 placeholder="Jumlah"
               />
-              
+
               {ukuranInputs.length > 1 && (
                 <button type="button" onClick={() => removeUkuranInput(index)} className={styles.removeUkuranButton}>
                   ×
@@ -384,16 +351,14 @@ export default function CreateProduk() {
               )}
             </div>
           ))}
-          
+
           {getTotalUkuran() < parseInt(formData.stok, 10) && (
             <button type="button" onClick={addUkuranInput} className={styles.addUkuranButton}>
               + Tambah Ukuran
             </button>
           )}
-          
-          {getTotalUkuran() > parseInt(formData.stok, 10) && (
-            <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>
-          )}
+
+          {getTotalUkuran() > parseInt(formData.stok, 10) && <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>}
         </div>
 
         <div className={styles.formGroup}>

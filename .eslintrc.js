@@ -4,6 +4,12 @@ module.exports = {
   rules: {
     'react/prop-types': 'off',
     'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.tsx'] }],
+    'no-console': 'warn',
+    'jsx-a11y/label-has-associated-control': 'warn',
+    'react/no-array-index-key': 'warn',
+    'jsx-a11y/media-has-caption': 'warn',
+    'arrow-body-style': 'warn',
+    'no-unused-vars': 'warn',
     // 'import-helpers/order-imports': [
     //   'warn',
     //   {

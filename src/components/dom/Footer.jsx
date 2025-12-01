@@ -1,5 +1,4 @@
 import AppearTitle from '@src/components/animationComponents/appearTitle/Index';
-import Link from 'next/link';
 import LinkText from '@src/components/animationComponents/linkText/Index';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import clsx from 'clsx';

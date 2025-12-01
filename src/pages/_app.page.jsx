@@ -63,7 +63,7 @@ function MyApp({ Component, pageProps, router }) {
   useIsomorphicLayoutEffect(() => {
     // Skip Lenis for admin pages
     if (isAdminPage) return undefined;
-    
+
     // eslint-disable-next-line no-shadow
     const lenis = new Lenis({
       smoothWheel: true,
