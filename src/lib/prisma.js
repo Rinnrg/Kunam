@@ -12,7 +12,8 @@ const globalForPrisma = global;
 const prismaClientOptions = {
   datasources: {
     db: {
-      url: process.env.DIRECT_URL || process.env.DATABASE_URL,
+      // Use DATABASE_URL (pooler) instead of DIRECT_URL for better reliability
+      url: process.env.DATABASE_URL,
     },
   },
 };
