@@ -53,14 +53,14 @@ function CustomHead({ title = '', description, keywords }) {
         <meta name="twitter:description" content={description} />
         <meta name="twitter:image" content={OG_IMAGE} />
 
-        {/* Favicons */}
-        <link rel="icon" type="image/svg+xml" href="/logo/logo 1 white.svg" />
-        <link rel="icon" type="image/png" sizes="32x32" href="/logo/logo 1 white.svg" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/logo/logo 1 white.svg" />
-        <link rel="shortcut icon" href="/logo/logo 1 white.svg" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/logo/logo 1 white.svg" />
+  {/* Favicons */}
+  <link rel="icon" type="image/svg+xml" href="/logo/icon.svg" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/logo/icon.svg" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/logo/icon.svg" />
+  <link rel="shortcut icon" href="/logo/icon.svg" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/logo/icon.svg" />
         <link rel="manifest" href="/site.webmanifest" />
-        <link rel="mask-icon" href="/logo/logo 1 white.svg" color="#ffffff" />
+  <link rel="mask-icon" href="/logo/icon.svg" color="#ffffff" />
         <meta name="msapplication-TileColor" content="#28282b" />
         <meta name="theme-color" content="#28282b" />
 
