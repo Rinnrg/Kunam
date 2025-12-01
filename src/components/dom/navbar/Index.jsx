@@ -74,7 +74,7 @@ function Navbar() {
           </Link>
 
           <div className={styles.rightContainer}>
-            {!isMobile && !isScrolled && <ButtonLink href="mailto:vaggelisgiats@gmail.com" label="GET IN TOUCH" />}
+            {!isMobile && !isScrolled && <ButtonLink href="mailto:info@kunam.com" label="GET IN TOUCH" />}
             <MenuButton isScrolled={isScrolled} />
           </div>
         </div>

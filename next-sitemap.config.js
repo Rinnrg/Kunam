@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: process.env.SITE_URL || 'https://giats.me',
+  siteUrl: process.env.SITE_URL || 'https://kunam-id.vercel.app',
   generateRobotsTxt: true,
   robotsTxtOptions: {
     policies: [

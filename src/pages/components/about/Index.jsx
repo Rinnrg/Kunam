@@ -42,7 +42,7 @@ function About() {
 
   const renderImageContainer = () => (
     <div className={styles.imageContainer}>
-      <Image priority src="/giats/front.webp" sizes="100%" fill alt="Evangelos Giatsidis" />
+      <Image priority src="/logo/logo 1 black.svg" sizes="100%" fill alt="Kunam Brand" />
     </div>
   );
 
@@ -50,8 +50,8 @@ function About() {
     <section ref={rootRef} className={styles.root}>
       <div className={clsx(styles.nameContainer, 'layout-block-inner')}>
         <AppearTitle>
-          <h1 className={clsx('h1', 'medium')}>Hey, My name&apos;s</h1>
-          <h1 className={clsx('h1', 'medium')}>Evangelos Giatsidis!</h1>
+          <h1 className={clsx('h1', 'medium')}>Welcome to</h1>
+          <h1 className={clsx('h1', 'medium')}>Kunam!</h1>
         </AppearTitle>
       </div>
 

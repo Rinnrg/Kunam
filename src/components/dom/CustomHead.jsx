@@ -2,24 +2,18 @@ import NextHead from 'next/head';
 import { NextSeo } from 'next-seo';
 import PropTypes from 'prop-types';
 
-const SITE_URL = 'https://giats.me';
+const SITE_URL = 'https://kunam-id.vercel.app';
 const OG_IMAGE = `${SITE_URL}/og.png`;
 
 const getSchema = () => ({
   '@context': 'http://schema.org',
-  '@type': 'Person',
+  '@type': 'Organization',
   name: 'Kunam',
-  jobTitle: 'Senior Frontend Developer',
+  description: 'Kunam - Fashion & Lifestyle Brand',
   url: SITE_URL,
   image: OG_IMAGE,
-  email: 'mailto:vaggelisgiats@gmail.com',
-  sameAs: ['https://www.linkedin.com/in/giats/', 'https://github.com/Giats2498', 'https://twitter.com/Giats_', 'https://www.instagram.com/giats_/'],
-  alumniOf: [
-    { '@type': 'Organization', name: 'Company 1' },
-    { '@type': 'Organization', name: 'Company 2' },
-    { '@type': 'Organization', name: 'Company 3' },
-    { '@type': 'Organization', name: 'Company 4' },
-  ],
+  email: 'mailto:info@kunam.com',
+  sameAs: ['https://www.instagram.com/kunam/', 'https://www.facebook.com/kunam', 'https://twitter.com/kunam'],
 });
 
 function CustomHead({ title = '', description, keywords }) {

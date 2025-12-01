@@ -111,7 +111,7 @@ function Footer() {
         </AppearTitle>
       </div>
 
-      <div className={styles.giats}>
+      <div className={styles.brandName}>
         <span className={styles.kunamText}>KUNAM</span>
       </div>
       <div className={styles.goToTop}>
