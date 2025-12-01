@@ -1,23 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
-import { PrismaClient } from '@prisma/client';
-
-// Create Prisma Client with singleton pattern to avoid too many connections
-const globalForPrisma = global;
-
-const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    datasources: {
-      db: {
-        url: process.env.DIRECT_URL || process.env.DATABASE_URL,
-      },
-    },
-    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  });
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+import prisma from '../../../lib/prisma';
 
 export const authOptions = {
   providers: [
@@ -29,22 +13,21 @@ export const authOptions = {
       },
       async authorize(credentials) {
         try {
+          // Validate credentials
           if (!credentials?.email || !credentials?.password) {
             return null;
           }
 
-          // Test database connection
-          try {
-            await prisma.$connect();
-          } catch (dbError) {
-            // eslint-disable-next-line no-console
-            console.error('[NextAuth] Database connection failed:', dbError);
-            throw new Error('Database connection failed');
-          }
-
+          // Find admin by email
           const admin = await prisma.admin.findUnique({
             where: {
               email: credentials.email,
+            },
+            select: {
+              id: true,
+              email: true,
+              password: true,
+              name: true,
             },
           });
 
@@ -52,12 +35,14 @@ export const authOptions = {
             return null;
           }
 
+          // Verify password
           const isPasswordValid = await bcrypt.compare(credentials.password, admin.password);
 
           if (!isPasswordValid) {
             return null;
           }
 
+          // Return user without password
           return {
             id: admin.id,
             email: admin.email,
@@ -65,7 +50,7 @@ export const authOptions = {
           };
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error('[NextAuth] Error in authorize:', error);
+          console.error('[NextAuth] Authorization error:', error);
           return null;
         }
       },
@@ -73,32 +58,20 @@ export const authOptions = {
   ],
   callbacks: {
     async jwt({ token, user }) {
-      try {
-        if (user) {
-          token.id = user.id;
-          token.email = user.email;
-          token.name = user.name;
-        }
-        return token;
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('[NextAuth] Error in jwt callback:', error);
-        return token;
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
       }
+      return token;
     },
     async session({ session, token }) {
-      try {
-        if (token && session.user) {
-          session.user.id = token.id;
-          session.user.email = token.email;
-          session.user.name = token.name;
-        }
-        return session;
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('[NextAuth] Error in session callback:', error);
-        return session;
+      if (token && session.user) {
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
       }
+      return session;
     },
   },
   pages: {
