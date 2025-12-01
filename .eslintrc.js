@@ -10,6 +10,7 @@ module.exports = {
     'jsx-a11y/media-has-caption': 'warn',
     'arrow-body-style': 'warn',
     'no-unused-vars': 'warn',
+    'import/no-named-as-default': 'off',
     // 'import-helpers/order-imports': [
     //   'warn',
     //   {
