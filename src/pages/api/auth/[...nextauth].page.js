@@ -1,9 +1,7 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-
-const prisma = new PrismaClient();
+import prisma from '@src/lib/db';
 
 export const authOptions = {
   providers: [
@@ -16,7 +14,7 @@ export const authOptions = {
       async authorize(credentials) {
         try {
           if (!credentials?.email || !credentials?.password) {
-            return null;
+            throw new Error('Email and password are required');
           }
 
           const admin = await prisma.admin.findUnique({
@@ -26,13 +24,13 @@ export const authOptions = {
           });
 
           if (!admin) {
-            return null;
+            throw new Error('No user found with this email');
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, admin.password);
 
           if (!isPasswordValid) {
-            return null;
+            throw new Error('Invalid password');
           }
 
           return {
@@ -42,8 +40,8 @@ export const authOptions = {
           };
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error('Error in authorize:', error);
-          return null;
+          console.error('[NextAuth] Error in authorize:', error.message);
+          throw error;
         }
       },
     }),
@@ -75,9 +73,7 @@ export const authOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: process.env.NODE_ENV === 'development',
-  // Use NEXTAUTH_URL from environment variables
-  ...(process.env.NEXTAUTH_URL && { url: process.env.NEXTAUTH_URL }),
+  debug: true, // Enable debug to see errors in production
 };
 
 export default NextAuth(authOptions);
