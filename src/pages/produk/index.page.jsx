@@ -1,4 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
 
 import CustomHead from '@src/components/dom/CustomHead';
 import ProdukGrid from '@src/pages/produk/components/produkGrid/ProdukGrid';

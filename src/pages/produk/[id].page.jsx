@@ -1,4 +1,6 @@
 /* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
 import { useMemo } from 'react';
 import Image from 'next/image';
 import CustomHead from '@src/components/dom/CustomHead';
