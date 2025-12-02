@@ -33,20 +33,17 @@ function Page({ produk }) {
 
 export async function getServerSideProps() {
   try {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = await import('../../../lib/prisma').then((mod) => mod.default);
 
     const produk = await prisma.produk.findMany({
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
 
-    await prisma.$disconnect();
-
     // Serialize dates
     const serializedProduk = produk.map((item) => ({
       ...item,
       tanggalDibuat: item.tanggalDibuat.toISOString(),
-      tanggalDiupdate: item.tanggalDiupdate.toISOString(),
+      tanggalDiubah: item.tanggalDiubah.toISOString(),
     }));
 
     return {

@@ -2,8 +2,8 @@
 import { useMemo } from 'react';
 import Image from 'next/image';
 import CustomHead from '@src/components/dom/CustomHead';
-import { PrismaClient } from '@prisma/client';
 import styles from '@src/pages/produk/produkDetail.module.scss';
+import prisma from '../../../lib/prisma';
 
 function Page({ produk }) {
   const currentProduk = produk;
@@ -125,28 +125,24 @@ function Page({ produk }) {
 }
 
 export async function getStaticPaths() {
-  const prisma = new PrismaClient();
   try {
     const produk = await prisma.produk.findMany();
     const paths = produk.map((item) => ({ params: { id: item.id } }));
-    await prisma.$disconnect();
     return { paths, fallback: 'blocking' };
   } catch (error) {
-    await prisma.$disconnect();
+    // eslint-disable-next-line no-console
+    console.error('Error in getStaticPaths:', error);
     return { paths: [], fallback: 'blocking' };
   }
 }
 
 export async function getStaticProps(context) {
   const { params } = context;
-  const prisma = new PrismaClient();
 
   try {
     const produk = await prisma.produk.findUnique({
       where: { id: params.id },
     });
-
-    await prisma.$disconnect();
 
     if (!produk) {
       return { notFound: true };
@@ -159,7 +155,8 @@ export async function getStaticProps(context) {
       revalidate: 60, // Revalidate every 60 seconds
     };
   } catch (error) {
-    await prisma.$disconnect();
+    // eslint-disable-next-line no-console
+    console.error('Error in getStaticProps:', error);
     return { notFound: true };
   }
 }
