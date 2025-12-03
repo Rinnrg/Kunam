@@ -9,7 +9,8 @@
     "postbuild": "next-sitemap",
     "lint": "next lint",
     "test:db": "node scripts/test-db.js",
-    "test:supabase": "node scripts/test-supabase.js"
+    "test:supabase": "node scripts/test-supabase.js",
+    "seed": "node prisma/seed.js"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [

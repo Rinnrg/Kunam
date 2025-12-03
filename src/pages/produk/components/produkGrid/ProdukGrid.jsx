@@ -32,7 +32,17 @@ function ProdukGrid({ produk = [] }) {
             <div className={styles.cardFooter}>
               <div className={styles.produkInfo}>
                 <span className={styles.kategoriLabel}>{item.kategori}</span>
-                <span className={styles.harga}>Rp {item.harga.toLocaleString('id-ID')}</span>
+                <div className={styles.priceContainer}>
+                  {item.diskon > 0 ? (
+                    <>
+                      <span className={styles.hargaAsli}>Rp {item.harga.toLocaleString('id-ID')}</span>
+                      <span className={styles.harga}>Rp {(item.harga * (1 - item.diskon / 100)).toLocaleString('id-ID')}</span>
+                      <span className={styles.diskonBadge}>-{item.diskon}%</span>
+                    </>
+                  ) : (
+                    <span className={styles.harga}>Rp {item.harga.toLocaleString('id-ID')}</span>
+                  )}
+                </div>
               </div>
               <button type="button" className={styles.viewButton}>
                 <span>LIHAT</span>
