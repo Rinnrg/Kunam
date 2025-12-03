@@ -15,7 +15,7 @@ function Page({ produk }) {
     document.body.style.overflow = 'auto';
     document.body.style.height = 'auto';
     document.documentElement.style.overflow = 'auto';
-    
+
     return () => {
       document.body.style.overflow = '';
       document.body.style.height = '';
