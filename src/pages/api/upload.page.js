@@ -1,7 +1,7 @@
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
-import { v2 as cloudinary } from 'cloudinary';
+import { put } from '@vercel/blob';
 
 export const config = {
   api: {
@@ -12,40 +12,9 @@ export const config = {
 // Check if running in production (Vercel)
 const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
 
-// Check if Cloudinary is configured
-const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
-
-// Configure Cloudinary if available
-if (hasCloudinary) {
-  cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-  });
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ message: 'Method not allowed' });
-  }
-
-  // In production without Cloudinary, return error
-  if (isProduction && !hasCloudinary) {
-    return res.status(501).json({
-      message: 'Upload not configured',
-      error: 'Cloudinary environment variables not set',
-      setup: {
-        step1: 'Sign up for free at https://cloudinary.com',
-        step2: 'Get your credentials from Dashboard',
-        step3: 'Add to Vercel Environment Variables:',
-        required: {
-          CLOUDINARY_CLOUD_NAME: 'your_cloud_name',
-          CLOUDINARY_API_KEY: 'your_api_key',
-          CLOUDINARY_API_SECRET: 'your_api_secret',
-        },
-        step4: 'Redeploy your application',
-      },
-    });
   }
 
   // Setup for local development
@@ -55,21 +24,18 @@ export default async function handler(req, res) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  // Configure formidable based on environment
-  const formOptions = isProduction
-    ? {
-        maxFileSize: 10 * 1024 * 1024, // 10MB
-        keepExtensions: true,
-      }
-    : {
-        uploadDir,
-        keepExtensions: true,
-        maxFileSize: 10 * 1024 * 1024, // 10MB
-        filename: (name, ext) => {
-          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          return `${uniqueSuffix}${ext}`;
-        },
-      };
+  // Configure formidable
+  const formOptions = {
+    maxFileSize: 10 * 1024 * 1024, // 10MB
+    keepExtensions: true,
+    ...((!isProduction) && {
+      uploadDir,
+      filename: (name, ext) => {
+        const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+        return `${uniqueSuffix}${ext}`;
+      },
+    }),
+  };
 
   const form = formidable(formOptions);
 
@@ -96,18 +62,24 @@ export default async function handler(req, res) {
       const uploadedFile = Array.isArray(fileData) ? fileData[0] : fileData;
 
       try {
-        if (isProduction && hasCloudinary) {
-          // Upload to Cloudinary in production
-          const uploadResult = await cloudinary.uploader.upload(uploadedFile.filepath, {
-            folder: 'kunam-products',
-            resource_type: 'auto',
-            transformation: [{ width: 1200, height: 1200, crop: 'limit', quality: 'auto' }],
+        if (isProduction) {
+          // Upload to Vercel Blob in production
+          const fileBuffer = fs.readFileSync(uploadedFile.filepath);
+          const originalFilename = uploadedFile.originalFilename || uploadedFile.newFilename;
+          const timestamp = Date.now();
+          const randomString = Math.random().toString(36).substring(7);
+          const fileExt = path.extname(originalFilename);
+          const filename = `products/${timestamp}-${randomString}${fileExt}`;
+
+          const blob = await put(filename, fileBuffer, {
+            access: 'public',
+            contentType: uploadedFile.mimetype || 'image/jpeg',
           });
 
           // eslint-disable-next-line no-console
-          console.log('File uploaded to Cloudinary:', uploadResult.secure_url);
+          console.log('File uploaded to Vercel Blob:', blob.url);
 
-          res.status(200).json({ url: uploadResult.secure_url });
+          res.status(200).json({ url: blob.url });
         } else {
           // Local filesystem upload (development)
           const filename = path.basename(uploadedFile.filepath);
