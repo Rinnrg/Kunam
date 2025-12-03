@@ -26,7 +26,15 @@ function ProdukGrid({ produk = [] }) {
             </div>
 
             <div className={styles.imageContainer}>
-              {item.gambar && item.gambar.length > 0 && <Image src={item.gambar[0]} alt={item.nama} fill sizes="(max-width: 768px) 100vw, 50vw" className={styles.projectImage} />}
+              {item.gambar && (
+                <Image
+                  src={Array.isArray(item.gambar) ? item.gambar[0] : item.gambar}
+                  alt={item.nama}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  className={styles.projectImage}
+                />
+              )}
             </div>
 
             <div className={styles.cardFooter}>

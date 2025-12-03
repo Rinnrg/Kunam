@@ -42,7 +42,7 @@ function Page({ produk }) {
         {/* Hero Product Images */}
         <div className={styles.heroMockup}>
           <div className={styles.mockupContainer}>
-            {currentProduk.gambar && currentProduk.gambar.length > 0 && <Image src={currentProduk.gambar[0]} alt={currentProduk.nama} fill priority className={styles.mockupImage} />}
+            {currentProduk.gambar && <Image src={Array.isArray(currentProduk.gambar) ? currentProduk.gambar[0] : currentProduk.gambar} alt={currentProduk.nama} fill priority className={styles.mockupImage} />}
           </div>
         </div>
 
