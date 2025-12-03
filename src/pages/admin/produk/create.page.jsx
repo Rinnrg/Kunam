@@ -315,7 +315,7 @@ export default function CreateProduk() {
           </label>
 
           {ukuranInputs.map((ukuran, index) => (
-            <div key={`ukuran-${index}`} className={styles.ukuranRow}>
+            <div key={`ukuran-row-${index}`} className={styles.ukuranRow}>
               <select id="ukuran" value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
                 <option value="S">S</option>
@@ -375,11 +375,11 @@ export default function CreateProduk() {
           </label>
           {imagePreviews.length > 0 && (
             <div className={styles.imagePreviewContainer}>
-              {imagePreviews.map((preview, index) => (
-                <div key={`image-preview-${index}`} className={styles.imagePreview}>
+              {imagePreviews.map((preview) => (
+                <div key={preview} className={styles.imagePreview}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={preview} alt={`Preview ${index + 1}`} />
-                  <button type="button" onClick={() => removeImage(index)} className={styles.removeImageButton}>
+                  <img src={preview} alt={`Preview ${preview}`} />
+                  <button type="button" onClick={() => removeImage(imagePreviews.indexOf(preview))} className={styles.removeImageButton}>
                     ×
                   </button>
                 </div>
@@ -395,12 +395,12 @@ export default function CreateProduk() {
           <input id="videos" type="file" name="videos" accept="video/*" multiple onChange={handleVideoChange} className={styles.input} />
           {videoPreviews.length > 0 && (
             <div className={styles.videoPreviewContainer}>
-              {videoPreviews.map((preview, index) => (
-                <div key={`video-preview-${index}`} className={styles.videoPreview}>
+              {videoPreviews.map((preview) => (
+                <div key={preview} className={styles.videoPreview}>
                   <video controls src={preview}>
                     <track kind="captions" />
                   </video>
-                  <button type="button" onClick={() => removeVideo(index)} className={styles.removeVideoButton}>
+                  <button type="button" onClick={() => removeVideo(videoPreviews.indexOf(preview))} className={styles.removeVideoButton}>
                     ×
                   </button>
                 </div>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
@@ -9,7 +9,7 @@ function Portal({ children, fadeIn, container }) {
   const [isVisible, setIsVisible] = useState(true);
   const fadeTimerRef = useRef(null);
 
-  const handleVisibility = () => {
+  const handleVisibility = useCallback(() => {
     if (fadeIn) {
       clearTimeout(fadeTimerRef.current);
       if (!isVisible) setIsVisible(true);
@@ -18,7 +18,7 @@ function Portal({ children, fadeIn, container }) {
         setIsVisible(false);
       }, FADE_OUT_DURATION);
     }
-  };
+  }, [fadeIn, isVisible]);
 
   useEffect(() => {
     handleVisibility();
