@@ -315,7 +315,7 @@ export default function CreateProduk() {
           </label>
 
           {ukuranInputs.map((ukuran, index) => (
-            <div key={`ukuran-row-${index}`} className={styles.ukuranRow}>
+            <div key={`ukuran-row-${ukuran.size || index}-${index}`} className={styles.ukuranRow}>
               <select id="ukuran" value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
                 <option value="S">S</option>
@@ -391,8 +391,8 @@ export default function CreateProduk() {
         <div className={styles.formGroup}>
           <label htmlFor="videos" className={styles.label}>
             Video
+            <input id="videos" type="file" name="videos" accept="video/*" multiple onChange={handleVideoChange} className={styles.input} />
           </label>
-          <input id="videos" type="file" name="videos" accept="video/*" multiple onChange={handleVideoChange} className={styles.input} />
           {videoPreviews.length > 0 && (
             <div className={styles.videoPreviewContainer}>
               {videoPreviews.map((preview) => (

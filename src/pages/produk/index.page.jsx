@@ -28,7 +28,7 @@ const seo = {
 function Page({ produk = [] }) {
   // eslint-disable-next-line no-console
   console.log('Produk page - Total products:', produk?.length || 0);
-  
+
   return (
     <>
       <CustomHead {...seo} />
@@ -41,7 +41,7 @@ export async function getServerSideProps() {
   try {
     // eslint-disable-next-line no-console
     console.log('Fetching products from database...');
-    
+
     const produk = await prisma.produk.findMany({
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });

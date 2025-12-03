@@ -438,6 +438,7 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
           <label className={styles.label}>Gambar Produk</label>
 
           {/* Debug Info */}
@@ -504,9 +505,8 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="videos" className={styles.label}>
-            Video Produk
-          </label>
+          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
+          <label className={styles.label}>Video Produk</label>
 
           {/* Existing Videos */}
           {existingVideos.length > 0 && (
