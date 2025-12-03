@@ -2,6 +2,23 @@ import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
 
+// Cloudinary setup (only if configured)
+let cloudinary;
+try {
+  // eslint-disable-next-line global-require
+  const cloudinaryModule = require('cloudinary').v2;
+  if (process.env.CLOUDINARY_CLOUD_NAME) {
+    cloudinary = cloudinaryModule;
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+  }
+} catch (e) {
+  // Cloudinary not installed, will use local upload
+}
+
 export const config = {
   api: {
     bodyParser: false,
@@ -13,26 +30,34 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
+  const useCloudinary = cloudinary && process.env.CLOUDINARY_CLOUD_NAME;
+
+  // For local development, use local filesystem
   const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
-  // Create uploads directory if it doesn't exist
-  if (!fs.existsSync(uploadDir)) {
+  if (!useCloudinary && !fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  const form = formidable({
-    uploadDir,
-    keepExtensions: true,
-    maxFileSize: 10 * 1024 * 1024, // 10MB
-    filename: (name, ext) => {
-      // Generate unique filename
-      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      return `${uniqueSuffix}${ext}`;
-    },
-  });
+  const formOptions = useCloudinary
+    ? {
+        maxFileSize: 10 * 1024 * 1024, // 10MB for Cloudinary
+        keepExtensions: true,
+      }
+    : {
+        uploadDir,
+        keepExtensions: true,
+        maxFileSize: 4.5 * 1024 * 1024, // 4.5MB for local/Vercel
+        filename: (name, ext) => {
+          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          return `${uniqueSuffix}${ext}`;
+        },
+      };
+
+  const form = formidable(formOptions);
 
   return new Promise((resolve) => {
-    form.parse(req, (err, fields, files) => {
+    form.parse(req, async (err, fields, files) => {
       if (err) {
         // eslint-disable-next-line no-console
         console.error('Upload error:', err);
@@ -41,7 +66,6 @@ export default async function handler(req, res) {
         return;
       }
 
-      // Formidable v3 returns files in different structure
       const fileData = files.file;
 
       if (!fileData) {
@@ -52,17 +76,35 @@ export default async function handler(req, res) {
         return;
       }
 
-      // Handle both single file and array of files
       const uploadedFile = Array.isArray(fileData) ? fileData[0] : fileData;
 
-      // Get the relative path for the URL
-      const filename = path.basename(uploadedFile.filepath);
-      const url = `/uploads/${filename}`;
+      try {
+        if (useCloudinary) {
+          // Upload to Cloudinary
+          const result = await cloudinary.uploader.upload(uploadedFile.filepath, {
+            folder: 'kunam-products',
+            resource_type: 'auto',
+          });
 
-      // eslint-disable-next-line no-console
-      console.log('File uploaded successfully:', url);
-      res.status(200).json({ url });
-      resolve();
+          // eslint-disable-next-line no-console
+          console.log('File uploaded to Cloudinary:', result.secure_url);
+          res.status(200).json({ url: result.secure_url });
+        } else {
+          // Local upload
+          const filename = path.basename(uploadedFile.filepath);
+          const url = `/uploads/${filename}`;
+
+          // eslint-disable-next-line no-console
+          console.log('File uploaded locally:', url);
+          res.status(200).json({ url });
+        }
+        resolve();
+      } catch (uploadError) {
+        // eslint-disable-next-line no-console
+        console.error('Upload to cloud error:', uploadError);
+        res.status(500).json({ message: 'Error uploading to storage', error: uploadError.message });
+        resolve();
+      }
     });
   });
 }
