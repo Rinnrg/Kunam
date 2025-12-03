@@ -29,7 +29,7 @@ export default function EditProduk() {
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [existingVideos, setExistingVideos] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [ukuranInputs, setUkuranInputs] = useState([{ size: '', qty: '' }]);
+  const [ukuranInputs, setUkuranInputs] = useState([{ id: Date.now(), size: '', qty: '' }]);
 
   const fetchProduk = async () => {
     try {
@@ -57,9 +57,9 @@ export default function EditProduk() {
 
         // Parse existing ukuran data (format: "S:3", "M:4")
         if (data.ukuran && data.ukuran.length > 0) {
-          const parsedUkuran = data.ukuran.map((item) => {
+          const parsedUkuran = data.ukuran.map((item, idx) => {
             const [size, qty] = item.split(':');
-            return { size: size || '', qty: qty || '' };
+            return { id: Date.now() + idx, size: size || '', qty: qty || '' };
           });
           setUkuranInputs(parsedUkuran);
         }
@@ -118,7 +118,7 @@ export default function EditProduk() {
   };
 
   const addUkuranInput = () => {
-    setUkuranInputs([...ukuranInputs, { size: '', qty: '' }]);
+    setUkuranInputs([...ukuranInputs, { id: Date.now() + Math.random(), size: '', qty: '' }]);
   };
 
   const removeUkuranInput = (index) => {
@@ -209,13 +209,18 @@ export default function EditProduk() {
           const data = await response.json();
           return data.url;
         }
-        throw new Error('Failed to upload image');
+        const errorData = await response.json().catch(() => ({ message: 'Unknown error' }));
+        // eslint-disable-next-line no-console
+        console.error('Upload failed:', errorData);
+        throw new Error(errorData.message || 'Failed to upload image');
       });
 
       const uploadedUrls = await Promise.all(uploadPromises);
       return uploadedUrls;
     } catch (err) {
-      throw new Error('Error uploading images');
+      // eslint-disable-next-line no-console
+      console.error('Error uploading images:', err);
+      throw new Error(`Error uploading images: ${err.message}`);
     } finally {
       setIsUploading(false);
     }
@@ -382,7 +387,7 @@ export default function EditProduk() {
           </label>
 
           {ukuranInputs.map((ukuran, index) => (
-            <div key={`ukuran-row-${ukuran.size}-${index}`} className={styles.ukuranRow}>
+            <div key={ukuran.id} className={styles.ukuranRow}>
               <select id={`ukuran-select-${index}`} value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
                 <option value="XXS">XXS</option>
