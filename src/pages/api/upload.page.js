@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   const formOptions = {
     maxFileSize: 10 * 1024 * 1024, // 10MB
     keepExtensions: true,
-    ...((!isProduction) && {
+    ...(!isProduction && {
       uploadDir,
       filename: (name, ext) => {
         const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
