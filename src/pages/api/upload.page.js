@@ -31,6 +31,28 @@ export default async function handler(req, res) {
   }
 
   const useCloudinary = cloudinary && process.env.CLOUDINARY_CLOUD_NAME;
+  const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+
+  // In production without Cloudinary, return helpful error
+  if (isProduction && !useCloudinary) {
+    return res.status(501).json({
+      message: 'Cloud storage not configured - Cloudinary required for production',
+      error: 'CLOUDINARY environment variables not set',
+      setup: {
+        step1: 'Sign up FREE at https://cloudinary.com/users/register/free (no credit card)',
+        step2: 'Login and go to Dashboard',
+        step3: 'Copy: Cloud Name, API Key, API Secret',
+        step4: 'Add to Vercel: Settings → Environment Variables',
+        required: {
+          CLOUDINARY_CLOUD_NAME: 'your_cloud_name',
+          CLOUDINARY_API_KEY: 'your_api_key',
+          CLOUDINARY_API_SECRET: 'your_api_secret',
+        },
+        step5: 'Redeploy (automatic after saving env vars)',
+        docs: 'See VERCEL_UPLOAD_FIX.md for detailed guide',
+      },
+    });
+  }
 
   // For local development, use local filesystem
   const uploadDir = path.join(process.cwd(), 'public', 'uploads');
