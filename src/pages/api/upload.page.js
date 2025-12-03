@@ -100,13 +100,11 @@ export default async function handler(req, res) {
           const filePath = `products/${uniqueFilename}`;
 
           // Upload to Supabase Storage
-          const { error } = await supabase.storage
-            .from('kunam-uploads')
-            .upload(filePath, fileBuffer, {
-              contentType: uploadedFile.mimetype || 'image/jpeg',
-              cacheControl: '3600',
-              upsert: false,
-            });
+          const { error } = await supabase.storage.from('kunam-uploads').upload(filePath, fileBuffer, {
+            contentType: uploadedFile.mimetype || 'image/jpeg',
+            cacheControl: '3600',
+            upsert: false,
+          });
 
           if (error) {
             throw new Error(`Supabase error: ${error.message}`);
