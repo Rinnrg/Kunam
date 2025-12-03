@@ -28,9 +28,7 @@ const Other = memo(({ setPortals }) => {
   const leftContainerRef = useRef();
   const categoriesRef = useRef([]);
   const shapesRef = useRef([]);
-  const optionTitlesRef = useRef(
-    containt.map((category) => category.options.map(() => [])),
-  );
+  const optionTitlesRef = useRef(containt.map((category) => category.options.map(() => [])));
   const windowSize = useWindowSize();
 
   useIsomorphicLayoutEffect(() => {
@@ -146,9 +144,7 @@ const Other = memo(({ setPortals }) => {
         thirdSection?.classList.toggle('fill-change');
         fourthSection?.classList.toggle('fill-change');
         setPortals((prevPortals) => {
-          const existingPortal = prevPortals.findIndex(
-            (portal) => portal.title === option.title,
-          );
+          const existingPortal = prevPortals.findIndex((portal) => portal.title === option.title);
           if (existingPortal !== -1) {
             const newPortals = [...prevPortals];
             newPortals[existingPortal] = {
@@ -189,9 +185,7 @@ const Other = memo(({ setPortals }) => {
       thirdSection.classList.remove('fill-change');
       fourthSection.classList.remove('fill-change');
       setPortals((prevPortals) => {
-        const existingPortal = prevPortals.findIndex(
-          (portal) => portal.title === option.title,
-        );
+        const existingPortal = prevPortals.findIndex((portal) => portal.title === option.title);
         if (existingPortal === -1) {
           return prevPortals;
         }
@@ -219,22 +213,14 @@ const Other = memo(({ setPortals }) => {
           {!isMobile ? (
             <>
               {containt.map((category, index) => (
-                <div
-                  key={`process-shape-${index}`}
-                  className={styles.shapesContainer}
-                >
+                <div key={`process-shape-${index}`} className={styles.shapesContainer}>
                   <div
                     ref={(el) => {
                       shapesRef.current[index] = el;
                     }}
                     className={styles.shape}
                   >
-                    <MagicBall
-                      isSphere={false}
-                      color={colors[index]}
-                      text={category.smallTitle}
-                      roughness={0.4}
-                    />
+                    <MagicBall isSphere={false} color={colors[index]} text={category.smallTitle} roughness={0.4} />
                   </div>
                 </div>
               ))}
@@ -259,12 +245,7 @@ const Other = memo(({ setPortals }) => {
                   }}
                   className={styles.shape}
                 >
-                  <MagicBall
-                    isSphere={false}
-                    color={colors[index]}
-                    text={category.smallTitle}
-                    roughness={0.5}
-                  />
+                  <MagicBall isSphere={false} color={colors[index]} text={category.smallTitle} roughness={0.5} />
                 </div>
               ) : null}
 
@@ -275,9 +256,7 @@ const Other = memo(({ setPortals }) => {
                 {isMobile ? (
                   <AppearTitle>
                     {category.descMobile.map((descMobile, idx) => (
-                      <Fragment key={`process-descMobile-${idx}`}>
-                        {descMobile}
-                      </Fragment>
+                      <Fragment key={`process-descMobile-${idx}`}>{descMobile}</Fragment>
                     ))}
                   </AppearTitle>
                 ) : null}
@@ -292,22 +271,14 @@ const Other = memo(({ setPortals }) => {
                 <div className={styles.options}>
                   {category.options.map((option, optionIndex) => (
                     <div
-                      onMouseEnter={() =>
-                        handleMouseEnter(index, optionIndex, option)
-                      }
-                      onMouseLeave={() =>
-                        handleMouseLeave(index, optionIndex, option)
-                      }
+                      onMouseEnter={() => handleMouseEnter(index, optionIndex, option)}
+                      onMouseLeave={() => handleMouseLeave(index, optionIndex, option)}
                       key={option.title}
                       className={styles.option}
                     >
                       <Arrow className={styles.arrow} />
                       <div className="p-l">
-                        <AppearTitle
-                          index={index}
-                          optionIndex={optionIndex}
-                          ref={optionTitlesRef}
-                        >
+                        <AppearTitle index={index} optionIndex={optionIndex} ref={optionTitlesRef}>
                           <div>{option.title}</div>
                         </AppearTitle>
                       </div>
