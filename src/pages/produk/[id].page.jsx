@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 /* eslint-disable import/no-unresolved */
 /* eslint-disable import/extensions */
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import Image from 'next/image';
 import CustomHead from '@src/components/dom/CustomHead';
 import styles from '@src/pages/produk/produkDetail.module.scss';
@@ -9,6 +9,19 @@ import prisma from '../../lib/prisma';
 
 function Page({ produk }) {
   const currentProduk = produk;
+
+  // Enable scrolling on this page (override global body overflow hidden)
+  useEffect(() => {
+    document.body.style.overflow = 'auto';
+    document.body.style.height = 'auto';
+    document.documentElement.style.overflow = 'auto';
+    
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.height = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, []);
 
   const seo = useMemo(
     () => ({
