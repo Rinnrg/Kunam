@@ -3,17 +3,6 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 import prisma from '../../../lib/prisma';
 
-// Log environment validation (don't throw during build)
-if (!process.env.NEXTAUTH_SECRET) {
-  // eslint-disable-next-line no-console
-  console.warn('WARNING: NEXTAUTH_SECRET is not defined');
-}
-
-if (!process.env.DATABASE_URL && !process.env.DIRECT_URL) {
-  // eslint-disable-next-line no-console
-  console.warn('WARNING: DATABASE_URL or DIRECT_URL is not defined');
-}
-
 export const authOptions = {
   providers: [
     CredentialsProvider({
@@ -61,7 +50,7 @@ export const authOptions = {
           };
         } catch (error) {
           // eslint-disable-next-line no-console
-          console.error('[NextAuth] Authorization error:', error.message);
+          console.error('[NextAuth] Authorization error:', error);
           return null;
         }
       },

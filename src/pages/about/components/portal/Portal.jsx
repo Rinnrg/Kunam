@@ -24,7 +24,7 @@ function Portal({ children, fadeIn, container }) {
     handleVisibility();
 
     return () => clearTimeout(fadeTimerRef.current);
-  }, [fadeIn]);
+  }, [fadeIn, handleVisibility]);
 
   if (!isVisible) return null;
 

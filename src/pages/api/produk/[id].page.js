@@ -14,7 +14,6 @@ async function getProduk(req, res, id) {
 
     return res.status(200).json(produk);
   } catch (error) {
-    console.error('Error fetching produk:', error);
     return res.status(500).json({ message: 'Error fetching produk' });
   }
 }
@@ -41,7 +40,6 @@ async function updateProduk(req, res, id) {
 
     return res.status(200).json(produk);
   } catch (error) {
-    console.error('Error updating produk:', error);
     if (error.code === 'P2025') {
       return res.status(404).json({ message: 'Produk tidak ditemukan' });
     }
@@ -57,7 +55,6 @@ async function deleteProduk(req, res, id) {
 
     return res.status(200).json({ message: 'Produk berhasil dihapus' });
   } catch (error) {
-    console.error('Error deleting produk:', error);
     if (error.code === 'P2025') {
       return res.status(404).json({ message: 'Produk tidak ditemukan' });
     }

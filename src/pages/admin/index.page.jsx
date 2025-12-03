@@ -18,10 +18,8 @@ export default function AdminDashboard() {
         setProduk(data);
       } else {
         setProduk([]);
-        console.error('Produk data is not an array:', data);
       }
     } catch (error) {
-      console.error('Error fetching produk:', error);
       setProduk([]);
     } finally {
       setIsLoading(false);

@@ -10,7 +10,6 @@ async function getProduk(req, res) {
 
     return res.status(200).json(produk);
   } catch (error) {
-    console.error('Error fetching produk:', error);
     return res.status(500).json({ message: 'Error fetching produk' });
   }
 }
@@ -25,21 +24,6 @@ async function createProduk(req, res) {
         message: 'Nama, kategori, dan harga wajib diisi',
       });
     }
-
-    console.log('Creating produk with data:', {
-      nama,
-      deskripsi,
-      kategori,
-      harga,
-      diskon,
-      stok,
-      ukuran,
-      warna,
-      images,
-      videos,
-      featured,
-      order,
-    });
 
     const produk = await prisma.produk.create({
       data: {
@@ -58,12 +42,8 @@ async function createProduk(req, res) {
       },
     });
 
-    console.log('Produk created successfully:', produk);
     return res.status(201).json(produk);
   } catch (error) {
-    console.error('Error creating produk:', error);
-    console.error('Error details:', error.message);
-    console.error('Error stack:', error.stack);
     return res.status(500).json({
       message: 'Error creating produk',
       error: error.message,

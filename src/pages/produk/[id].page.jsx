@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import Image from 'next/image';
 import CustomHead from '@src/components/dom/CustomHead';
 import styles from '@src/pages/produk/produkDetail.module.scss';
-import prisma from '../../../lib/prisma';
+import prisma from '../../lib/prisma';
 
 function Page({ produk }) {
   const currentProduk = produk;

@@ -152,7 +152,7 @@ const Other = memo(({ setPortals }) => {
         return [...prevPortals, newPortal];
       });
     }
-  }, []);
+  }, [setPortals]);
 
   const handleMouseLeave = useCallback((index, optionIndex, option) => {
     gsap.to(optionTitlesRef.current[index][optionIndex], { color: 'unset', duration: 0.35, ease: 'none' });

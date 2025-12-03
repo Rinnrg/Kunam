@@ -4,6 +4,7 @@
 
 import CustomHead from '@src/components/dom/CustomHead';
 import ProdukGrid from '@src/pages/produk/components/produkGrid/ProdukGrid';
+import prisma from '../../lib/prisma';
 
 const seo = {
   title: 'Kunam - Produk',
@@ -35,8 +36,6 @@ function Page({ produk }) {
 
 export async function getServerSideProps() {
   try {
-    const prisma = await import('../../../lib/prisma').then((mod) => mod.default);
-
     const produk = await prisma.produk.findMany({
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });

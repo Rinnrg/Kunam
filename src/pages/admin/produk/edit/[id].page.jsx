@@ -36,8 +36,6 @@ export default function EditProduk() {
       const response = await fetch(`/api/produk/${id}`);
       if (response.ok) {
         const data = await response.json();
-        console.log('Fetched product data:', data);
-        console.log('Images from API:', data.gambar || data.images);
 
         setFormData({
           nama: data.nama,
@@ -53,9 +51,6 @@ export default function EditProduk() {
         });
         const imagesArray = data.gambar || data.images || [];
         const videosArray = data.video || data.videos || [];
-
-        console.log('Setting existingImages:', imagesArray);
-        console.log('Setting existingVideos:', videosArray);
 
         setExistingImages(imagesArray);
         setExistingVideos(videosArray);
@@ -379,7 +374,7 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
+          <label htmlFor="ukuran-select-0" className={styles.label}>
             Ukuran & Jumlah per Ukuran *
             <span className={styles.stockInfo}>
               (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
@@ -387,8 +382,8 @@ export default function EditProduk() {
           </label>
 
           {ukuranInputs.map((ukuran, index) => (
-            <div key={`ukuran-${index}`} className={styles.ukuranRow}>
-              <select value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
+            <div key={`ukuran-row-${ukuran.size}-${index}`} className={styles.ukuranRow}>
+              <select id={`ukuran-select-${index}`} value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
                 <option value="XXS">XXS</option>
                 <option value="XS">XS</option>
@@ -458,14 +453,13 @@ export default function EditProduk() {
               <p className={styles.sectionLabel}>Gambar Saat Ini ({existingImages.length}):</p>
               <div className={styles.imagePreviewContainer}>
                 {existingImages.map((image, index) => (
-                  <div key={`existing-${image}-${index}`} className={styles.imagePreview}>
+                  <div key={image} className={styles.imagePreview}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={image}
                       alt={`Existing ${index + 1}`}
                       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                       onError={(e) => {
-                        console.error('Image load error:', image);
                         e.target.style.display = 'none';
                       }}
                     />
@@ -496,7 +490,7 @@ export default function EditProduk() {
               <p className={styles.sectionLabel}>Preview Gambar Baru:</p>
               <div className={styles.imagePreviewContainer}>
                 {imagePreviews.map((preview, index) => (
-                  <div key={`new-${preview}-${index}`} className={styles.imagePreview}>
+                  <div key={preview} className={styles.imagePreview}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={preview} alt={`Preview ${index + 1}`} />
                     <button type="button" onClick={() => removeNewImage(index)} className={styles.removeImageButton}>
@@ -510,7 +504,9 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>Video Produk</label>
+          <label htmlFor="videos" className={styles.label}>
+            Video Produk
+          </label>
 
           {/* Existing Videos */}
           {existingVideos.length > 0 && (
@@ -518,8 +514,10 @@ export default function EditProduk() {
               <p className={styles.sectionLabel}>Video Saat Ini:</p>
               <div className={styles.videoPreviewContainer}>
                 {existingVideos.map((video, index) => (
-                  <div key={`existing-video-${video}`} className={styles.videoPreview}>
-                    <video src={video} controls className={styles.videoElement} />
+                  <div key={video} className={styles.videoPreview}>
+                    <video src={video} controls className={styles.videoElement}>
+                      <track kind="captions" />
+                    </video>
                     <button type="button" onClick={() => removeExistingVideo(index)} className={styles.removeVideoButton}>
                       ×
                     </button>
@@ -541,8 +539,10 @@ export default function EditProduk() {
               <p className={styles.sectionLabel}>Preview Video Baru:</p>
               <div className={styles.videoPreviewContainer}>
                 {videoPreviews.map((preview, index) => (
-                  <div key={`new-video-${index}`} className={styles.videoPreview}>
-                    <video src={preview} controls className={styles.videoElement} />
+                  <div key={preview} className={styles.videoPreview}>
+                    <video src={preview} controls className={styles.videoElement}>
+                      <track kind="captions" />
+                    </video>
                     <button type="button" onClick={() => removeNewVideo(index)} className={styles.removeVideoButton}>
                       ×
                     </button>

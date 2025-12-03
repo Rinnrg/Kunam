@@ -151,7 +151,7 @@ const Other = memo(({ setPortals }) => {
         return [...prevPortals, newPortal];
       });
     }
-  }, []);
+  }, [setPortals]);
 
   const handleMouseLeave = useCallback((index, optionIndex, option) => {
     gsap.to(optionTitlesRef.current[index][optionIndex], { color: 'unset', duration: 0.35, ease: 'none' });
@@ -175,10 +175,10 @@ const Other = memo(({ setPortals }) => {
       newPortals[existingPortal] = { ...newPortals[existingPortal], fadeIn: false };
       return newPortals;
     });
-  }, []);
+  }, [setPortals]);
 
   return (
-    <section ref={rootRef} className={clsx(styles.root, 'layout-block-inner')}>
+    <section className={styles.other}>
       <div className={styles.topContainer}>
         <h1 className={clsx(styles.text, 'h1')}>
           <AppearByWords>Process</AppearByWords>

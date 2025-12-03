@@ -214,8 +214,6 @@ export default function CreateProduk() {
         videos: uploadedVideoUrls,
       };
 
-      console.log('Submitting data:', dataToSubmit);
-
       const response = await fetch('/api/produk', {
         method: 'POST',
         headers: {
@@ -225,16 +223,12 @@ export default function CreateProduk() {
       });
 
       if (response.ok) {
-        const result = await response.json();
-        console.log('Product created successfully:', result);
         router.push('/admin');
       } else {
         const data = await response.json();
-        console.error('Error response:', data);
         setError(data.error || data.message || 'Error creating produk');
       }
     } catch (err) {
-      console.error('Submit error:', err);
       setError(err.message || 'Error creating produk');
     } finally {
       setIsSubmitting(false);
@@ -313,7 +307,7 @@ export default function CreateProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label className={styles.label}>
+          <label htmlFor="ukuran" className={styles.label}>
             Ukuran & Jumlah per Ukuran *
             <span className={styles.stockInfo}>
               (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
@@ -321,11 +315,9 @@ export default function CreateProduk() {
           </label>
 
           {ukuranInputs.map((ukuran, index) => (
-            <div key={index} className={styles.ukuranRow}>
-              <select value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
+            <div key={`ukuran-${index}`} className={styles.ukuranRow}>
+              <select id="ukuran" value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
-                <option value="XXS">XXS</option>
-                <option value="XS">XS</option>
                 <option value="S">S</option>
                 <option value="M">M</option>
                 <option value="L">L</option>
@@ -384,7 +376,7 @@ export default function CreateProduk() {
           {imagePreviews.length > 0 && (
             <div className={styles.imagePreviewContainer}>
               {imagePreviews.map((preview, index) => (
-                <div key={`preview-${preview}-${index}`} className={styles.imagePreview}>
+                <div key={`image-preview-${index}`} className={styles.imagePreview}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={preview} alt={`Preview ${index + 1}`} />
                   <button type="button" onClick={() => removeImage(index)} className={styles.removeImageButton}>
@@ -398,14 +390,16 @@ export default function CreateProduk() {
 
         <div className={styles.formGroup}>
           <label htmlFor="videos" className={styles.label}>
-            Video Produk (opsional)
-            <input id="videos" name="videos" type="file" accept="video/*" multiple onChange={handleVideoChange} className={styles.fileInput} />
+            Video
           </label>
+          <input id="videos" type="file" name="videos" accept="video/*" multiple onChange={handleVideoChange} className={styles.input} />
           {videoPreviews.length > 0 && (
             <div className={styles.videoPreviewContainer}>
               {videoPreviews.map((preview, index) => (
                 <div key={`video-preview-${index}`} className={styles.videoPreview}>
-                  <video src={preview} controls className={styles.videoElement} />
+                  <video controls src={preview}>
+                    <track kind="captions" />
+                  </video>
                   <button type="button" onClick={() => removeVideo(index)} className={styles.removeVideoButton}>
                     ×
                   </button>
@@ -415,18 +409,13 @@ export default function CreateProduk() {
           )}
         </div>
 
-        <div className={styles.formActions}>
-          <button type="button" onClick={() => router.push('/admin')} className={styles.cancelButton} disabled={isSubmitting}>
-            Batal
-          </button>
-          <button type="submit" className={styles.submitButton} disabled={isSubmitting || isUploading}>
-            {(() => {
-              if (isUploading) return 'Mengupload Gambar...';
-              if (isSubmitting) return 'Menyimpan...';
-              return 'Simpan Produk';
-            })()}
-          </button>
-        </div>
+        <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
+          {(() => {
+            if (isUploading) return 'Mengupload Gambar...';
+            if (isSubmitting) return 'Menyimpan...';
+            return 'Simpan Produk';
+          })()}
+        </button>
       </form>
     </div>
   );
