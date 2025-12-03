@@ -13,10 +13,7 @@ export const config = {
 const isProduction = process.env.VERCEL || process.env.NODE_ENV === 'production';
 
 // Check if Cloudinary is configured
-const hasCloudinary =
-  process.env.CLOUDINARY_CLOUD_NAME &&
-  process.env.CLOUDINARY_API_KEY &&
-  process.env.CLOUDINARY_API_SECRET;
+const hasCloudinary = process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET;
 
 // Configure Cloudinary if available
 if (hasCloudinary) {
