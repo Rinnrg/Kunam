@@ -1,23 +1,7 @@
+import { createClient } from '@supabase/supabase-js';
 import formidable from 'formidable';
 import fs from 'fs';
 import path from 'path';
-
-// Cloudinary setup (only if configured)
-let cloudinary;
-try {
-  // eslint-disable-next-line global-require
-  const cloudinaryModule = require('cloudinary').v2;
-  if (process.env.CLOUDINARY_CLOUD_NAME) {
-    cloudinary = cloudinaryModule;
-    cloudinary.config({
-      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-      api_key: process.env.CLOUDINARY_API_KEY,
-      api_secret: process.env.CLOUDINARY_API_SECRET,
-    });
-  }
-} catch (e) {
-  // Cloudinary not installed, will use local upload
-}
 
 export const config = {
   api: {
@@ -30,26 +14,28 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  const useCloudinary = cloudinary && process.env.CLOUDINARY_CLOUD_NAME;
   const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // In production without Cloudinary, return helpful error
-  if (isProduction && !useCloudinary) {
+  // Check if Supabase is configured
+  const useSupabase = supabaseUrl && supabaseKey;
+
+  // In production without Supabase, return error
+  if (isProduction && !useSupabase) {
     return res.status(501).json({
-      message: 'Cloud storage not configured - Cloudinary required for production',
-      error: 'CLOUDINARY environment variables not set',
+      message: 'Cloud storage not configured - Supabase required for production',
+      error: 'SUPABASE environment variables not set',
       setup: {
-        step1: 'Sign up FREE at https://cloudinary.com/users/register/free (no credit card)',
-        step2: 'Login and go to Dashboard',
-        step3: 'Copy: Cloud Name, API Key, API Secret',
-        step4: 'Add to Vercel: Settings → Environment Variables',
+        step1: 'Create free project at https://supabase.com',
+        step2: 'Create storage bucket named "kunam-uploads" (public)',
+        step3: 'Get URL and keys from Settings → API',
+        step4: 'Add to Vercel Environment Variables:',
         required: {
-          CLOUDINARY_CLOUD_NAME: 'your_cloud_name',
-          CLOUDINARY_API_KEY: 'your_api_key',
-          CLOUDINARY_API_SECRET: 'your_api_secret',
+          NEXT_PUBLIC_SUPABASE_URL: 'your_project_url',
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: 'your_anon_key',
         },
-        step5: 'Redeploy (automatic after saving env vars)',
-        docs: 'See VERCEL_UPLOAD_FIX.md for detailed guide',
+        step5: 'Redeploy',
       },
     });
   }
@@ -57,19 +43,19 @@ export default async function handler(req, res) {
   // For local development, use local filesystem
   const uploadDir = path.join(process.cwd(), 'public', 'uploads');
 
-  if (!useCloudinary && !fs.existsSync(uploadDir)) {
+  if (!useSupabase && !fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir, { recursive: true });
   }
 
-  const formOptions = useCloudinary
+  const formOptions = useSupabase
     ? {
-        maxFileSize: 10 * 1024 * 1024, // 10MB for Cloudinary
+        maxFileSize: 10 * 1024 * 1024, // 10MB for Supabase
         keepExtensions: true,
       }
     : {
         uploadDir,
         keepExtensions: true,
-        maxFileSize: 4.5 * 1024 * 1024, // 4.5MB for local/Vercel
+        maxFileSize: 10 * 1024 * 1024, // 10MB for local
         filename: (name, ext) => {
           const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
           return `${uniqueSuffix}${ext}`;
@@ -101,16 +87,39 @@ export default async function handler(req, res) {
       const uploadedFile = Array.isArray(fileData) ? fileData[0] : fileData;
 
       try {
-        if (useCloudinary) {
-          // Upload to Cloudinary
-          const result = await cloudinary.uploader.upload(uploadedFile.filepath, {
-            folder: 'kunam-products',
-            resource_type: 'auto',
-          });
+        if (useSupabase) {
+          // Upload to Supabase
+          const supabase = createClient(supabaseUrl, supabaseKey);
+
+          // Read file
+          const fileBuffer = fs.readFileSync(uploadedFile.filepath);
+          const timestamp = Date.now();
+          const randomString = Math.random().toString(36).substring(7);
+          const fileExt = path.extname(uploadedFile.originalFilename || uploadedFile.newFilename);
+          const uniqueFilename = `${timestamp}-${randomString}${fileExt}`;
+          const filePath = `products/${uniqueFilename}`;
+
+          // Upload to Supabase Storage
+          const { error } = await supabase.storage
+            .from('kunam-uploads')
+            .upload(filePath, fileBuffer, {
+              contentType: uploadedFile.mimetype || 'image/jpeg',
+              cacheControl: '3600',
+              upsert: false,
+            });
+
+          if (error) {
+            throw new Error(`Supabase error: ${error.message}`);
+          }
+
+          // Get public URL
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from('kunam-uploads').getPublicUrl(filePath);
 
           // eslint-disable-next-line no-console
-          console.log('File uploaded to Cloudinary:', result.secure_url);
-          res.status(200).json({ url: result.secure_url });
+          console.log('File uploaded to Supabase:', publicUrl);
+          res.status(200).json({ url: publicUrl });
         } else {
           // Local upload
           const filename = path.basename(uploadedFile.filepath);
@@ -123,7 +132,7 @@ export default async function handler(req, res) {
         resolve();
       } catch (uploadError) {
         // eslint-disable-next-line no-console
-        console.error('Upload to cloud error:', uploadError);
+        console.error('Upload to storage error:', uploadError);
         res.status(500).json({ message: 'Error uploading to storage', error: uploadError.message });
         resolve();
       }
