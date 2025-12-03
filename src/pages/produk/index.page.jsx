@@ -25,7 +25,10 @@ const seo = {
   ],
 };
 
-function Page({ produk }) {
+function Page({ produk = [] }) {
+  // eslint-disable-next-line no-console
+  console.log('Produk page - Total products:', produk?.length || 0);
+  
   return (
     <>
       <CustomHead {...seo} />
@@ -36,9 +39,15 @@ function Page({ produk }) {
 
 export async function getServerSideProps() {
   try {
+    // eslint-disable-next-line no-console
+    console.log('Fetching products from database...');
+    
     const produk = await prisma.produk.findMany({
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
+
+    // eslint-disable-next-line no-console
+    console.log(`Found ${produk.length} products in database`);
 
     // Serialize dates
     const serializedProduk = produk.map((item) => ({
@@ -46,6 +55,9 @@ export async function getServerSideProps() {
       tanggalDibuat: item.tanggalDibuat.toISOString(),
       tanggalDiubah: item.tanggalDiubah.toISOString(),
     }));
+
+    // eslint-disable-next-line no-console
+    console.log('Products serialized successfully');
 
     return {
       props: {
@@ -55,6 +67,12 @@ export async function getServerSideProps() {
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error fetching produk:', error);
+    // eslint-disable-next-line no-console
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name,
+    });
     return {
       props: {
         produk: [],

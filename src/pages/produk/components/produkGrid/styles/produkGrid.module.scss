@@ -103,6 +103,26 @@
   color: #000000;
 }
 
+.produkInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kategoriLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #666666;
+}
+
+.harga {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000000;
+}
+
 .viewButton {
   display: flex;
   align-items: center;

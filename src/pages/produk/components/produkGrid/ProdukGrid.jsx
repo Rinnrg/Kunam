@@ -3,7 +3,19 @@ import Image from 'next/image';
 import clsx from 'clsx';
 import styles from './styles/produkGrid.module.scss';
 
-function ProdukGrid({ produk }) {
+function ProdukGrid({ produk = [] }) {
+  if (!produk || produk.length === 0) {
+    return (
+      <section className={styles.root}>
+        <div className={styles.gridContainer}>
+          <div style={{ padding: '2rem', textAlign: 'center', gridColumn: '1 / -1' }}>
+            <p style={{ fontSize: '1.2rem', color: '#666' }}>Belum ada produk tersedia.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className={styles.root}>
       <div className={styles.gridContainer}>

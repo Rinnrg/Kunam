@@ -59,7 +59,7 @@ export async function getServerSideProps() {
     const serializedProduk = produk.map((item) => ({
       ...item,
       tanggalDibuat: item.tanggalDibuat.toISOString(),
-      tanggalDiupdate: item.tanggalDiupdate.toISOString(),
+      tanggalDiubah: item.tanggalDiubah.toISOString(),
     }));
 
     return {
