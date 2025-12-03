@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
       // Formidable v3 returns files in different structure
       const fileData = files.file;
-      
+
       if (!fileData) {
         // eslint-disable-next-line no-console
         console.error('No file in request. Files object:', files);
