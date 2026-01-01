@@ -25,29 +25,30 @@ const seo = {
   ],
 };
 
-function Page({ produk = [] }) {
-  // eslint-disable-next-line no-console
-  console.log('Produk page - Total products:', produk?.length || 0);
+function Page({ produk = [], kategori = null }) {
+  const title = kategori ? `Kunam - ${kategori}` : 'Kunam - Produk';
+  const description = kategori
+    ? `Jelajahi koleksi ${kategori} Kunam. Temukan berbagai pilihan ${kategori} berkualitas dengan desain menarik dan harga terjangkau.`
+    : 'Jelajahi koleksi produk clothing Kunam. Temukan berbagai pilihan pakaian berkualitas dengan desain menarik dan harga terjangkau.';
 
   return (
     <>
-      <CustomHead {...seo} />
-      <ProdukGrid produk={produk} />
+      <CustomHead {...seo} title={title} description={description} />
+      <ProdukGrid produk={produk} kategori={kategori} />
     </>
   );
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps(context) {
+  const { kategori } = context.query;
+
   try {
-    // eslint-disable-next-line no-console
-    console.log('Fetching products from database...');
+    const whereClause = kategori ? { kategori } : {};
 
     const produk = await prisma.produk.findMany({
+      where: whereClause,
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
-
-    // eslint-disable-next-line no-console
-    console.log(`Found ${produk.length} products in database`);
 
     // Serialize dates
     const serializedProduk = produk.map((item) => ({
@@ -56,26 +57,18 @@ export async function getServerSideProps() {
       tanggalDiubah: item.tanggalDiubah.toISOString(),
     }));
 
-    // eslint-disable-next-line no-console
-    console.log('Products serialized successfully');
-
     return {
       props: {
         produk: serializedProduk,
+        kategori: kategori || null,
       },
     };
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error fetching produk:', error);
-    // eslint-disable-next-line no-console
-    console.error('Error details:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name,
-    });
+    // Return empty array on error to prevent page crash
     return {
       props: {
         produk: [],
+        kategori: kategori || null,
       },
     };
   }

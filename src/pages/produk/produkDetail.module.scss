@@ -232,6 +232,12 @@
     }
   }
 
+  .stockWrapper {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
   .stock {
     font-size: 1rem;
     color: var(--black);
@@ -240,6 +246,49 @@
 
     @include mobile {
       font-size: 0.9rem;
+    }
+  }
+}
+
+.wishlistIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-radius: 50%;
+  background-color: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: var(--black);
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: #ff4444;
+    background-color: rgba(255, 68, 68, 0.05);
+    color: #ff4444;
+    transform: scale(1.05);
+  }
+
+  &.liked {
+    border-color: #ff4444;
+    color: #ff4444;
+    background-color: rgba(255, 68, 68, 0.1);
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  @include mobile {
+    width: 2.25rem;
+    height: 2.25rem;
+
+    svg {
+      width: 1.1rem;
+      height: 1.1rem;
     }
   }
 }
@@ -386,6 +435,8 @@
   border-radius: 50px;
   text-decoration: none;
   transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
 
   &:hover {
     background-color: rgba(0, 0, 0, 0.8);
@@ -400,6 +451,70 @@
   @include mobile {
     width: 100%;
     justify-content: center;
+  }
+}
+
+// Action buttons for wishlist and cart
+.actionButtonsContainer {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+
+  @include mobile {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.actionBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  border: 2px solid var(--black);
+  cursor: pointer;
+  flex: 1;
+  min-width: 180px;
+
+  &:hover {
+    transform: translateY(-2px);
+  }
+
+  svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.cartBtn {
+  background-color: var(--black);
+  color: var(--white);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+  }
+}
+
+.buyBtn {
+  background-color: var(--white);
+  color: var(--black);
+  border: 2px solid var(--black);
+
+  &:hover {
+    background-color: var(--black);
+    color: var(--white);
   }
 }
 

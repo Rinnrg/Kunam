@@ -22,11 +22,13 @@
 .root {
   display: flex;
   align-items: center;
+  justify-content: center;
   height: 100svh;
   width: 100vw;
+  background-color: var(--black);
 }
 .layout {
-  background-color: transparent;
+  background-color: var(--white);
   opacity: 1;
   height: 100svh;
 
@@ -35,6 +37,9 @@
   position: relative;
   width: 100%;
   overflow: hidden;
+  border-radius: 0;
+  transition: border-radius 0.8s ease;
+  will-change: transform, border-radius;
   .main {
     flex-grow: 1;
     z-index: 1;

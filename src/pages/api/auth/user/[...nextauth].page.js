@@ -2,75 +2,17 @@ import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
-import prisma from '../../../lib/prisma';
+import prisma from '../../../../lib/prisma';
 
-export const authOptions = {
+export const userAuthOptions = {
   providers: [
-    // Google OAuth for users
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
-        },
-      },
     }),
-    // Admin credentials
-    CredentialsProvider({
-      id: 'admin-credentials',
-      name: 'Admin Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        try {
-          if (!credentials?.email || !credentials?.password) {
-            return null;
-          }
-
-          const admin = await prisma.admin.findUnique({
-            where: {
-              email: credentials.email,
-            },
-            select: {
-              id: true,
-              email: true,
-              password: true,
-              name: true,
-            },
-          });
-
-          if (!admin) {
-            return null;
-          }
-
-          const isPasswordValid = await bcrypt.compare(credentials.password, admin.password);
-
-          if (!isPasswordValid) {
-            return null;
-          }
-
-          return {
-            id: admin.id.toString(),
-            email: admin.email,
-            name: admin.name,
-            role: 'admin',
-          };
-        } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error('[Admin Auth] Authorization error:', error);
-          return null;
-        }
-      },
-    }),
-    // User credentials
     CredentialsProvider({
       id: 'user-credentials',
-      name: 'User Credentials',
+      name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
@@ -131,7 +73,6 @@ export const authOptions = {
   ],
   callbacks: {
     async signIn({ user, account }) {
-      // Handle Google OAuth for users
       if (account?.provider === 'google') {
         try {
           const existingUser = await prisma.user.findUnique({
@@ -139,6 +80,7 @@ export const authOptions = {
           });
 
           if (existingUser) {
+            // Update user info if already exists
             await prisma.user.update({
               where: { id: existingUser.id },
               data: {
@@ -148,6 +90,7 @@ export const authOptions = {
               },
             });
           } else {
+            // Create new user
             await prisma.user.create({
               data: {
                 email: user.email.toLowerCase(),
@@ -171,21 +114,20 @@ export const authOptions = {
     },
     async jwt({ token, user, account }) {
       if (user) {
-        // For Google OAuth, get user ID from database
+        // For Google OAuth, we need to get the user ID from database
         if (account?.provider === 'google') {
           const dbUser = await prisma.user.findUnique({
             where: { email: user.email.toLowerCase() },
             select: { id: true },
           });
           token.id = dbUser?.id.toString();
-          token.role = 'user';
         } else {
           token.id = user.id;
-          token.role = user.role;
         }
         token.email = user.email;
         token.name = user.name;
         token.image = user.image;
+        token.role = 'user';
       }
       return token;
     },
@@ -199,19 +141,10 @@ export const authOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // Check if the redirect URL is for admin pages
-      if (url.includes('/admin') || url.startsWith('/admin')) {
-        return url.startsWith('/') ? `${baseUrl}${url}` : url;
-      }
-      // For regular users, redirect to home
-      if (url.startsWith('/')) return `${baseUrl}${url}`;
-      if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
-    },
   },
   pages: {
-    // Don't set default sign in page, let each page handle its own redirect
+    signIn: '/login',
+    error: '/login',
   },
   session: {
     strategy: 'jwt',
@@ -221,4 +154,4 @@ export const authOptions = {
   debug: process.env.NODE_ENV === 'development',
 };
 
-export default NextAuth(authOptions);
+export default NextAuth(userAuthOptions);

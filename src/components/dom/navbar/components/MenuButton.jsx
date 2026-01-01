@@ -11,7 +11,9 @@ function MenuButton({ isScrolled = false }) {
   const handleClick = useCallback(() => {
     if (!isLoading) {
       setIsMenuOpen(true);
-      lenis.stop();
+      if (lenis) {
+        lenis.stop();
+      }
     }
   }, [isLoading, setIsMenuOpen, lenis]);
 

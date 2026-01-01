@@ -14,6 +14,8 @@ import Layout from '@src/components/dom/Layout';
 import Lenis from 'lenis';
 import Loader from '@src/components/dom/Loader';
 import Navbar from '@src/components/dom/navbar/Index';
+import MenuLinks from '@src/components/dom/navbar/components/MenuLinks';
+import AlertDialog from '@src/components/dom/AlertDialog';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Scrollbar from '@src/components/dom/Scrollbar';
 import { SessionProvider } from 'next-auth/react';
@@ -44,7 +46,7 @@ if (typeof window !== 'undefined') {
 }
 
 function MyApp({ Component, pageProps, router }) {
-  const [lenis, setLenis, isAbout] = useStore(useShallow((state) => [state.lenis, state.setLenis, state.isAbout]));
+  const [lenis, setLenis, isAbout, alertDialog, hideAlert] = useStore(useShallow((state) => [state.lenis, state.setLenis, state.isAbout, state.alertDialog, state.hideAlert]));
 
   const mainRef = useRef();
   const mainContainerRef = useRef();
@@ -52,6 +54,7 @@ function MyApp({ Component, pageProps, router }) {
 
   // Check if current page is admin page
   const isAdminPage = router.pathname.startsWith('/admin');
+  const isLoginPage = router.pathname === '/login';
 
   useFoucFix();
   useScroll(() => {
@@ -109,7 +112,6 @@ function MyApp({ Component, pageProps, router }) {
           </div>
         )}
         {!isAdminPage && <Scrollbar />}
-        {!isAdminPage && <Navbar />}
         <Analytics />
       </>
     ),
@@ -149,20 +151,44 @@ function MyApp({ Component, pageProps, router }) {
     );
   }
 
+  // Render login page with minimal wrapper (no header/footer)
+  if (isLoginPage) {
+    return (
+      <SessionProvider session={pageProps.session}>
+        <Component {...pageProps} />
+      </SessionProvider>
+    );
+  }
+
   return (
     <SessionProvider session={pageProps.session}>
       <div className={styles.root}>
+        {!isAdminPage && <MenuLinks />}
         {domElements}
         <div ref={layoutRef} id="layout" className={styles.layout}>
           {canvasElements}
           <main ref={mainRef} className={styles.main}>
             <div ref={mainContainerRef} id="mainContainer" className={styles.mainContainer}>
+              {!isAdminPage && <Navbar />}
               <Layout layoutRef={layoutRef} mainRef={mainRef} router={router}>
                 <Component {...pageProps} />
               </Layout>
             </div>
           </main>
         </div>
+        
+        {/* Global Alert Dialog */}
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={hideAlert}
+          onConfirm={alertDialog.onConfirm}
+          title={alertDialog.title}
+          message={alertDialog.message}
+          type={alertDialog.type}
+          confirmText={alertDialog.confirmText}
+          cancelText={alertDialog.cancelText}
+          showCancel={alertDialog.showCancel}
+        />
       </div>
     </SessionProvider>
   );

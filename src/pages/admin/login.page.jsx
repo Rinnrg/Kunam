@@ -24,7 +24,7 @@ export default function AdminLogin() {
     setIsLoading(true);
 
     try {
-      const result = await signIn('credentials', {
+      const result = await signIn('admin-credentials', {
         redirect: false,
         email,
         password,

@@ -14,4 +14,54 @@ export const useStore = create((set) => ({
   setFluidColor: (fluidColor) => set({ fluidColor }),
   isAbout: false,
   setIsAbout: (isAbout) => set({ isAbout }),
+  // Auth modal state
+  isAuthModalOpen: false,
+  setIsAuthModalOpen: (isAuthModalOpen) => set({ isAuthModalOpen }),
+  authModalTab: 'login', // 'login' or 'register'
+  setAuthModalTab: (authModalTab) => set({ authModalTab }),
+  // Wishlist and Cart
+  wishlist: [],
+  setWishlist: (wishlist) => set({ wishlist }),
+  cart: [],
+  setCart: (cart) => set({ cart }),
+  cartTotal: 0,
+  setCartTotal: (cartTotal) => set({ cartTotal }),
+  // Alert Dialog
+  alertDialog: {
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'info',
+    onConfirm: null,
+    confirmText: 'OK',
+    cancelText: 'Batal',
+    showCancel: false,
+  },
+  setAlertDialog: (alertDialog) => set({ alertDialog }),
+  showAlert: ({ title, message, type = 'info', onConfirm, confirmText, cancelText, showCancel }) =>
+    set({
+      alertDialog: {
+        isOpen: true,
+        title,
+        message,
+        type,
+        onConfirm,
+        confirmText: confirmText || 'OK',
+        cancelText: cancelText || 'Batal',
+        showCancel: showCancel !== undefined ? showCancel : type === 'confirm',
+      },
+    }),
+  hideAlert: () =>
+    set({
+      alertDialog: {
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        onConfirm: null,
+        confirmText: 'OK',
+        cancelText: 'Batal',
+        showCancel: false,
+      },
+    }),
 }));

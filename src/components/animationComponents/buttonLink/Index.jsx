@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import gsap from 'gsap';
 import styles from '@src/components/animationComponents/buttonLink/buttonLink.module.scss';
 
-function ButtonLink({ href, label, target = false }) {
+function ButtonLink({ href, label, target = false, onClick }) {
   const buttonRef = useRef(null);
   const spanRef = useRef(null);
   const relsRef = useRef({ relX: 0, relY: 0 });
@@ -44,15 +44,25 @@ function ButtonLink({ href, label, target = false }) {
     });
   }, []);
 
-  return (
-    <Link target={target ? '_blank' : undefined} rel={target ? 'noopener noreferrer' : undefined} aria-label={label} scroll={false} href={href}>
-      <button type="button" aria-label={label} ref={buttonRef} className={clsx('p-xs', styles.btnPosnawr)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-        <span className={clsx('p-x', styles.labelClassic)}>{label}</span>
-        <Arrow className={styles.arrowClassic} />
-        <span className={styles.ball} ref={spanRef} />
-      </button>
-    </Link>
+  const buttonContent = (
+    <button type="button" aria-label={label} ref={buttonRef} className={clsx('p-xs', styles.btnPosnawr)} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} onClick={onClick}>
+      <span className={clsx('p-x', styles.labelClassic)}>{label}</span>
+      <Arrow className={styles.arrowClassic} />
+      <span className={styles.ball} ref={spanRef} />
+    </button>
   );
+
+  // If href is provided, wrap with Link
+  if (href) {
+    return (
+      <Link target={target ? '_blank' : undefined} rel={target ? 'noopener noreferrer' : undefined} aria-label={label} scroll={false} href={href}>
+        {buttonContent}
+      </Link>
+    );
+  }
+
+  // Otherwise, just return the button
+  return buttonContent;
 }
 
 export default ButtonLink;

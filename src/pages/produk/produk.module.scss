@@ -4,8 +4,8 @@
   position: relative;
   width: 100%;
   background-color: var(--white);
-  padding-top: calc(var(--layout-columns-gap) * 4);
-  padding-bottom: calc(var(--layout-columns-gap) * 1);
+  padding-top: calc(var(--layout-columns-gap) * 0.5);
+  padding-bottom: calc(var(--layout-columns-gap) * 0.5);
   align-items: center;
 
   .title {
