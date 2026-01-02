@@ -114,26 +114,26 @@ function Navbar() {
 
           {/* Right Container - Desktop & Mobile */}
           <div className={styles.rightContainer}>
-            {!isMobile ? (
-              // Desktop
-              session?.user ? (
-                <UserNavbar />
-              ) : (
-                <ButtonLink onClick={handleLoginClick} label="LOGIN" />
-              )
-            ) : (
-              // Mobile
-              session?.user ? (
-                <UserNavbar />
-              ) : (
+            {(() => {
+              // Desktop view
+              if (!isMobile) {
+                return session?.user ? <UserNavbar /> : <ButtonLink onClick={handleLoginClick} label="LOGIN" />;
+              }
+              
+              // Mobile view
+              if (session?.user) {
+                return <UserNavbar />;
+              }
+              
+              return (
                 <button type="button" className={styles.mobileLoginButton} onClick={handleLoginClick}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </button>
-              )
-            )}
+              );
+            })()}
           </div>
         </div>
       </header>
