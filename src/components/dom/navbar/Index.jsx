@@ -17,7 +17,6 @@ function Navbar() {
   const isMobile = useIsMobile();
   const router = useRouter();
   const [lenis] = useStore(useShallow((state) => [state.lenis]));
-  const [showFloating, setShowFloating] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
   const scrollToPosition = useCallback(
@@ -47,8 +46,6 @@ function Navbar() {
 
     const handleScroll = (e) => {
       const scrollPosition = e.scroll || 0;
-      const shouldShow = scrollPosition > 150;
-      setShowFloating(shouldShow);
       setIsScrolled(scrollPosition > 10);
     };
 
@@ -76,14 +73,14 @@ function Navbar() {
             <Image src="/logo/logo 1 black.svg" alt="Kunam" width={getLogoWidth()} height={getLogoHeight()} priority />
           </Link>
 
-          {/* Search Bar */}
+          {/* Search Bar - Desktop */}
           {!isMobile && (
             <div className={styles.searchWrapper}>
               <SearchDropdown />
             </div>
           )}
 
-          {/* Navigation Menu */}
+          {/* Navigation Menu - Desktop */}
           {!isMobile && (
             <nav className={styles.mainNav}>
               {menuLinks.filter((link) => link.title !== 'Contact').map((link) => (
@@ -115,81 +112,26 @@ function Navbar() {
             </nav>
           )}
 
+          {/* Right Container - Desktop & Mobile */}
           <div className={styles.rightContainer}>
-            {!isMobile && (
+            {!isMobile ? (
+              // Desktop
               session?.user ? (
                 <UserNavbar />
               ) : (
                 <ButtonLink onClick={handleLoginClick} label="LOGIN" />
               )
-            )}
-          </div>
-        </div>
-      </header>
-
-      {/* Header floating yang muncul saat scroll (sticky) */}
-      <header
-        id="floating-header"
-        className={`${styles.floatingHeader} ${showFloating ? styles.show : ''}`}
-        role="banner"
-        style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 10000,
-          opacity: 1,
-          visibility: 'visible',
-          display: 'block',
-          pointerEvents: showFloating ? 'all' : 'none',
-          transform: showFloating ? 'translateY(0)' : 'translateY(-100%)',
-          transition: 'transform 0.4s ease-out, opacity 0.4s ease-out',
-          willChange: 'transform',
-        }}
-      >
-        <div className={styles.innerHeader}>
-          <Link onClick={goToTop} aria-label="Go home" scroll={false} href="/" className={styles.logoLink}>
-            <Image src="/logo/logo 2 black.svg" alt="Kunam" width={60} height={20} priority />
-          </Link>
-
-          {/* Navigation Menu - Floating Header */}
-          {!isMobile && (
-            <nav className={styles.mainNav}>
-              {menuLinks.filter((link) => link.title !== 'Contact').map((link) => (
-                <div key={link.title} className={styles.navItem}>
-                  {link.href ? (
-                    <Link href={link.href} className={styles.navLink}>
-                      {link.title}
-                    </Link>
-                  ) : (
-                    <span className={styles.navLink}>{link.title}</span>
-                  )}
-                  {link.submenu && link.submenu.length > 0 && (
-                    <div className={styles.dropdown}>
-                      {link.submenu.filter((sub) => sub.href).map((sublink) => (
-                        <Link
-                          key={sublink.title}
-                          href={sublink.href}
-                          className={styles.dropdownItem}
-                          target={sublink.external ? '_blank' : undefined}
-                          rel={sublink.external ? 'noopener noreferrer' : undefined}
-                        >
-                          {sublink.title}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </nav>
-          )}
-
-          <div className={styles.rightContainer}>
-            {!isMobile && (
+            ) : (
+              // Mobile
               session?.user ? (
                 <UserNavbar />
               ) : (
-                <ButtonLink onClick={handleLoginClick} label="LOGIN" />
+                <button type="button" className={styles.mobileLoginButton} onClick={handleLoginClick}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
               )
             )}
           </div>
