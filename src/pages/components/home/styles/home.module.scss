@@ -8,20 +8,22 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: calc(var(--layout-columns-gap) + 3.1vw) var(--layout-margin)
+  padding: 0 var(--layout-margin)
     calc(var(--layout-columns-gap) * 2);
+  padding-top: 0px;
 
   box-shadow:
-    inset 0 calc(var(--layout-columns-gap) + 3.2vw) 0 0 var(--white),
+    inset 0 0 0 0 var(--white),
     inset calc(var(--layout-margin) * -1.05) 0 0 0 var(--white),
     inset 0 calc(var(--layout-columns-gap) * -1.0065 * 2) 0 0 var(--white),
     inset calc(var(--layout-margin) * 1.05) 0 0 0 var(--white);
 
   @include mobile {
-    padding: calc(var(--layout-columns-gap) + 6.5vw) var(--layout-margin)
+    padding: 0 var(--layout-margin)
       calc(var(--layout-columns-gap) * 2);
+    padding-top: 0px;
     box-shadow:
-      inset 0 calc(var(--layout-columns-gap) + 6.6vw) 0 0 var(--white),
+      inset 0 0 0 0 var(--white),
       inset calc(var(--layout-margin) * -1.1001) 0 0 0 var(--white),
       inset 0 calc(var(--layout-columns-gap) * -1.04 * 2) 0 0 var(--white),
       inset calc(var(--layout-margin) * 1.1001) 0 0 0 var(--white);
@@ -34,7 +36,7 @@
     text-align: center;
     flex: 1 1 auto;
     width: 100%;
-    padding: 4rem 2rem;
+    padding: 2rem 2rem;
     background-color: var(--white);
     box-shadow: 0 0 0 1vw var(--white);
     border-radius: var(--layout-columns-gap);
@@ -45,7 +47,7 @@
     @include mobile {
       box-shadow: 0 0 0 2vw var(--white);
       border-radius: calc(var(--layout-columns-gap) * 0.5);
-      padding: 3rem 1.5rem;
+      padding: 1.5rem 1.5rem;
       gap: 1rem;
     }
 

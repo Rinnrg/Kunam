@@ -1,7 +1,14 @@
 .container {
   min-height: 100vh;
-  padding: 150px 5% 3rem;
+  padding: 0px 5% 3rem;
+  padding-top: 0px;
   background-color: var(--white, #f0f4f1);
+  
+  // Mobile scroll optimization
+  @media (max-width: 768px) {
+    touch-action: pan-y;
+    overflow-x: hidden;
+  }
 }
 
 .loading {

@@ -39,76 +39,44 @@ function Layout({ children, layoutRef, mainRef, router }) {
         enterTimelineRef.current = tl;
         setIsEntering(true);
 
-        tl.set(
+        // Simple fade in transition
+        tl.to(
           layoutRef.current,
           {
-            ease: 'power2.inOut',
-            height: '90%',
             opacity: 1,
+            duration: 0.4,
+            ease: 'power2.inOut',
             onComplete: () => {
               setIsAbout(router.asPath === '/about');
               setIsEntering(false);
             },
           },
-          0.3,
+          0,
         )
           .to(
             '#loader',
             {
-              x: '-100%',
-              ease: 'power2.inOut',
-              duration: 0.4,
-            },
-            0.3,
-          )
-          .to(
-            mainRef.current,
-            {
-              ease: 'power2.inOut',
-              x: '0px',
-              duration: 0.4,
-            },
-            0.3,
-          )
-          .to(
-            mainRef.current,
-            {
-              ease: 'power2.inOut',
-              borderRadius: 0,
-              scale: 1,
+              opacity: 0,
               duration: 0.3,
-            },
-            0.5,
-          )
-          .to(
-            layoutRef.current,
-            {
               ease: 'power2.inOut',
-              height: '100%',
-              opacity: 1,
-              duration: 0.3,
             },
-            0.5,
+            0,
           )
           .to(
             'header',
             {
-              ease: 'power2.inOut',
-              autoAlpha: 1,
+              opacity: 1,
               duration: 0.3,
+              ease: 'power2.inOut',
             },
-            0.6,
+            0.2,
           )
-          .to(
+          .set(
             mainRef.current,
             {
-              ease: 'power2.inOut',
-              height: 'auto',
-              border: 'none',
               pointerEvents: 'auto',
-              duration: 0.2,
             },
-            0.6,
+            0.4,
           );
       }
     },
@@ -135,13 +103,14 @@ function Layout({ children, layoutRef, mainRef, router }) {
 
           exitTimelineRef.current = tl;
 
+          // Simple fade out transition
           if (document?.getElementById('scrollbar')) {
             tl.to(
               document.getElementById('scrollbar'),
               {
-                ease: 'power2.inOut',
-                autoAlpha: 0,
+                opacity: 0,
                 duration: 0.3,
+                ease: 'power2.inOut',
               },
               menuTime,
             );
@@ -150,68 +119,28 @@ function Layout({ children, layoutRef, mainRef, router }) {
           tl.to(
             'header',
             {
-              ease: 'power2.inOut',
-              autoAlpha: 0,
+              opacity: 0,
               duration: 0.3,
-              onComplete: () => {
-                gsap.set('#loader', {
-                  scale: 0.9,
-                  x: '100%',
-                  borderRadius: '1.3888888889vw',
-                });
-                gsap.set('header', {
-                  left: 0,
-                  top: 0,
-                  scale: 1,
-                  duration: 0,
-                });
-              },
-              overwrite: true,
+              ease: 'power2.inOut',
             },
             menuTime,
           )
             .to(
               layoutRef.current,
               {
-                ease: 'power2.inOut',
-                height: '90svh',
-                opacity: 1,
+                opacity: 0,
                 duration: 0.3,
+                ease: 'power2.inOut',
               },
               menuTime,
             )
-            .to(
-              mainRef.current,
-              {
-                ease: 'power2.inOut',
-                scale: 0.9,
-                opacity: 1,
-                border: '2px solid #f0f4f1',
-                borderRadius: '1.3888888889vw',
-                duration: 0.3,
-              },
-              menuTime,
-            )
-            .to(
-              mainRef.current,
-              {
-                ease: 'power2.inOut',
-                x: '-100%',
-                duration: 0.3,
-              },
-              0.3 + menuTime,
-            )
-            .to(
-              '#loader',
-              {
-                ease: 'power2.inOut',
-                x: '0px',
-                duration: 0.3,
-              },
-              0.3 + menuTime,
-            )
-            .set(mainRef.current, {
-              x: '100%',
+            .set('#loader', {
+              opacity: 1,
+            })
+            .set('header', {
+              left: 0,
+              top: 0,
+              scale: 1,
             });
         }
       }
@@ -233,8 +162,8 @@ function Layout({ children, layoutRef, mainRef, router }) {
           in={false}
           unmountOnExit
           timeout={{
-            enter: introOut ? 900 : 0,
-            exit: introOut ? 700 : 0,
+            enter: introOut ? 500 : 0,
+            exit: introOut ? 400 : 0,
           }}
           onEnter={handleEnter}
           onExit={handleExit}

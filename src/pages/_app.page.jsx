@@ -66,18 +66,23 @@ function MyApp({ Component, pageProps, router }) {
     // Skip Lenis for admin pages
     if (isAdminPage) return undefined;
 
+    // Check if it's a mobile device
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
     // eslint-disable-next-line no-shadow
     const lenis = new Lenis({
       smoothWheel: true,
-      smoothTouch: false,
-      syncTouch: false,
-      lerp: 0.1,
-      duration: 1.2,
+      smoothTouch: isMobile || isTouch, // Enable smooth touch for all touch devices
+      syncTouch: isMobile || isTouch,   // Sync touch events on mobile/touch devices
+      lerp: isMobile ? 0.08 : 0.1,      // Slightly lower lerp for mobile for better control
+      duration: isMobile ? 1.0 : 1.2,    // Faster duration for mobile
       wrapper: mainRef.current || undefined,
       content: mainContainerRef.current || undefined,
       wheelMultiplier: 1,
-      touchMultiplier: 2,
+      touchMultiplier: isMobile ? 1.2 : 2,  // Adjusted for better mobile experience
       infinite: false,
+      normalizeWheel: true,
     });
 
     setLenis(lenis);
