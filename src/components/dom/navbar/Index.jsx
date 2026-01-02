@@ -18,6 +18,7 @@ function Navbar() {
   const router = useRouter();
   const [lenis] = useStore(useShallow((state) => [state.lenis]));
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isGuestMenuOpen, setIsGuestMenuOpen] = useState(false);
 
   const scrollToPosition = useCallback(
     (position, duration = 1.5) => {
@@ -120,23 +121,130 @@ function Navbar() {
                 return session?.user ? <UserNavbar /> : <ButtonLink onClick={handleLoginClick} label="LOGIN" />;
               }
               
-              // Mobile view
-              if (session?.user) {
-                return <UserNavbar />;
-              }
-              
+              // Mobile view - Always show search, wishlist, cart
               return (
-                <button type="button" className={styles.mobileLoginButton} onClick={handleLoginClick}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
+                <>
+                  {/* Search Icon - Mobile */}
+                  <Link href="/produk" className={styles.mobileIconButton} aria-label="Cari">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                  
+                  {/* Wishlist Icon - Mobile */}
+                  <Link href="/wishlist" className={styles.mobileIconButton} aria-label="Wishlist">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                  
+                  {/* Cart Icon - Mobile */}
+                  <Link href="/cart" className={styles.mobileIconButton} aria-label="Keranjang">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </Link>
+                  
+                  {/* User/Profile - Mobile */}
+                  {session?.user ? (
+                    <UserNavbar />
+                  ) : (
+                    <>
+                      <button type="button" className={styles.mobileLoginButton} onClick={handleLoginClick}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                          <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      
+                      {/* Menu Button for Guest - Mobile */}
+                      <button 
+                        type="button" 
+                        className={styles.mobileMenuButton} 
+                        onClick={() => setIsGuestMenuOpen(!isGuestMenuOpen)}
+                        aria-label="Menu"
+                      >
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 8h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                          <path d="M4 16h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      </button>
+                    </>
+                  )}
+                </>
               );
             })()}
           </div>
         </div>
       </header>
+      
+      {/* Guest Mobile Menu */}
+      {isMobile && !session?.user && isGuestMenuOpen && (
+        <>
+          <div 
+            className={styles.menuOverlay} 
+            onClick={() => setIsGuestMenuOpen(false)}
+            onKeyDown={(e) => e.key === 'Escape' && setIsGuestMenuOpen(false)}
+            role="button"
+            tabIndex={0}
+            aria-label="Tutup menu"
+          />
+          <div className={styles.mobileMenu}>
+            <div className={styles.mobileMenuHeader}>
+              <h3>Menu</h3>
+              <button 
+                type="button" 
+                className={styles.closeButton}
+                onClick={() => setIsGuestMenuOpen(false)}
+                aria-label="Tutup"
+              >
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 6L6 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                  <path d="M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </button>
+            </div>
+            <nav className={styles.mobileMenuNav}>
+              {menuLinks.filter((link) => link.title !== 'Contact').map((link) => (
+                <div key={link.title}>
+                  {link.href ? (
+                    <Link 
+                      href={link.href} 
+                      className={styles.mobileMenuItem} 
+                      onClick={() => setIsGuestMenuOpen(false)}
+                    >
+                      {link.title}
+                    </Link>
+                  ) : (
+                    <div className={styles.mobileMenuItem}>
+                      {link.title}
+                    </div>
+                  )}
+                  {link.submenu && link.submenu.length > 0 && (
+                    <div className={styles.mobileSubmenu}>
+                      {link.submenu.filter((sub) => sub.href).map((sublink) => (
+                        <Link
+                          key={sublink.title}
+                          href={sublink.href}
+                          className={styles.mobileSubmenuItem}
+                          onClick={() => setIsGuestMenuOpen(false)}
+                          target={sublink.external ? '_blank' : undefined}
+                          rel={sublink.external ? 'noopener noreferrer' : undefined}
+                        >
+                          {sublink.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </nav>
+          </div>
+        </>
+      )}
     </>
   );
 }
