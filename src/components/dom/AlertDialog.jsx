@@ -13,17 +13,7 @@ import styles from './alertDialog.module.scss';
  * @param {string} cancelText - Text for cancel button (default: 'Batal')
  * @param {boolean} showCancel - Show cancel button (default: false for info/success/error, true for confirm)
  */
-function AlertDialog({
-  isOpen,
-  onClose,
-  onConfirm,
-  title,
-  message,
-  type = 'info',
-  confirmText = 'OK',
-  cancelText = 'Batal',
-  showCancel,
-}) {
+function AlertDialog({ isOpen, onClose, onConfirm, title, message, type = 'info', confirmText = 'OK', cancelText = 'Batal', showCancel }) {
   // Auto-determine showCancel based on type if not explicitly set
   const shouldShowCancel = showCancel !== undefined ? showCancel : type === 'confirm';
 
@@ -105,9 +95,9 @@ function AlertDialog({
     <div className={styles.overlay} onClick={handleBackdropClick} role="presentation">
       <div className={`${styles.dialog} ${styles[type]}`}>
         <div className={styles.iconWrapper}>{getIcon()}</div>
-        
+
         {title && <h2 className={styles.title}>{title}</h2>}
-        
+
         {message && <p className={styles.message}>{message}</p>}
 
         <div className={styles.actions}>

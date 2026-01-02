@@ -25,7 +25,7 @@ function Loader() {
       ctx = gsap.context(() => {
         gsap.delayedCall(3, () => {
           // Header tidak perlu di-hide, biarkan selalu visible
-          
+
           // Animate logo out
           gsap.to(logoRef.current, {
             ease: 'power4.inOut',
@@ -98,7 +98,7 @@ function Loader() {
             height: '100%',
           });
           // Header tidak perlu animasi, biarkan selalu visible
-          
+
           gsap.to('main', {
             ease: 'power2.inOut',
             delay: 2.7,

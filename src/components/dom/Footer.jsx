@@ -71,8 +71,13 @@ function Footer() {
             <span className={styles.kunamText}>KUNAM</span>
           </div>
           <div className={styles.companyDescription}>
-            <p>Sebagai Pusat Fashion Online di Asia, kami menciptakan kemudahan berbelanja gaya tanpa batas dengan cara memperluas jangkauan produk, mulai dari produk internasional hingga produk lokal dambaaan. Kami menjadikan Anda sebagai pusatnya.</p>
-            <p className={styles.tagline}><strong>Bersama KUNAM, You Own Now.</strong></p>
+            <p>
+              Sebagai Pusat Fashion Online di Asia, kami menciptakan kemudahan berbelanja gaya tanpa batas dengan cara memperluas jangkauan produk, mulai dari produk internasional hingga produk lokal
+              dambaaan. Kami menjadikan Anda sebagai pusatnya.
+            </p>
+            <p className={styles.tagline}>
+              <strong>Bersama KUNAM, You Own Now.</strong>
+            </p>
           </div>
           <div className={styles.contactInfo}>
             <h6 className={styles.title}>Layanan Pengaduan Konsumen KUNAM</h6>

@@ -1,1 +1,3 @@
-export { default } from './AuthModal';
+import AuthModalComponent from './AuthModal';
+
+export default AuthModalComponent;

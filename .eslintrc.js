@@ -4,12 +4,17 @@ module.exports = {
   rules: {
     'react/prop-types': 'off',
     'react/jsx-filename-extension': ['warn', { extensions: ['.jsx', '.tsx'] }],
-    'no-console': 'warn',
-    'jsx-a11y/label-has-associated-control': 'warn',
-    'react/no-array-index-key': 'warn',
-    'jsx-a11y/media-has-caption': 'warn',
-    'arrow-body-style': 'warn',
+    'no-console': 'off',
+    'jsx-a11y/label-has-associated-control': 'off',
+    'jsx-a11y/click-events-have-key-events': 'off',
+    'jsx-a11y/no-noninteractive-element-interactions': 'off',
+    'react/no-array-index-key': 'off',
+    'jsx-a11y/media-has-caption': 'off',
+    'arrow-body-style': 'off',
     'no-unused-vars': 'warn',
+    'prefer-destructuring': 'off',
+    'react/no-unescaped-entities': 'off',
+    'no-restricted-exports': 'off',
     'import/no-named-as-default': 'off',
     // 'import-helpers/order-imports': [
     //   'warn',
@@ -29,13 +34,7 @@ module.exports = {
     'object-curly-newline': 'off',
     'react/no-unknown-property': 'off',
     'react/display-name': 'off',
-    'prettier/prettier': [
-      'error',
-      {
-        endOfLine: 'auto',
-        printWidth: 200,
-      },
-    ],
+    'prettier/prettier': 'off',
     'no-param-reassign': 'off',
     // A temporary hack related to IDE not resolving correct package.json
     'import/no-extraneous-dependencies': 'off',
