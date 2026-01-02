@@ -112,32 +112,62 @@ export const userAuthOptions = {
 
       return true;
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger }) {
       if (user) {
         // For Google OAuth, we need to get the user ID from database
         if (account?.provider === 'google') {
           const dbUser = await prisma.user.findUnique({
             where: { email: user.email.toLowerCase() },
-            select: { id: true },
+            select: { id: true, image: true },
           });
           token.id = dbUser?.id.toString();
+          token.image = dbUser?.image || user.image;
         } else {
           token.id = user.id;
+          token.image = user.image;
         }
         token.email = user.email;
         token.name = user.name;
-        token.image = user.image;
         token.role = 'user';
       }
+      
+      // Update token on session update
+      if (trigger === 'update') {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: parseInt(token.id, 10) },
+          select: { name: true, image: true, email: true },
+        });
+        if (dbUser) {
+          token.name = dbUser.name;
+          token.image = dbUser.image;
+          token.email = dbUser.email;
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        session.user.image = token.image;
-        session.user.role = token.role;
+        // Always fetch fresh image from database
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: parseInt(token.id, 10) },
+            select: { image: true },
+          });
+          
+          session.user.id = token.id;
+          session.user.email = token.email;
+          session.user.name = token.name;
+          session.user.image = dbUser?.image || token.image;
+          session.user.role = token.role;
+        } catch (error) {
+          // Fallback to token image if database query fails
+          session.user.id = token.id;
+          session.user.email = token.email;
+          session.user.name = token.name;
+          session.user.image = token.image;
+          session.user.role = token.role;
+        }
       }
       return session;
     },
