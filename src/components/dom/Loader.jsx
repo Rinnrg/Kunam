@@ -22,22 +22,30 @@ function Loader() {
     if (!introOut) {
       setIsAbout(router.asPath === '/about');
 
+      // Detect mobile device
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobileDevice = isMobile || isTouch;
+
       ctx = gsap.context(() => {
-        gsap.delayedCall(3, () => {
+        // Skip intro animation on mobile for better UX
+        const introDelay = isMobileDevice ? 0.5 : 3;
+
+        gsap.delayedCall(introDelay, () => {
           // Header tidak perlu di-hide, biarkan selalu visible
 
           // Animate logo out
           gsap.to(logoRef.current, {
             ease: 'power4.inOut',
-            y: '-12vw',
+            y: isMobileDevice ? '-5vw' : '-12vw',
             opacity: 0,
-            duration: 1,
+            duration: isMobileDevice ? 0.5 : 1,
           });
 
           // Animate "Stand Out Loud" text in
           gsap.to(shortNameRef.current, {
             opacity: 1,
-            delay: 0.3,
+            delay: isMobileDevice ? 0.1 : 0.3,
           });
           const splittedShort = new SplitType(shortNameRef.current, {
             types: 'lines',
@@ -47,7 +55,7 @@ function Loader() {
             gsap.to(line, {
               ease: 'power4.inOut',
               top: '0px',
-              duration: 1,
+              duration: isMobileDevice ? 0.5 : 1,
             });
           });
 
@@ -57,51 +65,54 @@ function Loader() {
           });
 
           gsap.set('main', {
-            x: '100%',
-            scale: 0.9,
+            x: isMobileDevice ? '0' : '100%',
+            scale: isMobileDevice ? 1 : 0.9,
             opacity: 1,
-            border: '2px solid #f0f4f1',
-            borderRadius: '1.3888888889vw',
+            border: isMobileDevice ? 'none' : '2px solid #f0f4f1',
+            borderRadius: isMobileDevice ? 0 : '1.3888888889vw',
           });
 
+          const animDuration = isMobileDevice ? 0.3 : 0.5;
+          const animDelay = isMobileDevice ? 0.3 : 0.8;
+
           gsap.to(root.current, {
-            scale: 0.9,
+            scale: isMobileDevice ? 1 : 0.9,
             ease: 'power2.inOut',
-            delay: 0.8,
-            duration: 0.5,
-            borderRadius: '1.3888888889vw',
+            delay: animDelay,
+            duration: animDuration,
+            borderRadius: isMobileDevice ? 0 : '1.3888888889vw',
           });
           gsap.to(root.current, {
             ease: 'power2.inOut',
-            delay: 1.7,
-            duration: 0.5,
+            delay: isMobileDevice ? 0.6 : 1.7,
+            duration: animDuration,
             x: '-100%',
           });
 
           gsap.to('main', {
             ease: 'power2.inOut',
-            delay: 1.7,
-            duration: 0.5,
+            delay: isMobileDevice ? 0.6 : 1.7,
+            duration: animDuration,
             x: '0px',
           });
           gsap.to('main', {
             ease: 'power2.inOut',
-            delay: 2.2,
-            duration: 0.5,
+            delay: isMobileDevice ? 0.9 : 2.2,
+            duration: animDuration,
             scale: 1,
             borderRadius: 0,
           });
           gsap.to(document?.getElementById('layout'), {
             ease: 'power2.inOut',
-            delay: 2.2,
-            duration: 0.5,
+            delay: isMobileDevice ? 0.9 : 2.2,
+            duration: animDuration,
             height: '100%',
           });
           // Header tidak perlu animasi, biarkan selalu visible
 
           gsap.to('main', {
             ease: 'power2.inOut',
-            delay: 2.7,
+            delay: isMobileDevice ? 1.2 : 2.7,
             height: 'auto',
             border: 'none',
             pointerEvents: 'auto',

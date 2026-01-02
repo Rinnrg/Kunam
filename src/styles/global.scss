@@ -6,20 +6,12 @@
 @import '@src/styles/utils.scss';
 @import '@src/styles/fontStyle.scss';
 @import '@src/styles/scroll.scss';
-@import '@src/styles/mobile-scroll.scss';
 
 html {
   font-weight: bolder;
   font-family: var(--font-primary), sans-serif;
 
   scrollbar-width: thin;
-  
-  // Enable smooth scrolling for mobile
-  @media (max-width: 768px) {
-    overflow: auto;
-    height: 100%;
-  }
-  
   &.nav {
     overflow: hidden;
   }
