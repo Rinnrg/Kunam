@@ -122,13 +122,10 @@
   color: #333;
   position: relative;
   transition: color 0.2s ease;
+  text-decoration: none;
 
   &:hover {
     color: #000;
-  }
-
-  &.active {
-    color: #e91e63;
   }
 }
 
@@ -136,7 +133,7 @@
   position: absolute;
   top: 0px;
   right: 0px;
-  background: #e91e63;
+  background: #000;
   color: #fff;
   font-size: 0.6rem;
   font-weight: 600;

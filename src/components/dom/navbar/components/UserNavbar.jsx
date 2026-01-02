@@ -18,12 +18,49 @@ function UserNavbar() {
     useShallow((state) => [state.setIsAuthModalOpen, state.wishlist, state.cart, state.setWishlist, state.setCart, state.showAlert]),
   );
 
-  // Update profile image when session changes
+  // Helper function to hash email for Gravatar
+  const hashEmail = async (email) => {
+    const normalized = email.trim().toLowerCase();
+    const encoder = new TextEncoder();
+    const data = encoder.encode(normalized);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  // Fetch and update profile image from user data or email
   useEffect(() => {
-    if (session?.user?.image) {
-      setProfileImage(session.user.image);
-    }
-  }, [session?.user?.image]);
+    const fetchProfileImage = async () => {
+      if (session?.user) {
+        // Priority 1: Use image from session if available
+        if (session.user.image) {
+          setProfileImage(session.user.image);
+          return;
+        }
+
+        // Priority 2: Fetch from API to get updated profile picture
+        try {
+          const response = await fetch('/api/user/profile');
+          const data = await response.json();
+          
+          if (data.user?.image) {
+            setProfileImage(data.user.image);
+          } else if (session.user.email) {
+            // Priority 3: Use Gravatar based on email as fallback
+            const emailHash = await hashEmail(session.user.email);
+            const gravatarUrl = `https://www.gravatar.com/avatar/${emailHash}?d=mp&s=200`;
+            setProfileImage(gravatarUrl);
+          }
+        } catch (error) {
+          console.error('Error fetching profile:', error);
+          // Fallback to initials if everything fails
+          setProfileImage(null);
+        }
+      }
+    };
+
+    fetchProfileImage();
+  }, [session]);
 
   // Fetch wishlist and cart when user is logged in
   useEffect(() => {
@@ -101,7 +138,7 @@ function UserNavbar() {
     <div className={styles.userNavbar}>
       {/* Wishlist - Desktop Only */}
       {!isMobile && (
-        <Link href="/wishlist" className={`${styles.iconButton} ${wishlist.length > 0 ? styles.active : ''}`} aria-label="Wishlist">
+        <Link href="/wishlist" className={styles.iconButton} aria-label="Wishlist">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
