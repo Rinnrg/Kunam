@@ -124,15 +124,18 @@ function ProdukSidebar({ produkList = [], onFilterChange }) {
       onFilterChange(filters);
     }
 
-    // Update URL with filters
-    const query = {};
-    if (filters.categories.length === 1) query.kategori = filters.categories[0];
-    if (filters.discount) query.diskon = filters.discount;
+    // Update URL with filters ONLY if we're on /produk page
+    // Don't update if we're on homepage (which also renders this component)
+    if (router.pathname === '/produk') {
+      const query = {};
+      if (filters.categories.length === 1) query.kategori = filters.categories[0];
+      if (filters.discount) query.diskon = filters.discount;
 
-    router.push({
-      pathname: '/produk',
-      query,
-    }, undefined, { shallow: true });
+      router.push({
+        pathname: '/produk',
+        query,
+      }, undefined, { shallow: true });
+    }
   }, [selectedCategories, selectedColors, selectedDiscount, priceRange, onFilterChange, router]);
 
   // Apply filters on change

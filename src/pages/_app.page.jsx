@@ -51,7 +51,6 @@ function MyApp({ Component, pageProps, router }) {
   const mainRef = useRef();
   const mainContainerRef = useRef();
   const layoutRef = useRef();
-
   // Check if current page is admin page
   const isAdminPage = router.pathname.startsWith('/admin');
   const isLoginPage = router.pathname === '/login';

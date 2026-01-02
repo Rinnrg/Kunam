@@ -204,6 +204,12 @@ export const authOptions = {
       if (url.includes('/admin') || url.startsWith('/admin')) {
         return url.startsWith('/') ? `${baseUrl}${url}` : url;
       }
+      
+      // Always redirect to home after logout
+      if (url.includes('signout') || url.includes('logout')) {
+        return baseUrl;
+      }
+      
       // For regular users, redirect to home
       if (url.startsWith('/')) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;

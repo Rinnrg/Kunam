@@ -49,11 +49,21 @@ function UserNavbar() {
       message: 'Apakah Anda yakin ingin keluar dari akun Anda?',
       confirmText: 'Keluar',
       showCancel: true,
-      onConfirm: () => {
-        signOut({ callbackUrl: '/' });
+      onConfirm: async () => {
+        // Clear wishlist and cart before logout
+        setWishlist([]);
+        setCart([]);
+        
+        // Sign out and redirect to home
+        await signOut({ callbackUrl: '/', redirect: true });
+        
+        // Force navigation to home page after logout
+        if (typeof window !== 'undefined') {
+          window.history.pushState(null, '', '/');
+        }
       },
     });
-  }, [showAlert]);
+  }, [showAlert, setWishlist, setCart]);
 
   const getInitials = useCallback((name) => {
     if (!name) return 'U';
