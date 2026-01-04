@@ -45,8 +45,24 @@ export async function getServerSideProps(context) {
   try {
     const whereClause = kategori ? { kategori } : {};
 
+    // Optimized query with field selection
     const produk = await prisma.produk.findMany({
       where: whereClause,
+      select: {
+        id: true,
+        nama: true,
+        kategori: true,
+        harga: true,
+        diskon: true,
+        stok: true,
+        gambar: true,
+        ukuran: true,
+        warna: true,
+        produkUnggulan: true,
+        urutanTampilan: true,
+        tanggalDibuat: true,
+        tanggalDiubah: true,
+      },
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
 

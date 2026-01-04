@@ -1,4 +1,5 @@
 import { prisma } from '../../lib/db';
+import cache from '../../lib/cache';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -12,9 +13,16 @@ export default async function handler(req, res) {
   }
 
   const searchTerm = q.trim().toLowerCase();
+  const cacheKey = `search:${searchTerm}:${limit}`;
+
+  // Check cache first
+  const cachedResult = cache.get(cacheKey, 300); // 5 minutes cache
+  if (cachedResult) {
+    return res.status(200).json(cachedResult);
+  }
 
   try {
-    // Search products by name, category, or description
+    // Search products by name, category, or description - optimized with select
     const products = await prisma.produk.findMany({
       where: {
         OR: [
@@ -61,11 +69,16 @@ export default async function handler(req, res) {
       id: prod.id,
     }));
 
-    return res.status(200).json({
+    const result = {
       results: products,
       suggestions: [...suggestions, ...productSuggestions],
       total: products.length,
-    });
+    };
+
+    // Cache the result
+    cache.set(cacheKey, result);
+
+    return res.status(200).json(result);
   } catch (error) {
     console.error('Search error:', error);
     return res.status(500).json({ message: 'Error searching', error: error.message });

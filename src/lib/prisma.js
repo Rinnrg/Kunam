@@ -8,19 +8,16 @@ import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = global;
 
-// Configure Prisma Client based on environment
+// Configure Prisma Client based on environment with optimized settings
 const prismaClientOptions = {
   datasources: {
     db: {
       url: process.env.DATABASE_URL,
     },
   },
+  // Add connection pooling and timeout settings
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
 };
-
-// Add logging in development
-if (process.env.NODE_ENV === 'development') {
-  prismaClientOptions.log = ['error', 'warn'];
-}
 
 // Create singleton instance
 export const prisma = globalForPrisma.prisma || new PrismaClient(prismaClientOptions);

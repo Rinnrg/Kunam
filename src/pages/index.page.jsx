@@ -46,14 +46,32 @@ function Page({ produk }) {
 
 export async function getServerSideProps() {
   try {
-    const { PrismaClient } = await import('@prisma/client');
-    const prisma = new PrismaClient();
+    const prisma = (await import('../lib/prisma')).default;
 
+    // Optimized query: Select only needed fields and limit results
     const produk = await prisma.produk.findMany({
+      where: {
+        OR: [
+          { produkUnggulan: true },
+          { urutanTampilan: { gt: 0 } },
+        ],
+      },
+      select: {
+        id: true,
+        nama: true,
+        kategori: true,
+        harga: true,
+        diskon: true,
+        stok: true,
+        gambar: true,
+        produkUnggulan: true,
+        urutanTampilan: true,
+        tanggalDibuat: true,
+        tanggalDiubah: true,
+      },
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
+      take: 20, // Limit to 20 products for homepage
     });
-
-    await prisma.$disconnect();
 
     // Serialize dates
     const serializedProduk = produk.map((item) => ({

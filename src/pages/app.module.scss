@@ -20,12 +20,10 @@
   }
 }
 .root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative;
   height: 100svh;
   width: 100vw;
-  background-color: var(--black);
+  background-color: var(--white); // Changed from black to white
 }
 .layout {
   background-color: var(--white);
@@ -44,7 +42,7 @@
   .main {
     flex-grow: 1;
     z-index: 1;
-    opacity: 0;
+    opacity: 1;
     top: 0;
     left: 0;
     position: fixed;
@@ -54,6 +52,7 @@
     max-height: 100svh;
     height: 100svh !important;
     width: 100%;
+    pointer-events: auto !important; /* Ensure main is always interactive */
     
     // Mobile touch optimization - tidak mengubah structure
     @media (max-width: 768px) {
@@ -76,6 +75,7 @@
     .mainContainer {
       height: auto;
       width: 100%;
+      pointer-events: auto; /* Ensure mainContainer is always interactive */
     }
   }
   .canvasContainer {

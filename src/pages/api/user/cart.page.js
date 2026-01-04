@@ -17,7 +17,19 @@ export default async function handler(req, res) {
       const cart = await prisma.cart.findMany({
         where: { userId },
         include: {
-          produk: true,
+          produk: {
+            select: {
+              id: true,
+              nama: true,
+              kategori: true,
+              harga: true,
+              diskon: true,
+              stok: true,
+              gambar: true,
+              ukuran: true,
+              warna: true,
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
       });

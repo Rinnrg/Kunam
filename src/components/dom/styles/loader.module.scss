@@ -3,13 +3,20 @@
 .root {
   position: fixed;
   top: 0;
-  z-index: 5;
+  z-index: 9999;
   width: 100vw;
   height: 100vh;
   height: calc(100 * var(--svh, 1vh));
   height: 100svh;
   color: #28282b;
   background-color: #f0f4f1;
+  pointer-events: all;
+  transition: z-index 0s 0.6s, pointer-events 0s 0.6s; // Delay z-index and pointer-events change
+  
+  &[style*="opacity: 0"] {
+    pointer-events: none !important;
+    z-index: -1 !important;
+  }
   .innerContainer {
     position: relative;
     width: 100%;
@@ -77,4 +84,91 @@
 }
 .other {
   display: none;
+}
+
+// Skeleton Loader Styles
+.skeletonContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  width: 90%;
+  max-width: 600px;
+  padding: 2rem;
+
+  @include mobile {
+    gap: 1rem;
+    padding: 1rem;
+  }
+}
+
+.skeletonBox {
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 0%,
+    #f0f0f0 50%,
+    #e0e0e0 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 8px;
+  width: 100%;
+}
+
+.skeletonTitle {
+  height: 3rem;
+  width: 70%;
+  margin: 0 auto;
+
+  @include mobile {
+    height: 2rem;
+  }
+}
+
+.skeletonText {
+  height: 1.5rem;
+  width: 100%;
+
+  &:nth-child(2) {
+    width: 90%;
+  }
+
+  &:nth-child(3) {
+    width: 80%;
+  }
+
+  @include mobile {
+    height: 1rem;
+  }
+}
+
+.skeletonImage {
+  height: 300px;
+  width: 100%;
+  margin-top: 1rem;
+
+  @include mobile {
+    height: 200px;
+  }
+}
+
+.skeletonButton {
+  height: 3rem;
+  width: 200px;
+  margin-top: 1rem;
+  border-radius: 50px;
+
+  @include mobile {
+    height: 2.5rem;
+    width: 150px;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

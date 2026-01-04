@@ -4,8 +4,31 @@ import { prisma } from '../../../lib/db';
 
 async function getProduk(req, res) {
   try {
+    const { limit = 50, kategori } = req.query;
+    
+    const whereClause = kategori ? { kategori } : {};
+    
     const produk = await prisma.produk.findMany({
+      where: whereClause,
+      select: {
+        id: true,
+        nama: true,
+        kategori: true,
+        harga: true,
+        diskon: true,
+        stok: true,
+        deskripsi: true,
+        ukuran: true,
+        warna: true,
+        gambar: true,
+        video: true,
+        produkUnggulan: true,
+        urutanTampilan: true,
+        tanggalDibuat: true,
+        tanggalDiubah: true,
+      },
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
+      take: parseInt(limit, 10),
     });
 
     return res.status(200).json(produk);

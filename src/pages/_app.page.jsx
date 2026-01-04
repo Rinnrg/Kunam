@@ -5,7 +5,7 @@ import '@src/styles/global.css';
 
 import * as THREE from 'three';
 
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 
 import { Analytics } from '@vercel/analytics/react';
 import Background from '@src/components/canvas/background/Index';
@@ -51,6 +51,7 @@ function MyApp({ Component, pageProps, router }) {
   const mainRef = useRef();
   const mainContainerRef = useRef();
   const layoutRef = useRef();
+  const transitionOverlayRef = useRef();
   // Check if current page is admin page
   const isAdminPage = router.pathname.startsWith('/admin');
   const isLoginPage = router.pathname === '/login';
@@ -86,9 +87,28 @@ function MyApp({ Component, pageProps, router }) {
     });
 
     setLenis(lenis);
-    lenis.stop();
+    
+    // Start immediately for testing - remove stop
+    // lenis.stop();
+    
+    // Safeguard: Ensure lenis starts
+    setTimeout(() => {
+      if (lenis) {
+        console.log('Starting Lenis from timeout');
+        lenis.start();
+      }
+    }, 100);
+    
+    // Safeguard: Start lenis after 3 seconds if loader doesn't start it
+    const fallbackTimer = setTimeout(() => {
+      if (lenis && !lenis.isScrolling) {
+        console.log('Fallback: Starting Lenis');
+        lenis.start();
+      }
+    }, 3000);
 
     return () => {
+      clearTimeout(fallbackTimer);
       lenis.destroy();
       setLenis(null);
     };
@@ -105,6 +125,51 @@ function MyApp({ Component, pageProps, router }) {
       lenis.raf(time);
     }
   }, 0);
+
+  // Page Transition Effect
+  useEffect(() => {
+    const overlay = transitionOverlayRef.current;
+    if (!overlay) return;
+
+    // Initial page load - fade in from white
+    gsap.fromTo(
+      overlay,
+      { opacity: 1 },
+      { 
+        opacity: 0, 
+        duration: 0.6, 
+        ease: 'power2.out',
+        delay: 0.1
+      }
+    );
+
+    // Handle route changes
+    const handleRouteChangeStart = () => {
+      gsap.to(overlay, {
+        opacity: 1,
+        duration: 0.4,
+        ease: 'power2.in',
+      });
+    };
+
+    const handleRouteChangeComplete = () => {
+      window.scrollTo(0, 0);
+      gsap.to(overlay, {
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        delay: 0.1
+      });
+    };
+
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+    router.events.on('routeChangeComplete', handleRouteChangeComplete);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+      router.events.off('routeChangeComplete', handleRouteChangeComplete);
+    };
+  }, [router]);
 
   const domElements = useMemo(
     () => (
@@ -150,6 +215,8 @@ function MyApp({ Component, pageProps, router }) {
   if (isAdminPage) {
     return (
       <SessionProvider session={pageProps.session}>
+        {/* Page Transition Overlay */}
+        <div ref={transitionOverlayRef} className="page-transition-overlay" />
         <Component {...pageProps} />
       </SessionProvider>
     );
@@ -159,6 +226,8 @@ function MyApp({ Component, pageProps, router }) {
   if (isLoginPage) {
     return (
       <SessionProvider session={pageProps.session}>
+        {/* Page Transition Overlay */}
+        <div ref={transitionOverlayRef} className="page-transition-overlay" />
         <Component {...pageProps} />
       </SessionProvider>
     );
@@ -166,6 +235,9 @@ function MyApp({ Component, pageProps, router }) {
 
   return (
     <SessionProvider session={pageProps.session}>
+      {/* Page Transition Overlay */}
+      <div ref={transitionOverlayRef} className="page-transition-overlay" />
+      
       <div className={styles.root}>
         {!isAdminPage && <MenuLinks />}
         {domElements}

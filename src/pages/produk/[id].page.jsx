@@ -11,9 +11,8 @@ import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
 import AddToCartDialog from '@src/components/dom/AddToCartDialog';
 import styles from '@src/pages/produk/produkDetail.module.scss';
-import prisma from '../../lib/prisma';
 
-function Page({ produk }) {
+function Page({ produk, error }) {
   const currentProduk = produk;
   const { data: session } = useSession();
   const router = useRouter();
@@ -192,6 +191,38 @@ function Page({ produk }) {
     [currentProduk],
   );
 
+  // Show error message if failed to load
+  if (error) {
+    return (
+      <div style={{ 
+        minHeight: '100vh', 
+        display: 'flex', 
+        flexDirection: 'column',
+        alignItems: 'center', 
+        justifyContent: 'center',
+        padding: '2rem',
+        textAlign: 'center'
+      }}>
+        <h2 style={{ marginBottom: '1rem', color: 'var(--black)' }}>Gagal Memuat Produk</h2>
+        <p style={{ marginBottom: '1.5rem', color: 'rgba(0, 0, 0, 0.6)' }}>{error}</p>
+        <button 
+          type="button"
+          onClick={() => router.back()} 
+          style={{ 
+            padding: '0.75rem 1.5rem', 
+            background: 'var(--black)', 
+            color: 'var(--white)', 
+            border: 'none', 
+            borderRadius: '0.5rem',
+            cursor: 'pointer'
+          }}
+        >
+          Kembali
+        </button>
+      </div>
+    );
+  }
+
   if (!currentProduk) {
     return <div>Produk tidak ditemukan</div>;
   }
@@ -254,6 +285,51 @@ function Page({ produk }) {
                   </button>
                 </div>
               </div>
+              
+              {/* Jumlah Terjual Badge */}
+              {currentProduk?.jumlahTerjual && currentProduk.jumlahTerjual > 0 && (
+                <div className={styles.soldBadge}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M20 12V22H4V12"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M22 7H2V12H22V7Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 22V7"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 7H7.5C6.83696 7 6.20107 6.73661 5.73223 6.26777C5.26339 5.79893 5 5.16304 5 4.5C5 3.83696 5.26339 3.20107 5.73223 2.73223C6.20107 2.26339 6.83696 2 7.5 2C11 2 12 7 12 7Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                    <path
+                      d="M12 7H16.5C17.163 7 17.7989 6.73661 18.2678 6.26777C18.7366 5.79893 19 5.16304 19 4.5C19 3.83696 18.7366 3.20107 18.2678 2.73223C17.7989 2.26339 17.163 2 16.5 2C13 2 12 7 12 7Z"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <span>{currentProduk.jumlahTerjual.toLocaleString('id-ID')} Terjual</span>
+                </div>
+              )}
+              
               {currentProduk.deskripsi && (
                 <div className={styles.descriptionWrapper}>
                   <h3 className={styles.descriptionLabel}>Deskripsi Produk</h3>
@@ -337,25 +413,23 @@ function Page({ produk }) {
   );
 }
 
-export async function getStaticPaths() {
-  try {
-    const produk = await prisma.produk.findMany();
-    const paths = produk.map((item) => ({ params: { id: item.id } }));
-    return { paths, fallback: 'blocking' };
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error in getStaticPaths:', error);
-    return { paths: [], fallback: 'blocking' };
-  }
-}
-
-export async function getStaticProps(context) {
+export async function getServerSideProps(context) {
   const { params } = context;
 
+  // Import prisma hanya di server side
+  const prisma = (await import('../../lib/prisma')).default;
+
   try {
-    const produk = await prisma.produk.findUnique({
+    // Add timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Database query timeout')), 10000); // 10 second timeout
+    });
+
+    const queryPromise = prisma.produk.findUnique({
       where: { id: params.id },
     });
+
+    const produk = await Promise.race([queryPromise, timeoutPromise]);
 
     if (!produk) {
       return { notFound: true };
@@ -365,12 +439,18 @@ export async function getStaticProps(context) {
       props: {
         produk: JSON.parse(JSON.stringify(produk)),
       },
-      revalidate: 60, // Revalidate every 60 seconds
     };
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error in getStaticProps:', error);
-    return { notFound: true };
+    console.error('Error in getServerSideProps:', error.message || error);
+    
+    // Return error page instead of 404
+    return {
+      props: {
+        error: 'Failed to load product. Please try again.',
+        produk: null,
+      },
+    };
   }
 }
 

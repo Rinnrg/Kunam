@@ -1,0 +1,380 @@
+@import '@src/styles/functions';
+
+.container {
+  margin-top: 3rem;
+  padding: 2rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+
+  @include mobile {
+    margin-top: 2rem;
+    padding: 1.5rem 0;
+  }
+}
+
+.header {
+  margin-bottom: 2rem;
+
+  @include mobile {
+    margin-bottom: 1.5rem;
+  }
+}
+
+.title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--black);
+
+  @include mobile {
+    font-size: 1.5rem;
+  }
+}
+
+.statsWrapper {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ratingDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 0.75rem;
+
+  @include mobile {
+    padding: 0.75rem 1rem;
+  }
+}
+
+.ratingNumber {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--black);
+
+  @include mobile {
+    font-size: 1.5rem;
+  }
+}
+
+.totalReviews {
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-left: 0.25rem;
+}
+
+.stars {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.star {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: #fbbf24;
+  transition: transform 0.2s ease;
+
+  &:disabled {
+    cursor: default;
+  }
+
+  &:not(:disabled):hover {
+    transform: scale(1.1);
+  }
+
+  svg {
+    display: block;
+  }
+}
+
+// Review Prompt
+.reviewPrompt {
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 0.75rem;
+  margin-bottom: 2rem;
+
+  p {
+    margin-bottom: 1rem;
+    color: rgba(0, 0, 0, 0.8);
+  }
+
+  @include mobile {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.writeReviewBtn {
+  padding: 0.75rem 1.5rem;
+  background-color: var(--black);
+  color: var(--white);
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.85);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  @include mobile {
+    width: 100%;
+    padding: 0.875rem;
+  }
+}
+
+// Review Form
+.reviewForm {
+  padding: 2rem;
+  background-color: rgba(0, 0, 0, 0.03);
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+
+  @include mobile {
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.label {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 0.75rem;
+}
+
+.textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.75rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--black);
+  background-color: var(--white);
+  resize: vertical;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--black);
+  }
+
+  &::placeholder {
+    color: rgba(0, 0, 0, 0.4);
+  }
+}
+
+.charCount {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: right;
+}
+
+.formActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+
+  @include mobile {
+    flex-direction: column-reverse;
+  }
+}
+
+.cancelBtn,
+.submitBtn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  @include mobile {
+    width: 100%;
+    padding: 0.875rem;
+  }
+}
+
+.cancelBtn {
+  background-color: transparent;
+  color: var(--black);
+  border: 2px solid rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.submitBtn {
+  background-color: var(--black);
+  color: var(--white);
+
+  &:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.85);
+    transform: translateY(-2px);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Reviews List
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.noReviews {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+
+  p {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+
+    &:first-child {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: rgba(0, 0, 0, 0.7);
+    }
+  }
+
+  @include mobile {
+    padding: 2rem 1rem;
+  }
+}
+
+.reviewItem {
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+
+  @include mobile {
+    padding: 1rem;
+  }
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+  gap: 1rem;
+
+  @include mobile {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userAvatar,
+.userAvatarPlaceholder {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 50%;
+  object-fit: cover;
+
+  @include mobile {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.userAvatarPlaceholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--black);
+  color: var(--white);
+  font-size: 1.25rem;
+  font-weight: 600;
+
+  @include mobile {
+    font-size: 1rem;
+  }
+}
+
+.userName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 0.25rem;
+
+  @include mobile {
+    font-size: 0.95rem;
+  }
+}
+
+.reviewDate {
+  font-size: 0.875rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.reviewComment {
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgba(0, 0, 0, 0.8);
+  white-space: pre-wrap;
+
+  @include mobile {
+    font-size: 0.95rem;
+  }
+}
+
+.loading {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 1rem;
+}

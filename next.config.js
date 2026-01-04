@@ -8,9 +8,19 @@ const nextConfig = {
   },
   reactStrictMode: false, // Recommended for the `pages` directory, default in `app`.
 
+  // Performance optimizations
+  compress: true, // Enable gzip compression
+  
+  // Optimize production builds
+  productionBrowserSourceMaps: false,
+  
+  // Optimize images
   images: {
     formats: ['image/avif', 'image/webp'],
     unoptimized: process.env.NODE_ENV === 'development',
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: 'https',
