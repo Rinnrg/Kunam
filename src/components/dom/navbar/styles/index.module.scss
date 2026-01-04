@@ -207,15 +207,25 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #333;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 8px;
+  min-width: 40px;
+  min-height: 40px;
 
   &:hover {
     color: #000;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 6px;
+    min-width: 36px;
+    min-height: 36px;
   }
 }
 
@@ -224,7 +234,7 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 6px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -232,6 +242,8 @@
   transition: color 0.2s ease, background 0.2s ease;
   text-decoration: none;
   border-radius: 8px;
+  min-width: 40px;
+  min-height: 40px;
 
   &:hover {
     color: #000;
@@ -239,8 +251,19 @@
   }
   
   svg {
-    width: 18px;
-    height: 18px;
+    width: 20px;
+    height: 20px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 6px;
+    min-width: 36px;
+    min-height: 36px;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
   }
 }
 
@@ -249,20 +272,35 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #333;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 8px;
+  min-width: 40px;
+  min-height: 40px;
 
   &:hover {
     color: #000;
+    background: rgba(0, 0, 0, 0.05);
   }
   
   svg {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 6px;
+    min-width: 36px;
+    min-height: 36px;
+    
+    svg {
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 
@@ -292,6 +330,12 @@
   display: flex;
   flex-direction: column;
   animation: slideInRight 0.3s ease-out;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  
+  @media (max-width: 480px) {
+    width: 260px;
+  }
 }
 
 @keyframes slideInRight {
@@ -307,14 +351,23 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 18px 20px;
   border-bottom: 1px solid #eee;
+  flex-shrink: 0;
 
   h3 {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: #111;
     margin: 0;
+  }
+  
+  @media (max-width: 480px) {
+    padding: 16px 18px;
+    
+    h3 {
+      font-size: 1rem;
+    }
   }
 }
 
@@ -328,30 +381,47 @@
   justify-content: center;
   color: #333;
   border-radius: 50%;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
+  min-width: 36px;
+  min-height: 36px;
 
   &:hover {
     background: #f5f5f5;
+    color: #000;
   }
 
   svg {
     width: 20px;
     height: 20px;
   }
+  
+  @media (max-width: 480px) {
+    padding: 6px;
+    min-width: 32px;
+    min-height: 32px;
+    
+    svg {
+      width: 18px;
+      height: 18px;
+    }
+  }
 }
 
 .mobileMenuNav {
   display: flex;
   flex-direction: column;
-  padding: 10px 0;
+  padding: 8px 0;
+  overflow-y: auto;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobileMenuItem {
   display: block;
-  padding: 16px 20px;
+  padding: 14px 20px;
   color: #333;
   text-decoration: none;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 500;
   transition: background 0.2s ease, color 0.2s ease;
   border-left: 3px solid transparent;
@@ -365,6 +435,11 @@
   &:active {
     background: #eee;
   }
+  
+  @media (max-width: 480px) {
+    padding: 12px 18px;
+    font-size: 0.9rem;
+  }
 }
 
 .mobileSubmenu {
@@ -376,10 +451,10 @@
 
 .mobileSubmenuItem {
   display: block;
-  padding: 12px 20px 12px 40px;
+  padding: 11px 20px 11px 40px;
   color: #666;
   text-decoration: none;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   font-weight: 400;
   transition: background 0.2s ease, color 0.2s ease;
 
@@ -391,20 +466,50 @@
   &:active {
     background: #e8e8e8;
   }
+  
+  @media (max-width: 480px) {
+    padding: 10px 18px 10px 36px;
+    font-size: 0.85rem;
+  }
 }
 
 // Mobile Specific Styles
 @media (max-width: 768px) {
   .root {
-    padding: 0.6rem var(--layout-margin);
+    padding: 0.8rem var(--layout-margin);
     
     .innerHeader {
-      min-height: 40px;
+      min-height: 44px;
+      gap: 8px;
     }
   }
 
   .rightContainer {
-    gap: 8px;
+    gap: 4px;
+    margin-left: auto;
+  }
+  
+  .logoLink {
+    flex-shrink: 0;
+    
+    img {
+      width: auto !important;
+      height: auto !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .root {
+    padding: 0.7rem 1rem;
+    
+    .innerHeader {
+      min-height: 42px;
+    }
+  }
+  
+  .rightContainer {
+    gap: 2px;
   }
 }
 

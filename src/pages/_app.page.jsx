@@ -56,6 +56,12 @@ function MyApp({ Component, pageProps, router }) {
   const isAdminPage = router.pathname.startsWith('/admin');
   const isLoginPage = router.pathname === '/login';
 
+  // Prevent flash on initial load
+  useEffect(() => {
+    document.documentElement.style.backgroundColor = '#ffffff';
+    document.body.style.backgroundColor = '#ffffff';
+  }, []);
+
   useFoucFix();
   useScroll(() => {
     if (!isAdminPage) {
@@ -134,44 +140,57 @@ function MyApp({ Component, pageProps, router }) {
     }
 
     // Initial page load - fade in from white
-    gsap.fromTo(
-      overlay,
-      { opacity: 1 },
-      { 
-        opacity: 0, 
-        duration: 0.6, 
-        ease: 'power2.out',
-        delay: 0.1
-      }
-    );
+    gsap.set(overlay, { opacity: 1 });
+    gsap.to(overlay, { 
+      opacity: 0, 
+      duration: 0.5, 
+      ease: 'power2.out',
+      delay: 0.2
+    });
 
     // Handle route changes
     const handleRouteChangeStart = () => {
       gsap.to(overlay, {
         opacity: 1,
-        duration: 0.4,
+        duration: 0.3,
         ease: 'power2.in',
       });
     };
 
     const handleRouteChangeComplete = () => {
-      window.scrollTo(0, 0);
+      // Scroll to top after route change
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true });
+      } else {
+        window.scrollTo(0, 0);
+      }
+      
       gsap.to(overlay, {
         opacity: 0,
-        duration: 0.6,
+        duration: 0.5,
         ease: 'power2.out',
-        delay: 0.1
+        delay: 0.15
+      });
+    };
+
+    const handleRouteChangeError = () => {
+      gsap.to(overlay, {
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.out'
       });
     };
 
     router.events.on('routeChangeStart', handleRouteChangeStart);
     router.events.on('routeChangeComplete', handleRouteChangeComplete);
+    router.events.on('routeChangeError', handleRouteChangeError);
 
     return () => {
       router.events.off('routeChangeStart', handleRouteChangeStart);
       router.events.off('routeChangeComplete', handleRouteChangeComplete);
+      router.events.off('routeChangeError', handleRouteChangeError);
     };
-  }, [router]);
+  }, [router, lenis]);
 
   const domElements = useMemo(
     () => (

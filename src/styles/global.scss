@@ -11,9 +11,15 @@ html {
   font-weight: bolder;
   font-family: var(--font-primary), sans-serif;
   background-color: var(--white); /* Prevent white flash */
-
+  
   scrollbar-width: thin;
+  
   &.nav {
+    overflow: hidden;
+  }
+  
+  // Prevent flash of unstyled content
+  &.loading {
     overflow: hidden;
   }
 }
@@ -33,6 +39,7 @@ body {
   overflow: hidden;
   pointer-events: auto; /* Ensure body is always interactive */
   background-color: var(--white); /* Prevent white flash */
+  opacity: 1;
   
   // Mobile touch scroll optimization
   @media (max-width: 768px) {
@@ -46,6 +53,7 @@ body {
     left: 0;
     width: 100vw;
     height: 100%;
+    opacity: 1;
   }
 }
 
@@ -125,8 +133,11 @@ main > div > section:nth-last-child(1) {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background-color: white;
-  z-index: 9999;
+  height: 100dvh; // Better mobile support
+  background-color: #ffffff;
+  z-index: 10000;
   pointer-events: none;
-  opacity: 0;
+  opacity: 1;
+  will-change: opacity;
+  transition: none; // Remove CSS transitions, use GSAP only
 }
