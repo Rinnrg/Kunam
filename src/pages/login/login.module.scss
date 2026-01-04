@@ -4,11 +4,10 @@
   min-height: 100vh;
   height: 100vh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   background: #fafafa;
-  padding: 0px 20px 40px;
-  padding-top: 0px;
+  padding: 20px;
   overflow-y: auto;
   overflow-x: hidden;
   scroll-behavior: smooth;
@@ -17,6 +16,7 @@
   @media (max-width: 768px) {
     height: auto;
     min-height: 100vh;
+    padding: 15px;
     touch-action: pan-y;
   }
   
@@ -55,8 +55,18 @@
   max-width: 320px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
   overflow: visible;
-  margin: 20px auto;
+  margin: 0 auto;
   flex-shrink: 0;
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+  
+  @media (max-width: 480px) {
+    max-width: 100%;
+    border-radius: 8px;
+  }
 }
 
 .logoContainer {
@@ -71,6 +81,14 @@
     height: auto;
     max-width: 100px;
     object-fit: contain;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 16px 16px 12px;
+    
+    img {
+      max-width: 80px;
+    }
   }
 }
 
@@ -110,13 +128,22 @@
       background: #000;
     }
   }
+  
+  @media (max-width: 768px) {
+    padding: 10px 12px;
+    font-size: 0.85rem;
+  }
 }
 
 .content {
   padding: 18px 20px 20px;
 
   @include mobile {
-    padding: 16px 18px 18px;
+    padding: 14px 16px 16px;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 14px 16px 16px;
   }
 }
 
@@ -164,6 +191,17 @@
     height: 18px;
     flex-shrink: 0;
   }
+  
+  @media (max-width: 768px) {
+    height: 38px;
+    font-size: 0.8rem;
+    gap: 8px;
+    
+    svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
 }
 
 .dividerText {
@@ -210,6 +248,11 @@
     &::-webkit-calendar-picker-indicator {
       cursor: pointer;
     }
+  }
+  
+  @media (max-width: 768px) {
+    padding: 9px 11px;
+    font-size: 0.8rem;
   }
 }
 
@@ -407,6 +450,11 @@
     background: #ccc;
     cursor: not-allowed;
   }
+  
+  @media (max-width: 768px) {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
 }
 
 .privacyText {
@@ -448,33 +496,65 @@
 
 @media (max-width: 480px) {
   .container {
-    padding: 20px 12px;
-    align-items: flex-start;
-    height: 100vh;
-    height: 100dvh; // Dynamic viewport height for mobile browsers
+    padding: 12px;
+    align-items: center;
+    justify-content: center;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh; // Dynamic viewport height for mobile browsers
   }
 
   .card {
     max-width: 100%;
-    margin: 10px auto;
+    margin: 0 auto;
   }
 
   .content {
-    padding: 16px 18px 20px;
+    padding: 14px 16px 18px;
   }
 
   .socialButton {
-    height: 42px;
-    font-size: 0.85rem;
+    height: 38px;
+    font-size: 0.8rem;
 
     svg {
-      width: 18px;
-      height: 18px;
+      width: 16px;
+      height: 16px;
     }
   }
   
-  .logoContainer img {
-    max-width: 100px;
+  .logoContainer {
+    padding: 14px 14px 10px;
+    
+    img {
+      max-width: 70px;
+    }
+  }
+  
+  .input {
+    font-size: 0.8rem;
+    padding: 9px 11px;
+  }
+  
+  .submitButton {
+    font-size: 0.85rem;
+    padding: 10px 16px;
+  }
+  
+  .checkboxLabel {
+    font-size: 0.75rem;
+  }
+  
+  .forgotLink {
+    font-size: 0.75rem;
+  }
+  
+  .dividerText {
+    font-size: 0.75rem;
+  }
+  
+  .socialDivider {
+    font-size: 0.75rem;
   }
 }
 
