@@ -291,13 +291,34 @@
   gap: 0.35rem;
 }
 
+.labelContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.25rem;
+}
+
 .kategoriLabel {
   font-size: 0.8rem;
   font-weight: 400;
   letter-spacing: 0;
   text-transform: none;
   color: #666666;
-  margin-bottom: 0.25rem;
+}
+
+.terjualLabel {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: #666666;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  
+  &::before {
+    content: '•';
+    color: #ccc;
+  }
 }
 
 .produkNama {

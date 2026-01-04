@@ -80,9 +80,9 @@ function Page({ produk, error }) {
           });
         }
       }
-    } catch (error) {
+    } catch (err) {
       // eslint-disable-next-line no-console
-      console.error('Error updating wishlist:', error);
+      console.error('Error updating wishlist:', err);
       showAlert({
         type: 'error',
         title: 'Terjadi Kesalahan',
@@ -134,9 +134,9 @@ function Page({ produk, error }) {
             message: 'Produk berhasil ditambahkan ke keranjang Anda.',
           });
         }
-      } catch (error) {
+      } catch (err) {
         // eslint-disable-next-line no-console
-        console.error('Error adding to cart:', error);
+        console.error('Error adding to cart:', err);
         showAlert({
           type: 'error',
           title: 'Terjadi Kesalahan',
@@ -271,7 +271,15 @@ function Page({ produk, error }) {
                   )}
                 </div>
                 <div className={styles.stockWrapper}>
-                  <p className={styles.stock}>Stok: {currentProduk.stok}</p>
+                  <div className={styles.stockInfo}>
+                    <p className={styles.stock}>Stok: {currentProduk.stok}</p>
+                    {currentProduk?.jumlahTerjual && currentProduk.jumlahTerjual > 0 && (
+                      <p className={styles.soldCount}>
+                        <span className={styles.separator}>•</span>
+                        {currentProduk.jumlahTerjual.toLocaleString('id-ID')} Terjual
+                      </p>
+                    )}
+                  </div>
                   <button type="button" className={clsx(styles.wishlistIcon, isLiked && styles.liked)} onClick={handleLike} aria-label={isLiked ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} xmlns="http://www.w3.org/2000/svg">
                       <path

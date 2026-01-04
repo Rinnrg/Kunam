@@ -259,7 +259,14 @@ function ProdukGrid({ produk = [], kategori = null }) {
 
             <div className={styles.cardFooter}>
               <div className={styles.produkInfo}>
-                <span className={styles.kategoriLabel}>{item.kategori}</span>
+                <div className={styles.labelContainer}>
+                  <span className={styles.kategoriLabel}>{item.kategori}</span>
+                  {item.jumlahTerjual && item.jumlahTerjual > 0 && (
+                    <span className={styles.terjualLabel}>
+                      {item.jumlahTerjual.toLocaleString('id-ID')} Terjual
+                    </span>
+                  )}
+                </div>
                 <div className={styles.produkHeader}>
                   <h3 className={styles.produkNama}>{item.nama}</h3>
                   <button

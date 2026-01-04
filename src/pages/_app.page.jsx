@@ -129,7 +129,9 @@ function MyApp({ Component, pageProps, router }) {
   // Page Transition Effect
   useEffect(() => {
     const overlay = transitionOverlayRef.current;
-    if (!overlay) return;
+    if (!overlay) {
+      return undefined;
+    }
 
     // Initial page load - fade in from white
     gsap.fromTo(

@@ -235,7 +235,15 @@
   .stockWrapper {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: 1rem;
+  }
+
+  .stockInfo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
   }
 
   .stock {
@@ -246,6 +254,25 @@
 
     @include mobile {
       font-size: 0.9rem;
+    }
+  }
+
+  .soldCount {
+    font-size: 1rem;
+    color: var(--black);
+    opacity: 0.7;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    @include mobile {
+      font-size: 0.9rem;
+    }
+
+    .separator {
+      color: #ccc;
+      font-weight: bold;
     }
   }
 }

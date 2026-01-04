@@ -66,6 +66,7 @@ export async function getServerSideProps() {
         gambar: true,
         produkUnggulan: true,
         urutanTampilan: true,
+        jumlahTerjual: true,
         tanggalDibuat: true,
         tanggalDiubah: true,
       },
