@@ -18,10 +18,10 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
   
   // Filter state
   const [filters, setFilters] = useState({
-    search: '',
-    categories: [],
+    search: router.query.search || '',
+    categories: router.query.kategori ? [router.query.kategori] : [],
     colors: [],
-    discount: '',
+    discount: router.query.diskon || '',
     priceMin: '',
     priceMax: '',
   });
@@ -81,19 +81,6 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
   const handleFilterChange = useCallback((newFilters) => {
     setFilters(newFilters);
   }, []);
-
-  // Initialize filters from URL
-  useMemo(() => {
-    const { search, kategori: urlKategori, diskon } = router.query;
-    if (search || urlKategori || diskon) {
-      setFilters((prev) => ({
-        ...prev,
-        search: search || '',
-        categories: urlKategori ? [urlKategori] : [],
-        discount: diskon || '',
-      }));
-    }
-  }, [router.query]);
 
   const wishlistIds = useMemo(() => new Set(wishlist.map((item) => item.produkId)), [wishlist]);
   // eslint-disable-next-line no-unused-vars

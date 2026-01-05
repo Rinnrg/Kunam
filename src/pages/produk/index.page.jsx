@@ -31,14 +31,6 @@ function Page({ produk = [], kategori = null, error = null }) {
     ? `Jelajahi koleksi ${kategori} Kunam. Temukan berbagai pilihan ${kategori} berkualitas dengan desain menarik dan harga terjangkau.`
     : 'Jelajahi koleksi produk clothing Kunam. Temukan berbagai pilihan pakaian berkualitas dengan desain menarik dan harga terjangkau.';
 
-  // Log for debugging
-  if (typeof window !== 'undefined') {
-    console.log('[Produk Page Client] Received produk count:', produk.length);
-    if (error) {
-      console.error('[Produk Page Client] Error:', error);
-    }
-  }
-
   return (
     <>
       <CustomHead {...seo} title={title} description={description} />
