@@ -130,7 +130,7 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
             setWishlist([...wishlist, data.wishlistItem]);
           }
         }
-      } catch (error) {
+      } catch (err) {
         // Silently handle error to avoid console spam
       }
     },
@@ -164,7 +164,7 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
             setCart([...cart, data.cartItem]);
           }
         }
-      } catch (error) {
+      } catch (err) {
         // Silently handle error to avoid console spam
       }
     },
