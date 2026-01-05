@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import ProdukSidebar from '../produkSidebar/ProdukSidebar';
 import styles from './styles/produkGrid.module.scss';
 
-function ProdukGrid({ produk = [], kategori = null }) {
+function ProdukGrid({ produk = [], kategori = null, error = null }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [wishlist, cart, setWishlist, setCart, setIsAuthModalOpen] = useStore(
@@ -179,11 +179,36 @@ function ProdukGrid({ produk = [], kategori = null }) {
           <div className={styles.mainContent}>
             <div style={{ padding: '2rem', textAlign: 'center' }}>
               <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{kategori ? `${kategori}` : 'Semua Produk'}</h1>
-              <p style={{ fontSize: '1.2rem', color: '#666' }}>{kategori ? `Belum ada produk ${kategori} tersedia.` : 'Belum ada produk tersedia.'}</p>
-              {kategori && (
-                <Link href="/produk" style={{ marginTop: '1rem', display: 'inline-block', color: '#000', textDecoration: 'underline' }}>
-                  Lihat semua produk
-                </Link>
+              {error ? (
+                <>
+                  <p style={{ fontSize: '1.2rem', color: '#e91e63', marginBottom: '0.5rem' }}>Terjadi kesalahan saat memuat produk</p>
+                  <p style={{ fontSize: '0.9rem', color: '#666' }}>{error}</p>
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    style={{
+                      marginTop: '1rem',
+                      padding: '0.75rem 1.5rem',
+                      fontSize: '1rem',
+                      color: '#fff',
+                      backgroundColor: '#000',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Coba Lagi
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize: '1.2rem', color: '#666' }}>{kategori ? `Belum ada produk ${kategori} tersedia.` : 'Belum ada produk tersedia.'}</p>
+                  {kategori && (
+                    <Link href="/produk" style={{ marginTop: '1rem', display: 'inline-block', color: '#000', textDecoration: 'underline' }}>
+                      Lihat semua produk
+                    </Link>
+                  )}
+                </>
               )}
             </div>
           </div>

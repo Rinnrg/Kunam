@@ -9,7 +9,7 @@
   height: calc(100 * var(--svh, 1vh));
   height: 100svh;
   color: #28282b;
-  background-color: #f0f4f1;
+  background-color: #f5f5f5;
   pointer-events: all;
   transition: z-index 0s 0.6s, pointer-events 0s 0.6s; // Delay z-index and pointer-events change
   

@@ -25,16 +25,24 @@ const seo = {
   ],
 };
 
-function Page({ produk = [], kategori = null }) {
+function Page({ produk = [], kategori = null, error = null }) {
   const title = kategori ? `Kunam - ${kategori}` : 'Kunam - Produk';
   const description = kategori
     ? `Jelajahi koleksi ${kategori} Kunam. Temukan berbagai pilihan ${kategori} berkualitas dengan desain menarik dan harga terjangkau.`
     : 'Jelajahi koleksi produk clothing Kunam. Temukan berbagai pilihan pakaian berkualitas dengan desain menarik dan harga terjangkau.';
 
+  // Log for debugging
+  if (typeof window !== 'undefined') {
+    console.log('[Produk Page Client] Received produk count:', produk.length);
+    if (error) {
+      console.error('[Produk Page Client] Error:', error);
+    }
+  }
+
   return (
     <>
       <CustomHead {...seo} title={title} description={description} />
-      <ProdukGrid produk={produk} kategori={kategori} />
+      <ProdukGrid produk={produk} kategori={kategori} error={error} />
     </>
   );
 }
@@ -44,6 +52,8 @@ export async function getServerSideProps(context) {
 
   try {
     const whereClause = kategori ? { kategori } : {};
+
+    console.log('[Produk Page] Fetching products with whereClause:', whereClause);
 
     // Optimized query with field selection
     const produk = await prisma.produk.findMany({
@@ -69,6 +79,8 @@ export async function getServerSideProps(context) {
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
 
+    console.log(`[Produk Page] Found ${produk.length} products`);
+
     // Serialize dates
     const serializedProduk = produk.map((item) => ({
       ...item,
@@ -83,13 +95,20 @@ export async function getServerSideProps(context) {
       },
     };
   } catch (error) {
-    // Log error for debugging
-    console.error('Error fetching produk:', error);
+    // Log error for debugging in production
+    console.error('[Produk Page] Error fetching produk:', error);
+    console.error('[Produk Page] Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
+    
     // Return empty array on error to prevent page crash
     return {
       props: {
         produk: [],
         kategori: kategori || null,
+        error: process.env.NODE_ENV === 'development' ? error.message : 'Failed to fetch products',
       },
     };
   }
