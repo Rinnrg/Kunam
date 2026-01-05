@@ -134,7 +134,7 @@ main > div > section:nth-last-child(1) {
   width: 100vw;
   height: 100vh;
   height: 100dvh; // Better mobile support
-  background-color: #f5f5f5;
+  background-color: #ffffff; // Match global background
   z-index: 10000;
   pointer-events: none;
   opacity: 1;

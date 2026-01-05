@@ -194,7 +194,6 @@
   flex-direction: column;
   border-radius: 0;
   overflow: hidden;
-  transition: box-shadow 0.3s ease;
   cursor: pointer;
   text-decoration: none;
   color: inherit;
@@ -202,11 +201,7 @@
   height: 100%;
 
   &:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-    .projectImage {
-      transform: scale(1.05);
-    }
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 }
 
@@ -222,14 +217,13 @@
 .imageContainer {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1.1; // Rasio lebih lebar lagi
+  aspect-ratio: 1 / 1.1;
   overflow: hidden;
-  background: transparent; // Background transparan
+  background: #f9f9f9;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 6rem; // Padding lebih besar lagi
-
+  padding: 6rem;
   
   @media (max-width: 768px) {
     padding: 2.5rem;
@@ -250,8 +244,7 @@
 }
 
 .projectImage {
-  object-fit: contain; // Contain agar gambar tidak ter-crop
-  transition: transform 0.3s ease;
+  object-fit: contain;
   z-index: 1;
 }
 

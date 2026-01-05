@@ -26,9 +26,11 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
     priceMax: '',
   });
 
-  // Apply filters to products
+  // Apply filters to products - memoized properly
   const filteredProduk = useMemo(() => {
-    let result = [...produk];
+    if (!produk || produk.length === 0) return [];
+    
+    let result = produk;
 
     // Search filter
     if (filters.search) {
@@ -75,7 +77,7 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
     }
 
     return result;
-  }, [produk, filters]);
+  }, [produk, filters.search, filters.categories, filters.colors, filters.discount, filters.priceMin, filters.priceMax]);
 
   // Handle filter change from sidebar
   const handleFilterChange = useCallback((newFilters) => {
@@ -239,13 +241,23 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
           {/* Product Grid */}
           <div className={styles.gridContainer}>
             {filteredProduk.map((item) => (
-          <Link key={item.id} href={`/produk/${item.id}`} className={styles.projectCard} scroll={false} aria-label={`View ${item.nama}`}>
+          <Link key={item.id} href={`/produk/${item.id}`} className={styles.projectCard} aria-label={`View ${item.nama}`}>
             <div className={styles.cardHeader}>
               <h2 className={clsx(styles.projectTitle, 'h2')}>{item.nama}</h2>
             </div>
 
             <div className={styles.imageContainer}>
-              {item.gambar && <Image src={Array.isArray(item.gambar) ? item.gambar[0] : item.gambar} alt={item.nama} fill sizes="(max-width: 768px) 100vw, 50vw" className={styles.projectImage} />}
+              {item.gambar && (
+                <Image 
+                  src={Array.isArray(item.gambar) ? item.gambar[0] : item.gambar} 
+                  alt={item.nama} 
+                  fill 
+                  sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" 
+                  className={styles.projectImage}
+                  quality={75}
+                  priority={false}
+                />
+              )}
               
               {/* Discount Badge */}
               {item.diskon > 0 && (
