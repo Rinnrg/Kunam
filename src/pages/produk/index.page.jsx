@@ -54,6 +54,16 @@ export async function getServerSideProps(context) {
     const whereClause = kategori ? { kategori } : {};
 
     console.log('[Produk Page] Fetching products with whereClause:', whereClause);
+    console.log('[Produk Page] Database URL exists:', !!process.env.DATABASE_URL);
+
+    // Test database connection first
+    try {
+      await prisma.$connect();
+      console.log('[Produk Page] Database connected successfully');
+    } catch (connErr) {
+      console.error('[Produk Page] Database connection failed:', connErr);
+      throw new Error('Database connection failed: ' + connErr.message);
+    }
 
     // Optimized query with field selection
     const produk = await prisma.produk.findMany({
@@ -108,7 +118,7 @@ export async function getServerSideProps(context) {
       props: {
         produk: [],
         kategori: kategori || null,
-        error: process.env.NODE_ENV === 'development' ? error.message : 'Failed to fetch products',
+        error: error.message || 'Failed to fetch products',
       },
     };
   }

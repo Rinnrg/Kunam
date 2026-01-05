@@ -4,7 +4,8 @@ const nextConfig = {
   trailingSlash: false,
   swcMinify: true,
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    // Keep console for debugging in production temporarily
+    removeConsole: false,
   },
   reactStrictMode: false, // Recommended for the `pages` directory, default in `app`.
 
@@ -29,6 +30,10 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh3.googleusercontent.com',
       },
     ],
   },
