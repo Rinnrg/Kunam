@@ -4,7 +4,7 @@
 
 import CustomHead from '@src/components/dom/CustomHead';
 import ProdukGrid from '@src/pages/produk/components/produkGrid/ProdukGrid';
-import prisma from '../../lib/prisma';
+import prisma from '@src/lib/db';
 
 const seo = {
   title: 'Kunam - Produk',
@@ -58,6 +58,8 @@ export async function getServerSideProps(context) {
         gambar: true,
         ukuran: true,
         warna: true,
+        deskripsi: true,
+        video: true,
         produkUnggulan: true,
         urutanTampilan: true,
         jumlahTerjual: true,
@@ -81,6 +83,8 @@ export async function getServerSideProps(context) {
       },
     };
   } catch (error) {
+    // Log error for debugging
+    console.error('Error fetching produk:', error);
     // Return empty array on error to prevent page crash
     return {
       props: {
