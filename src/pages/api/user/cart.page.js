@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import prisma from '../../../lib/prisma';
+import prisma from '@src/lib/db';
 import { userAuthOptions } from '../auth/user/[...nextauth].page';
 
 export default async function handler(req, res) {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   // GET - Get user's cart
   if (req.method === 'GET') {
     try {
-      const cart = await prisma.cart.findMany({
+      const cart = await prisma.carts.findMany({
         where: { userId },
         include: {
           produk: {
@@ -67,7 +67,7 @@ export default async function handler(req, res) {
       }
 
       // Check if already in cart with same ukuran and warna
-      const existing = await prisma.cart.findFirst({
+      const existing = await prisma.carts.findFirst({
         where: {
           userId,
           produkId,
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
 
       if (existing) {
         // Update quantity
-        cartItem = await prisma.cart.update({
+        cartItem = await prisma.carts.update({
           where: { id: existing.id },
           data: {
             quantity: existing.quantity + quantity,
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
         });
       } else {
         // Create new cart item
-        cartItem = await prisma.cart.create({
+        cartItem = await prisma.carts.create({
           data: {
             userId,
             produkId,
@@ -127,13 +127,13 @@ export default async function handler(req, res) {
 
       if (quantity < 1) {
         // Delete if quantity is 0 or less
-        await prisma.cart.delete({
+        await prisma.carts.delete({
           where: { id: cartId },
         });
         return res.status(200).json({ message: 'Item dihapus dari keranjang' });
       }
 
-      const cartItem = await prisma.cart.update({
+      const cartItem = await prisma.carts.update({
         where: { id: cartId },
         data: { quantity },
         include: {
@@ -161,7 +161,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Cart ID wajib diisi' });
       }
 
-      await prisma.cart.delete({
+      await prisma.carts.delete({
         where: { id: cartId },
       });
 

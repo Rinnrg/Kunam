@@ -1,5 +1,5 @@
 import { getServerSession } from 'next-auth/next';
-import prisma from '../../../lib/prisma';
+import prisma from '@src/lib/db';
 import { userAuthOptions } from '../auth/user/[...nextauth].page';
 
 export default async function handler(req, res) {
@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   // GET - Get user's wishlist
   if (req.method === 'GET') {
     try {
-      const wishlist = await prisma.wishlist.findMany({
+      const wishlist = await prisma.wishlists.findMany({
         where: { userId },
         include: {
           produk: {
@@ -61,7 +61,7 @@ export default async function handler(req, res) {
       }
 
       // Check if already in wishlist
-      const existing = await prisma.wishlist.findUnique({
+      const existing = await prisma.wishlists.findUnique({
         where: {
           userId_produkId: {
             userId,
@@ -74,7 +74,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Produk sudah ada di wishlist' });
       }
 
-      const wishlistItem = await prisma.wishlist.create({
+      const wishlistItem = await prisma.wishlists.create({
         data: {
           userId,
           produkId,
@@ -104,7 +104,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Produk ID wajib diisi' });
       }
 
-      await prisma.wishlist.delete({
+      await prisma.wishlists.delete({
         where: {
           userId_produkId: {
             userId,
