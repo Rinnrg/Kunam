@@ -56,16 +56,8 @@ export async function getServerSideProps(context) {
     console.log('[Produk Page] Fetching products with whereClause:', whereClause);
     console.log('[Produk Page] Database URL exists:', !!process.env.DATABASE_URL);
 
-    // Test database connection first
-    try {
-      await prisma.$connect();
-      console.log('[Produk Page] Database connected successfully');
-    } catch (connErr) {
-      console.error('[Produk Page] Database connection failed:', connErr);
-      throw new Error(`Database connection failed: ${connErr.message}`);
-    }
-
     // Optimized query with field selection
+    // Prisma Client automatically manages connections in serverless environments
     const produk = await prisma.produk.findMany({
       where: whereClause,
       select: {
