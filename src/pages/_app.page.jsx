@@ -139,20 +139,28 @@ function MyApp({ Component, pageProps, router }) {
       return undefined;
     }
 
-    // Initial page load - fade in from white
-    gsap.set(overlay, { opacity: 1 });
-    gsap.to(overlay, { 
-      opacity: 0, 
-      duration: 0.5, 
-      ease: 'power2.out',
-      delay: 0.2
-    });
+    // Initial page load - instant, no animation
+    gsap.set(overlay, { opacity: 0 });
 
     // Handle route changes
-    const handleRouteChangeStart = () => {
+    const handleRouteChangeStart = (url) => {
+      // Skip transition for same-section navigation (e.g., produk to produk detail)
+      const currentPath = router.asPath;
+      const isSameSectionNavigation = 
+        (currentPath.includes('/produk') && url.includes('/produk')) ||
+        (currentPath === '/' && url === '/') ||
+        (currentPath.includes('/cart') && url.includes('/cart'));
+      
+      if (isSameSectionNavigation) {
+        // No overlay for same section - instant
+        gsap.set(overlay, { opacity: 0 });
+        return;
+      }
+      
+      // Very quick fade in only for different sections
       gsap.to(overlay, {
         opacity: 1,
-        duration: 0.3,
+        duration: 0.15,
         ease: 'power2.in',
       });
     };
@@ -165,18 +173,19 @@ function MyApp({ Component, pageProps, router }) {
         window.scrollTo(0, 0);
       }
       
+      // Quick fade out
       gsap.to(overlay, {
         opacity: 0,
-        duration: 0.5,
+        duration: 0.15,
         ease: 'power2.out',
-        delay: 0.15
+        delay: 0
       });
     };
 
     const handleRouteChangeError = () => {
       gsap.to(overlay, {
         opacity: 0,
-        duration: 0.4,
+        duration: 0.15,
         ease: 'power2.out'
       });
     };

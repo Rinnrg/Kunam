@@ -27,7 +27,8 @@ function Loader() {
 
       ctx = gsap.context(() => {
         // Simple fade out animation
-        const introDelay = isMobileDevice ? 0.3 : 0.5;
+        const isMobileDevice = isMobile || isTouch;
+        const introDelay = isMobileDevice ? 0.2 : 0.3; // Reduced delay
 
         gsap.delayedCall(introDelay, () => {
           console.log('Loader animation starting...');
@@ -68,10 +69,10 @@ function Loader() {
             console.log('Loader pointer-events disabled immediately');
           }
           
-          // Simple fade out loader
+          // Faster fade out loader
           gsap.to(root.current, {
             opacity: 0,
-            duration: 0.6,
+            duration: 0.3, // Reduced from 0.6 to 0.3
             ease: 'power2.out',
             onStart: () => {
               // Disable pointer events at animation start

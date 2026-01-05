@@ -137,7 +137,7 @@ main > div > section:nth-last-child(1) {
   background-color: #ffffff; // Match global background
   z-index: 10000;
   pointer-events: none;
-  opacity: 1;
-  will-change: opacity;
+  opacity: 0; // Start hidden by default
   transition: none; // Remove CSS transitions, use GSAP only
+  display: none; // Hide by default, GSAP will show when needed
 }
