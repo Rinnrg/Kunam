@@ -82,9 +82,9 @@ export async function getServerSideProps(context) {
         video: true,
         produkUnggulan: true,
         urutanTampilan: true,
-        jumlahTerjual: true,
         tanggalDibuat: true,
         tanggalDiubah: true,
+        // jumlahTerjual will be added after Prisma Client regenerates in Vercel
       },
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
