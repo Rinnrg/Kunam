@@ -82,7 +82,6 @@ export async function getServerSideProps(context) {
         video: true,
         produkUnggulan: true,
         urutanTampilan: true,
-        jumlahTerjual: true,
         tanggalDibuat: true,
         tanggalDiubah: true,
       },

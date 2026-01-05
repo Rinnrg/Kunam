@@ -9,49 +9,15 @@ datasource db {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
+  id        String   @id
   email     String   @unique
   password  String
   name      String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime
 }
 
-model User {
-  id         Int        @id @default(autoincrement())
-  email      String     @unique
-  password   String?
-  name       String?
-  phone      String?
-  image      String?
-  provider   String     @default("credentials")
-  providerId String?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
-  cart       Cart[]
-  orders     Order[]
-  reviews    Review[]
-  wishlist   Wishlist[]
-
-  @@index([email])
-  @@map("users")
-}
-
-model Wishlist {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  produkId  String
-  createdAt DateTime @default(now())
-  produk    Produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, produkId])
-  @@index([userId])
-  @@index([produkId])
-  @@map("wishlists")
-}
-
-model Cart {
+model carts {
   id        Int      @id @default(autoincrement())
   userId    Int
   produkId  String
@@ -59,64 +25,16 @@ model Cart {
   ukuran    String?
   warna     String?
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  produk    Produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime
+  produk    produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, produkId, ukuran, warna])
-  @@index([userId])
   @@index([produkId])
-  @@map("carts")
-}
-
-model Produk {
-  id             String      @id @default(cuid())
-  nama           String
-  kategori       String
-  harga          Float
-  diskon         Float       @default(0)
-  stok           Int         @default(0)
-  deskripsi      String?
-  ukuran         String[]
-  warna          String[]
-  gambar         String[]
-  video          String[]
-  produkUnggulan Boolean     @default(false)
-  urutanTampilan Int         @default(0)
-  tanggalDibuat  DateTime    @default(now())
-  tanggalDiubah  DateTime    @updatedAt
-  jumlahTerjual  Int         @default(0)
-  cart           Cart[]
-  orderItems     OrderItem[]
-  reviews        Review[]
-  wishlist       Wishlist[]
-
-  @@index([urutanTampilan])
-  @@index([produkUnggulan])
-  @@index([kategori])
-  @@index([diskon])
-  @@index([jumlahTerjual])
-  @@map("produk")
-}
-
-model Order {
-  id          Int         @id @default(autoincrement())
-  userId      Int
-  orderNumber String      @unique
-  status      String      @default("pending")
-  totalAmount Float
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  items       OrderItem[]
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@index([userId])
-  @@index([orderNumber])
-  @@index([status])
-  @@map("orders")
 }
 
-model OrderItem {
+model order_items {
   id       Int     @id @default(autoincrement())
   orderId  Int
   produkId String
@@ -124,27 +42,102 @@ model OrderItem {
   price    Float
   ukuran   String?
   warna    String?
-  order    Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  produk   Produk  @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  orders   orders  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  produk   produk  @relation(fields: [produkId], references: [id], onDelete: Cascade)
 
   @@index([orderId])
   @@index([produkId])
-  @@map("order_items")
 }
 
-model Review {
+model orders {
+  id          Int           @id @default(autoincrement())
+  userId      Int
+  orderNumber String        @unique
+  status      String        @default("pending")
+  totalAmount Float
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime
+  order_items order_items[]
+  users       users         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderNumber])
+  @@index([status])
+  @@index([userId])
+}
+
+model produk {
+  id             String        @id
+  nama           String
+  kategori       String
+  harga          Float
+  diskon         Float         @default(0)
+  stok           Int           @default(0)
+  deskripsi      String?
+  ukuran         String[]
+  warna          String[]
+  gambar         String[]
+  video          String[]
+  produkUnggulan Boolean       @default(false)
+  urutanTampilan Int           @default(0)
+  tanggalDibuat  DateTime      @default(now())
+  tanggalDiubah  DateTime
+  jumlahTerjual  Int           @default(0)
+  carts          carts[]
+  order_items    order_items[]
+  reviews        reviews[]
+  wishlists      wishlists[]
+
+  @@index([diskon])
+  @@index([jumlahTerjual])
+  @@index([kategori])
+  @@index([produkUnggulan])
+  @@index([urutanTampilan])
+}
+
+model reviews {
   id        Int      @id @default(autoincrement())
   userId    Int
   produkId  String
   rating    Int
   comment   String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  produk    Produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  updatedAt DateTime
+  produk    produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, produkId])
   @@index([produkId])
   @@index([userId])
-  @@map("reviews")
+}
+
+model users {
+  id         Int         @id @default(autoincrement())
+  email      String      @unique
+  password   String?
+  name       String?
+  phone      String?
+  image      String?
+  provider   String      @default("credentials")
+  providerId String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime
+  carts      carts[]
+  orders     orders[]
+  reviews    reviews[]
+  wishlists  wishlists[]
+
+  @@index([email])
+}
+
+model wishlists {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  produkId  String
+  createdAt DateTime @default(now())
+  produk    produk   @relation(fields: [produkId], references: [id], onDelete: Cascade)
+  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, produkId])
+  @@index([produkId])
+  @@index([userId])
 }

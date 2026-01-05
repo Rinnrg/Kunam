@@ -286,11 +286,13 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
               <div className={styles.produkInfo}>
                 <div className={styles.labelContainer}>
                   <span className={styles.kategoriLabel}>{item.kategori}</span>
+                  {/* Temporarily disabled until jumlahTerjual field is added to database
                   {item.jumlahTerjual && item.jumlahTerjual > 0 && (
                     <span className={styles.terjualLabel}>
                       {item.jumlahTerjual.toLocaleString('id-ID')} Terjual
                     </span>
                   )}
+                  */}
                 </div>
                 <div className={styles.produkHeader}>
                   <h3 className={styles.produkNama}>{item.nama}</h3>
