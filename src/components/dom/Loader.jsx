@@ -27,7 +27,6 @@ function Loader() {
 
       ctx = gsap.context(() => {
         // Simple fade out animation
-        const isMobileDevice = isMobile || isTouch;
         const introDelay = isMobileDevice ? 0.2 : 0.3; // Reduced delay
 
         gsap.delayedCall(introDelay, () => {
