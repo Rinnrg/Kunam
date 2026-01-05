@@ -62,7 +62,7 @@ export async function getServerSideProps(context) {
       console.log('[Produk Page] Database connected successfully');
     } catch (connErr) {
       console.error('[Produk Page] Database connection failed:', connErr);
-      throw new Error('Database connection failed: ' + connErr.message);
+      throw new Error(`Database connection failed: ${connErr.message}`);
     }
 
     // Optimized query with field selection
