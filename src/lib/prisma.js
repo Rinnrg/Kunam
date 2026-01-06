@@ -20,17 +20,12 @@ const prismaClientOptions = {
 };
 
 // Create singleton instance with better error handling
-let prisma;
+const prisma =
+  globalForPrisma.prisma ||
+  new PrismaClient(prismaClientOptions);
 
-if (process.env.NODE_ENV === 'production') {
-  // In production, always create a new instance
-  prisma = new PrismaClient(prismaClientOptions);
-} else {
-  // In development, use global instance to prevent hot-reload issues
-  if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = new PrismaClient(prismaClientOptions);
-  }
-  prisma = globalForPrisma.prisma;
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
 }
 
 // Graceful shutdown
