@@ -91,25 +91,30 @@ function MyApp({ Component, pageProps, router }) {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     
+    // Skip Lenis on mobile devices - use native scroll instead
+    if (isMobile || isTouch) {
+      // Use native scroll on mobile for better performance and no jumping
+      document.documentElement.style.scrollBehavior = 'auto';
+      document.body.style.scrollBehavior = 'auto';
+      return undefined;
+    }
+    
     // eslint-disable-next-line no-shadow
     const lenis = new Lenis({
       smoothWheel: true,
-      smoothTouch: isMobile || isTouch, // Enable smooth touch for all touch devices
-      syncTouch: isMobile || isTouch,   // Sync touch events on mobile/touch devices
-      lerp: isMobile ? 0.08 : 0.1,      // Slightly lower lerp for mobile for better control
-      duration: isMobile ? 1.0 : 1.2,    // Faster duration for mobile
+      smoothTouch: false,  // Disable smooth touch
+      syncTouch: false,    // Disable sync touch
+      lerp: 0.1,
+      duration: 1.2,
       wrapper: mainRef.current || undefined,
       content: mainContainerRef.current || undefined,
       wheelMultiplier: 1,
-      touchMultiplier: isMobile ? 1.2 : 2,  // Adjusted for better mobile experience
+      touchMultiplier: 2,
       infinite: false,
       normalizeWheel: true,
     });
 
     setLenis(lenis);
-    
-    // Start immediately for testing - remove stop
-    // lenis.stop();
     
     // Safeguard: Ensure lenis starts
     setTimeout(() => {

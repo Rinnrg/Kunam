@@ -1,10 +1,5 @@
 .lenis.lenis-smooth {
   scroll-behavior: auto;
-  
-  // Enable touch scrolling on mobile
-  @media (max-width: 768px) {
-    overflow: auto !important;
-  }
 }
 
 .lenis.lenis-smooth [data-lenis-prevent] {
@@ -19,17 +14,19 @@
   pointer-events: none;
 }
 
-// Additional mobile optimization
+// Mobile optimization - use native scroll
 @media (max-width: 768px) {
-  .lenis {
+  html, body {
     overflow: auto !important;
+    height: auto !important;
+    scroll-behavior: auto !important;
+    -webkit-overflow-scrolling: touch;
   }
   
-  html.lenis {
-    overflow: auto !important;
-  }
-  
+  .lenis, 
+  html.lenis,
   body.lenis {
     overflow: auto !important;
+    height: auto !important;
   }
 }

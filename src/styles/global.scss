@@ -36,13 +36,19 @@ body {
   // -ms-user-select: none; /* Internet Explorer/Edge */
   // user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
   max-height: 100%;
-  overflow: hidden;
   pointer-events: auto; /* Ensure body is always interactive */
   background-color: var(--white); /* Prevent white flash */
   opacity: 1;
   
-  // Mobile touch scroll optimization
+  // Desktop: hide overflow for Lenis
+  @media (min-width: 769px) {
+    overflow: hidden;
+  }
+  
+  // Mobile: use native scroll - no overflow hidden
   @media (max-width: 768px) {
+    overflow-y: auto;
+    overflow-x: hidden;
     touch-action: pan-y pinch-zoom;
     overscroll-behavior-y: none;
   }
