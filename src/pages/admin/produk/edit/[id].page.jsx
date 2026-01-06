@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 // eslint-disable-next-line import/extensions
 import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
 import ColorSelector from '@src/components/admin/ColorSelector';
+import SectionsEditor from '@src/components/admin/SectionsEditor';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from '../form.module.scss';
 
@@ -14,6 +15,7 @@ export default function EditProduk() {
   const [formData, setFormData] = useState({
     nama: '',
     deskripsi: '',
+    sections: [],
     kategori: '',
     harga: '',
     diskon: '0',
@@ -47,6 +49,7 @@ export default function EditProduk() {
         setFormData({
           nama: data.nama,
           deskripsi: data.deskripsi || '',
+          sections: data.sections || [],
           kategori: data.kategori,
           harga: data.harga.toString(),
           diskon: data.diskon ? data.diskon.toString() : '0',
@@ -385,10 +388,13 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="deskripsi" className={styles.label}>
-            Deskripsi
-            <textarea id="deskripsi" name="deskripsi" value={formData.deskripsi} onChange={handleChange} className={styles.textarea} rows={4} />
+          <label className={styles.label}>
+            Deskripsi / Product Sections
           </label>
+          <SectionsEditor
+            sections={formData.sections}
+            onChange={(newSections) => setFormData({ ...formData, sections: newSections })}
+          />
         </div>
 
         <div className={styles.formGroup}>
