@@ -301,7 +301,9 @@ export default function HomeSectionManager() {
 
           <div className={styles.buttonGroup}>
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Menyimpan...' : (editingId ? 'Update' : 'Tambah')}
+              {loading && 'Menyimpan...'}
+              {!loading && editingId && 'Update'}
+              {!loading && !editingId && 'Tambah'}
             </button>
             {editingId && (
               <button
