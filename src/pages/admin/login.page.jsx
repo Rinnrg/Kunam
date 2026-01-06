@@ -12,9 +12,9 @@ export default function AdminLogin() {
   const { status } = useSession();
 
   useEffect(() => {
-    // Jika sudah login, redirect ke dashboard
+    // Jika sudah login sebagai admin, redirect ke dashboard
     if (status === 'authenticated') {
-      router.push('/admin');
+      router.replace('/admin');
     }
   }, [status, router]);
 
@@ -28,14 +28,13 @@ export default function AdminLogin() {
         redirect: false,
         email,
         password,
-        callbackUrl: '/admin',
       });
 
       if (result?.error) {
         setError('Email atau password salah');
       } else if (result?.ok) {
-        // Force redirect to admin
-        window.location.href = '/admin';
+        // Force redirect to admin dashboard
+        router.replace('/admin');
       }
     } catch (err) {
       setError('Terjadi kesalahan. Silakan coba lagi.');

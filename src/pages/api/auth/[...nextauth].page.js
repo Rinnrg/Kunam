@@ -199,15 +199,21 @@ export const authOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
+    async redirect({ url, baseUrl, token }) {
       // Always redirect to home after logout
       if (url.includes('signout') || url.includes('logout')) {
         return baseUrl;
       }
       
-      // Check if the redirect URL is for admin pages
-      if (url.includes('/admin') || url.startsWith('/admin')) {
-        return url.startsWith('/') ? `${baseUrl}${url}` : url;
+      // Check if user is admin and redirect to admin dashboard
+      if (token?.role === 'admin') {
+        if (url.includes('/admin/login') || url.includes('/api/auth/callback')) {
+          return `${baseUrl}/admin`;
+        }
+        if (url.includes('/admin')) {
+          return url.startsWith('/') ? `${baseUrl}${url}` : url;
+        }
+        return `${baseUrl}/admin`;
       }
       
       // Prevent redirect to /api/auth/signin
