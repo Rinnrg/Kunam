@@ -51,9 +51,6 @@ export default function EditHomeSection() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, status]);
-      setIsLoading(false);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;

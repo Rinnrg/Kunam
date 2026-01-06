@@ -167,22 +167,6 @@ export default function HomeSectionManager() {
     }
   };
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      images: [],
-      layoutType: 'slider',
-      columns: 3,
-      autoplay: true,
-      interval: 3000,
-      order: 0,
-      isActive: true,
-    });
-    setSelectedFiles([]);
-    setPreviewUrls([]);
-    setEditingId(null);
-  };
-
   return (
     <div className={styles.section}>
       <h2>Home Sections Manager</h2>

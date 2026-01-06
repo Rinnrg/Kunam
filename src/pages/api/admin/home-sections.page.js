@@ -140,8 +140,12 @@ export default async function handler(req, res) {
 
       // Handle new uploaded images
       const newImages = [];
-      const imageFilesArray = Array.isArray(files.images) ? files.images : files.images ? [files.images] : [];
-      const imageFiles = imageFilesArray;
+      let imageFiles = [];
+      if (Array.isArray(files.images)) {
+        imageFiles = files.images;
+      } else if (files.images) {
+        imageFiles = [files.images];
+      }
 
       imageFiles.forEach((file) => {
         if (file && file.filepath) {
