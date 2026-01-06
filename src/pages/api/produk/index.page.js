@@ -18,6 +18,7 @@ async function getProduk(req, res) {
         diskon: true,
         stok: true,
         deskripsi: true,
+        sections: true,
         ukuran: true,
         warna: true,
         thumbnail: true,
@@ -40,7 +41,7 @@ async function getProduk(req, res) {
 
 async function createProduk(req, res) {
   try {
-    const { nama, deskripsi, kategori, harga, diskon, stok, ukuran, warna, thumbnail, images, videos, featured, order } = req.body;
+    const { nama, deskripsi, sections, kategori, harga, diskon, stok, ukuran, warna, thumbnail, images, videos, featured, order } = req.body;
 
     // Validasi input
     if (!nama || !kategori || harga === undefined) {
@@ -49,10 +50,40 @@ async function createProduk(req, res) {
       });
     }
 
+    // Validasi sections jika ada
+    if (sections && !Array.isArray(sections)) {
+      return res.status(400).json({
+        message: 'Sections harus berupa array',
+      });
+    }
+
+    // Validasi setiap section
+    if (sections) {
+      for (const section of sections) {
+        if (!section.judul || !section.deskripsi) {
+          return res.status(400).json({
+            message: 'Setiap section harus memiliki judul dan deskripsi',
+          });
+        }
+      }
+    }
+
+    // Generate unique ID from nama (slug format) and timestamp
+    const generateId = (nama) => {
+      const slug = nama
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      const timestamp = Date.now();
+      return `${slug}-${timestamp}`;
+    };
+
     const produk = await prisma.produk.create({
       data: {
+        id: generateId(nama),
         nama,
-        deskripsi: deskripsi || null,
+        deskripsi: deskripsi || null, // Keep for backward compatibility
+        sections: sections || [],
         kategori,
         harga: parseFloat(harga),
         diskon: parseFloat(diskon) || 0,

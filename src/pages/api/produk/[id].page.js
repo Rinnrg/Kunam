@@ -20,13 +20,32 @@ async function getProduk(req, res, id) {
 
 async function updateProduk(req, res, id) {
   try {
-    const { nama, deskripsi, kategori, harga, diskon, stok, ukuran, warna, thumbnail, images, videos } = req.body;
+    const { nama, deskripsi, sections, kategori, harga, diskon, stok, ukuran, warna, thumbnail, images, videos } = req.body;
+
+    // Validasi sections jika ada
+    if (sections && !Array.isArray(sections)) {
+      return res.status(400).json({
+        message: 'Sections harus berupa array',
+      });
+    }
+
+    // Validasi setiap section
+    if (sections) {
+      for (const section of sections) {
+        if (!section.judul || !section.deskripsi) {
+          return res.status(400).json({
+            message: 'Setiap section harus memiliki judul dan deskripsi',
+          });
+        }
+      }
+    }
 
     const produk = await prisma.produk.update({
       where: { id },
       data: {
         nama,
         deskripsi,
+        sections: sections !== undefined ? sections : undefined,
         kategori,
         harga: parseFloat(harga),
         diskon: diskon ? parseFloat(diskon) : 0,

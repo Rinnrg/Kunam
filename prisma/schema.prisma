@@ -87,7 +87,8 @@ model produk {
   harga          Float
   diskon         Float         @default(0)
   stok           Int           @default(0)
-  deskripsi      String?
+  deskripsi      String?       // Deprecated, use sections instead
+  sections       Json[]        @default([]) // Array of {judul: string, deskripsi: string, gambar?: string}
   ukuran         String[]
   warna          String[]
   gambar         String[]      // Main product images (gallery)

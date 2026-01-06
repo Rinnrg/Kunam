@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 // eslint-disable-next-line import/extensions
 import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
+import ColorSelector from '@src/components/admin/ColorSelector';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from '../form.module.scss';
 
@@ -105,15 +106,6 @@ export default function EditProduk() {
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-
-  const handleArrayChange = (e, field) => {
-    const { value } = e.target;
-    const array = value.split('\n').filter((item) => item.trim() !== '');
-    setFormData((prev) => ({
-      ...prev,
-      [field]: array,
     }));
   };
 
@@ -449,18 +441,13 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="warna" className={styles.label}>
-            Warna (satu per baris)
-            <textarea
-              id="warna"
-              name="warna"
-              value={formData.warna.join('\n')}
-              onChange={(e) => handleArrayChange(e, 'warna')}
-              className={styles.textarea}
-              rows={3}
-              placeholder="Hitam&#10;Putih&#10;Merah&#10;Biru"
-            />
+          <label className={styles.label}>
+            Warna
           </label>
+          <ColorSelector
+            selectedColors={formData.warna}
+            onChange={(colors) => setFormData({ ...formData, warna: colors })}
+          />
         </div>
 
         <MultipleImageUpload

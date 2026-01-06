@@ -1,0 +1,158 @@
+.colorSelector {
+  margin: 1rem 0;
+
+  .colorGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+
+    @media (max-width: 768px) {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 0.5rem;
+    }
+  }
+
+  .colorItem {
+    display: block;
+    cursor: pointer;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:hover {
+      border-color: #007bff;
+      background: #f8f9fa;
+    }
+
+    .checkbox {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+
+      &:checked + .colorDisplay {
+        .colorBox {
+          box-shadow: 0 0 0 3px #007bff;
+          transform: scale(1.05);
+        }
+      }
+    }
+
+    // Checked state styling
+    &:has(.checkbox:checked) {
+      border-color: #007bff;
+      background: #e7f3ff;
+    }
+
+    .colorDisplay {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+
+      .colorBox {
+        width: 40px;
+        height: 40px;
+        border-radius: 6px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+        @media (max-width: 768px) {
+          width: 35px;
+          height: 35px;
+        }
+      }
+
+      .colorName {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: #333;
+        flex: 1;
+
+        @media (max-width: 768px) {
+          font-size: 0.8125rem;
+        }
+      }
+    }
+  }
+
+  .selectedColors {
+    padding: 0.75rem 1rem;
+    background: #f5f5f5;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    color: #555;
+    border-left: 3px solid #007bff;
+
+    strong {
+      color: #333;
+      margin-right: 0.5rem;
+    }
+  }
+}
+
+// Alternative styling for compact mode
+.colorSelector.compact {
+  .colorGrid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 0.5rem;
+  }
+
+  .colorItem {
+    padding: 0.5rem;
+
+    .colorDisplay {
+      gap: 0.5rem;
+
+      .colorBox {
+        width: 30px;
+        height: 30px;
+      }
+
+      .colorName {
+        font-size: 0.8125rem;
+      }
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .colorSelector {
+    .colorItem {
+      background: #2a2a2a;
+      border-color: #444;
+
+      &:hover {
+        background: #333;
+        border-color: #007bff;
+      }
+
+      &:has(.checkbox:checked) {
+        background: #1a3a5a;
+      }
+
+      .colorDisplay {
+        .colorName {
+          color: #e0e0e0;
+        }
+      }
+    }
+
+    .selectedColors {
+      background: #2a2a2a;
+      color: #e0e0e0;
+
+      strong {
+        color: #fff;
+      }
+    }
+  }
+}

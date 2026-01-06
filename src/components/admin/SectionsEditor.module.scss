@@ -1,0 +1,209 @@
+.sectionsEditor {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #fafafa;
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .addButton {
+      padding: 0.5rem 1rem;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: background 0.2s;
+
+      &:hover {
+        background: #0056b3;
+      }
+    }
+  }
+
+  .emptyState {
+    padding: 2rem;
+    text-align: center;
+    color: #666;
+    border: 2px dashed #ddd;
+    border-radius: 4px;
+    margin: 1rem 0;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .sectionItem {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .sectionHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #eee;
+
+      .sectionNumber {
+        font-weight: 600;
+        color: #333;
+      }
+
+      .sectionActions {
+        display: flex;
+        gap: 0.5rem;
+
+        button {
+          padding: 0.25rem 0.5rem;
+          border: 1px solid #ddd;
+          background: white;
+          cursor: pointer;
+          border-radius: 4px;
+          font-size: 0.875rem;
+          transition: all 0.2s;
+
+          &:hover:not(:disabled) {
+            background: #f5f5f5;
+            border-color: #999;
+          }
+
+          &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+        }
+
+        .moveButton {
+          min-width: 32px;
+          font-weight: bold;
+        }
+
+        .removeButton {
+          color: #dc3545;
+          border-color: #dc3545;
+
+          &:hover {
+            background: #dc3545;
+            color: white;
+          }
+        }
+      }
+    }
+
+    .sectionForm {
+      .formGroup {
+        margin-bottom: 1rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        label {
+          display: block;
+          margin-bottom: 0.5rem;
+          font-weight: 500;
+          color: #333;
+          font-size: 0.875rem;
+        }
+
+        input,
+        textarea {
+          width: 100%;
+          padding: 0.5rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          font-size: 0.875rem;
+          font-family: inherit;
+          transition: border-color 0.2s;
+
+          &:focus {
+            outline: none;
+            border-color: #007bff;
+          }
+
+          &::placeholder {
+            color: #999;
+          }
+        }
+
+        textarea {
+          resize: vertical;
+          min-height: 80px;
+        }
+
+        small {
+          display: block;
+          margin-top: 0.25rem;
+          color: #666;
+          font-size: 0.75rem;
+        }
+
+        .imagePreview {
+          margin-top: 0.75rem;
+          border: 1px solid #ddd;
+          border-radius: 4px;
+          overflow: hidden;
+          max-width: 300px;
+
+          img {
+            width: 100%;
+            height: auto;
+            display: block;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .sectionsEditor {
+    padding: 1rem;
+
+    .header {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+
+      .addButton {
+        width: 100%;
+      }
+    }
+
+    .sectionItem {
+      padding: 1rem;
+
+      .sectionHeader {
+        .sectionActions {
+          button {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}
