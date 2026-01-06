@@ -97,7 +97,7 @@ model produk {
   produkUnggulan Boolean       @default(false)
   urutanTampilan Int           @default(0)
   tanggalDibuat  DateTime      @default(now())
-  tanggalDiubah  DateTime
+  tanggalDiubah  DateTime      @updatedAt
   jumlahTerjual  Int           @default(0)
   carts          carts[]
   order_items    order_items[]

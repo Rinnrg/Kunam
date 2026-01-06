@@ -54,6 +54,7 @@ async function updateProduk(req, res, id) {
         thumbnail: thumbnail || null,
         gambar: images,
         video: videos,
+        // tanggalDiubah will be auto-updated by Prisma @updatedAt
       },
     });
 

@@ -94,6 +94,7 @@ async function createProduk(req, res) {
         video: videos || [],
         produkUnggulan: featured || false,
         urutanTampilan: order || 0,
+        tanggalDiubah: new Date(),
       },
     });
 

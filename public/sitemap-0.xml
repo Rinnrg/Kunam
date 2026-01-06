@@ -1,11 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:mobile="http://www.google.com/schemas/sitemap-mobile/1.0" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
-<url><loc>https://kunam-id.vercel.app</loc><lastmod>2026-01-02T01:15:10.573Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/about</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/admin</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/cart</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/login</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/produk</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/wishlist</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
-<url><loc>https://kunam-id.vercel.app/produk/cmipxlao60000v72cvlggbb4s</loc><lastmod>2026-01-02T01:15:10.578Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app</loc><lastmod>2026-01-06T18:14:22.698Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/about</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/admin</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/cart</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/login</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/pembayaran</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/pembayaran/gagal</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/pembayaran/pending</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/pembayaran/sukses</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/pesanan</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/produk</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/profil</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
+<url><loc>https://kunam-id.vercel.app/wishlist</loc><lastmod>2026-01-06T18:14:22.702Z</lastmod><changefreq>daily</changefreq><priority>0.7</priority></url>
 </urlset>
