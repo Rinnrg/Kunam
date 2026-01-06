@@ -61,16 +61,26 @@
     position: fixed;
     transition: 0.35s ease-in-out color;
     color: var(--black);
-    overflow: hidden;
-    max-height: 100svh;
-    height: 100svh !important;
     width: 100%;
     pointer-events: auto !important;
     background-color: var(--white);
     
-    // Mobile touch optimization
+    // Desktop: use overflow hidden for Lenis smooth scroll
+    @media (min-width: 769px) {
+      overflow: hidden;
+      max-height: 100svh;
+      height: 100svh !important;
+    }
+    
+    // Mobile: use native scroll - no overflow hidden
     @media (max-width: 768px) {
-      touch-action: pan-y;
+      position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      height: auto !important;
+      max-height: none;
+      touch-action: pan-y pinch-zoom;
+      -webkit-overflow-scrolling: touch;
     }
     
     /* Hide scrollbar for Chrome, Safari and Opera */
