@@ -225,9 +225,48 @@ function ProdukDetailPage({ produk, error }) {
   }, [session, selectedSize, selectedColor, addToCartAction, router, showAlert]);
 
   const handleBuyNow = useCallback(async () => {
-    await handleAddToCart();
-    router.push('/cart');
-  }, [handleAddToCart, router]);
+    if (!session?.user) {
+      showAlert({
+        type: 'warning',
+        title: 'Login Diperlukan',
+        message: 'Anda harus login terlebih dahulu untuk membeli produk.',
+        confirmText: 'Login Sekarang',
+        showCancel: true,
+        onConfirm: () => {
+          router.push('/login');
+        },
+      });
+      return;
+    }
+
+    if (!selectedSize || !selectedColor) {
+      showAlert({
+        type: 'warning',
+        title: 'Pilihan Belum Lengkap',
+        message: 'Mohon pilih ukuran dan warna terlebih dahulu.',
+      });
+      return;
+    }
+
+    // Create checkout item for direct purchase
+    const checkoutItem = {
+      produkId: currentProduk.id,
+      quantity,
+      ukuran: selectedSize,
+      warna: selectedColor,
+      produk: {
+        id: currentProduk.id,
+        nama: currentProduk.nama,
+        harga: currentProduk.harga,
+        diskon: currentProduk.diskon,
+        gambar: currentProduk.gambar,
+      },
+    };
+
+    // Store in localStorage and navigate to payment
+    localStorage.setItem('checkoutItems', JSON.stringify([checkoutItem]));
+    router.push('/pembayaran');
+  }, [session, selectedSize, selectedColor, currentProduk, quantity, router, showAlert]);
 
   // SEO
   const seo = useMemo(

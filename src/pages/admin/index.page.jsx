@@ -2,6 +2,7 @@ import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
+import HomeSectionManager from './components/HomeSectionManager';
 import styles from './dashboard.module.scss';
 
 export default function AdminDashboard() {
@@ -22,9 +23,13 @@ export default function AdminDashboard() {
       }
     } catch (error) {
       setProduk([]);
-    } finally {
-      setIsLoading(false);
     }
+  };
+
+  const fetchAll = async () => {
+    setIsLoading(true);
+    await fetchProduk();
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -36,7 +41,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      fetchProduk();
+      fetchAll();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
@@ -93,6 +98,8 @@ export default function AdminDashboard() {
       </header>
 
       <main className={styles.main}>
+        <HomeSectionManager />
+
         <div className={styles.section}>
           <div className={styles.sectionHeader}>
             <h2 className={styles.sectionTitle}>Produk</h2>

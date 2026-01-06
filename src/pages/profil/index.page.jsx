@@ -245,9 +245,6 @@ function ProfilPage() {
       <CustomHead title="Profil Saya - Kunam" description="Kelola profil dan akun Anda" />
       <main className={styles.container}>
         <Breadcrumb items={[{ label: 'Profil', href: null }]} />
-        <div className={styles.header}>
-          <h1>Profil Saya</h1>
-        </div>
 
         <div className={styles.content}>
           {/* Sidebar Menu */}

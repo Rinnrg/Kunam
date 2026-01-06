@@ -50,19 +50,34 @@ model order_items {
 }
 
 model orders {
-  id          Int           @id @default(autoincrement())
-  userId      Int
-  orderNumber String        @unique
-  status      String        @default("pending")
-  totalAmount Float
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime
+  id              Int           @id @default(autoincrement())
+  userId          Int
+  orderNumber     String        @unique
+  status          String        @default("pending")
+  totalAmount     Float
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  
+  // Payment related fields
+  snapToken       String?
+  paymentType     String?       // e.g. "gopay", "bank_transfer", "credit_card"
+  paymentStatus   String?       @default("pending") // pending, settlement, expire, cancel, deny
+  transactionId   String?       // Midtrans transaction ID
+  transactionTime DateTime?
+  paidAt          DateTime?
+  
+  // Customer info
+  customerName    String?
+  customerEmail   String?
+  customerPhone   String?
+  
   order_items order_items[]
   users       users         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([orderNumber])
   @@index([status])
   @@index([userId])
+  @@index([transactionId])
 }
 
 model produk {
@@ -141,4 +156,20 @@ model wishlists {
   @@unique([userId, produkId])
   @@index([produkId])
   @@index([userId])
+}
+
+model HomeSection {
+  id          String   @id @default(cuid())
+  title       String
+  images      String[] // Array of image URLs
+  layoutType  String   @default("slider") // slider, grid, masonry, carousel
+  columns     Int      @default(3) // For grid layout
+  autoplay    Boolean  @default(true) // For slider
+  interval    Int      @default(3000) // Slider interval in ms
+  order       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([order])
 }

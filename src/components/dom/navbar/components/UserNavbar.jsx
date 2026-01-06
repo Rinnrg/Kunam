@@ -14,8 +14,8 @@ function UserNavbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
 
-  const [setIsAuthModalOpen, wishlist, cart, setWishlist, setCart, showAlert] = useStore(
-    useShallow((state) => [state.setIsAuthModalOpen, state.wishlist, state.cart, state.setWishlist, state.setCart, state.showAlert]),
+  const [setIsAuthModalOpen, wishlist, cart, setWishlist, setCart, showAlert, lenis] = useStore(
+    useShallow((state) => [state.setIsAuthModalOpen, state.wishlist, state.cart, state.setWishlist, state.setCart, state.showAlert, state.lenis]),
   );
 
   // Update profile image from session
@@ -26,6 +26,22 @@ function UserNavbar() {
       setProfileImage(null);
     }
   }, [session?.user?.image]);
+
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden';
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    };
+  }, [isMenuOpen, lenis]);
 
   // Fetch wishlist and cart when user is logged in
   useEffect(() => {

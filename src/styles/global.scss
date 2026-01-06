@@ -29,12 +29,12 @@ main.lenis-stopped {
 }
 
 body {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Old versions of Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
+  // -webkit-touch-callout: none; /* iOS Safari */
+  // -webkit-user-select: none; /* Safari */
+  // -khtml-user-select: none; /* Konqueror HTML */
+  // -moz-user-select: none; /* Old versions of Firefox */
+  // -ms-user-select: none; /* Internet Explorer/Edge */
+  // user-select: none; /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
   max-height: 100%;
   overflow: hidden;
   pointer-events: auto; /* Ensure body is always interactive */
@@ -134,10 +134,10 @@ main > div > section:nth-last-child(1) {
   width: 100vw;
   height: 100vh;
   height: 100dvh; // Better mobile support
-  background-color: #ffffff; // Match global background
+  background-color: #ffffff; // Putih untuk fade in/out
   z-index: 10000;
   pointer-events: none;
   opacity: 0; // Start hidden by default
   transition: none; // Remove CSS transitions, use GSAP only
-  display: none; // Hide by default, GSAP will show when needed
+  will-change: opacity;
 }

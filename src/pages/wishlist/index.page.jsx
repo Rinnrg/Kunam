@@ -113,9 +113,6 @@ function WishlistPage() {
       <CustomHead title="Wishlist - Kunam" description="Produk yang Anda sukai" />
       <main className={styles.container}>
         <Breadcrumb items={[{ label: 'Wishlist', href: null }]} />
-        <div className={styles.header}>
-          <h1>Wishlist Saya</h1>
-        </div>
 
         {wishlist.length === 0 ? (
           <div className={styles.empty}>

@@ -1,9 +1,8 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import Home from '@src/pages/components/home/Index';
-import About from '@src/pages/components/about/Index';
+import HomeSections from '@src/pages/components/homeSections/Index';
 import Quote from '@src/pages/components/quote/Index';
 import Produk from '@src/pages/components/produk/Index';
-import Clients from '@src/pages/components/clients/Index';
 import CustomHead from '@src/components/dom/CustomHead';
 
 const seo = {
@@ -31,13 +30,12 @@ const seo = {
   ],
 };
 
-function Page({ produk }) {
+function Page({ produk, homeSections }) {
   return (
     <>
       <CustomHead {...seo} />
       <Home />
-      <About />
-      <Clients />
+      <HomeSections sections={homeSections} />
       <Quote />
       <Produk produk={produk} />
     </>
@@ -48,7 +46,7 @@ export async function getServerSideProps() {
   try {
     const prisma = (await import('../lib/prisma')).default;
 
-    // Optimized query: Select only needed fields and limit results
+    // Fetch products
     const produk = await prisma.produk.findMany({
       where: {
         OR: [
@@ -74,24 +72,40 @@ export async function getServerSideProps() {
       take: 20, // Limit to 20 products for homepage
     });
 
-    // Serialize dates
+    // Fetch home sections
+    const homeSections = await prisma.homeSections.findMany({
+      orderBy: {
+        urutan: 'asc',
+      },
+    });
+
+    // Serialize dates for products
     const serializedProduk = produk.map((item) => ({
       ...item,
       tanggalDibuat: item.tanggalDibuat.toISOString(),
       tanggalDiubah: item.tanggalDiubah.toISOString(),
     }));
 
+    // Serialize dates for home sections
+    const serializedHomeSections = homeSections.map((item) => ({
+      ...item,
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    }));
+
     return {
       props: {
         produk: serializedProduk,
+        homeSections: serializedHomeSections,
       },
     };
   } catch (error) {
     // eslint-disable-next-line no-console
-    console.error('Error fetching produk:', error);
+    console.error('Error fetching data:', error);
     return {
       props: {
         produk: [],
+        homeSections: [],
       },
     };
   }

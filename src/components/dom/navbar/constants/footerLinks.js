@@ -13,14 +13,6 @@ const footerLinks = {
   ],
   tentangKami: [
     { title: 'About Us', href: '/about' },
-    { title: 'Promosikan Brand Anda', href: '/promosi-brand' },
-    { title: 'Pers/Media', href: '/media' },
-    { title: 'Karir', href: '/karir' },
-    { title: 'Persyaratan & Ketentuan', href: '/ketentuan' },
-    { title: 'Kebijakan Privasi', href: '/privasi' },
-    { title: 'Responsible Disclosure', href: '/disclosure' },
-    { title: 'Influencer Program', href: '/influencer' },
-    { title: 'KUNAM THREAD', href: '/thread' },
   ],
   social: [
     { title: 'Instagram', href: 'https://instagram.com', icon: 'instagram' },

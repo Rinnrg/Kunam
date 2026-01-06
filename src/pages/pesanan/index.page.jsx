@@ -237,9 +237,6 @@ function PesananPage() {
       <CustomHead title="Pesanan Saya - Kunam" description="Lihat riwayat dan status pesanan Anda" />
       <main className={styles.container}>
         <Breadcrumb items={[{ label: 'Pesanan', href: null }]} />
-        <div className={styles.header}>
-          <h1>Pesanan Saya</h1>
-        </div>
 
         <div className={styles.content}>
           {/* Status Tabs */}

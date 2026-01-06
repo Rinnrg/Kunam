@@ -143,7 +143,11 @@
   pointer-events: all;
   
   @include mobile {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
   }
 }
 
@@ -296,6 +300,18 @@
     width: 19px;
     height: 19px;
     flex-shrink: 0;
+    stroke-width: 1.5;
+    fill: none;
+  }
+  
+  // Style khusus untuk search icon di mobile - hanya outline
+  &:first-child {
+    svg {
+      stroke-width: 1.8;
+      circle, path {
+        fill: none;
+      }
+    }
   }
   
   @media (max-width: 480px) {
@@ -306,6 +322,14 @@
     svg {
       width: 17px;
       height: 17px;
+      stroke-width: 1.8;
+    }
+    
+    // Style khusus untuk search icon di layar kecil
+    &:first-child {
+      svg {
+        stroke-width: 2;
+      }
     }
   }
 }
@@ -360,10 +384,24 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 1001;
-  -webkit-backdrop-filter: blur(2px);
-  backdrop-filter: blur(2px);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 99998;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  animation: overlayFadeIn 0.3s ease-out;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .mobileMenu {
@@ -371,28 +409,32 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 280px;
-  max-width: 85vw;
-  background: #fff;
-  z-index: 1002;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  width: 85%;
+  max-width: 320px;
+  height: 100vh;
+  background: #ffffff;
+  z-index: 99999;
+  box-shadow: -8px 0 40px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  animation: slideInRight 0.3s ease-out;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  animation: slideInRight 0.35s cubic-bezier(0.32, 0.72, 0, 1);
+  overflow: hidden;
+  pointer-events: auto;
   
   @media (max-width: 480px) {
-    width: 260px;
+    width: 80%;
+    max-width: 280px;
   }
 }
 
 @keyframes slideInRight {
   from {
     transform: translateX(100%);
+    opacity: 0.8;
   }
   to {
     transform: translateX(0);
+    opacity: 1;
   }
 }
 
@@ -400,43 +442,53 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  border-bottom: 1px solid #eee;
+  padding: 24px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  background: #ffffff;
+  position: relative;
+  z-index: 1;
 
   h3 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     color: #111;
     margin: 0;
+    letter-spacing: -0.02em;
   }
   
   @media (max-width: 480px) {
-    padding: 16px 18px;
+    padding: 20px 20px;
     
     h3 {
-      font-size: 1rem;
+      font-size: 1.1rem;
     }
   }
 }
 
 .closeButton {
-  background: none;
+  background: rgba(0, 0, 0, 0.05);
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #333;
-  border-radius: 50%;
-  transition: background 0.2s ease, color 0.2s ease;
-  min-width: 36px;
-  min-height: 36px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  min-width: 40px;
+  min-height: 40px;
 
   &:hover {
-    background: #f5f5f5;
+    background: rgba(0, 0, 0, 0.1);
     color: #000;
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+    background: rgba(0, 0, 0, 0.15);
   }
 
   svg {
@@ -445,9 +497,10 @@
   }
   
   @media (max-width: 480px) {
-    padding: 6px;
-    min-width: 32px;
-    min-height: 32px;
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+    border-radius: 10px;
     
     svg {
       width: 18px;
@@ -459,66 +512,123 @@
 .mobileMenuNav {
   display: flex;
   flex-direction: column;
-  padding: 8px 0;
+  padding: 16px 0;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   -webkit-overflow-scrolling: touch;
+  background: #ffffff;
+  position: relative;
+  z-index: 1;
+  
+  // Ensure content is visible
+  > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 .mobileMenuItem {
-  display: block;
-  padding: 14px 20px;
-  color: #333;
+  display: flex !important;
+  align-items: center;
+  padding: 18px 24px;
+  color: #111 !important;
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   font-weight: 500;
-  transition: background 0.2s ease, color 0.2s ease;
-  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  margin: 0;
+  background: #ffffff;
+  cursor: pointer;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative;
+  z-index: 1;
+  line-height: 1.4;
 
   &:hover {
-    background: #f5f5f5;
-    color: #000;
-    border-left-color: #000;
+    background: rgba(0, 0, 0, 0.05);
+    color: #000 !important;
   }
 
   &:active {
-    background: #eee;
+    background: rgba(0, 0, 0, 0.1);
   }
   
   @media (max-width: 480px) {
-    padding: 12px 18px;
-    font-size: 0.9rem;
+    padding: 16px 20px;
+    font-size: 1rem;
   }
 }
 
 .mobileSubmenu {
-  display: flex;
+  display: flex !important;
   flex-direction: column;
-  background: #f9f9f9;
-  padding: 5px 0;
+  padding: 0;
+  background: #f8f8f8;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative;
+  z-index: 1;
 }
 
 .mobileSubmenuItem {
-  display: block;
-  padding: 11px 20px 11px 40px;
-  color: #666;
+  display: flex !important;
+  align-items: center;
+  padding: 14px 24px 14px 40px;
+  color: #555 !important;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 0.95rem;
   font-weight: 400;
-  transition: background 0.2s ease, color 0.2s ease;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  opacity: 1 !important;
+  visibility: visible !important;
+  background: #f8f8f8;
+  z-index: 1;
+
+  &::before {
+    content: '→';
+    position: absolute;
+    left: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1rem;
+    color: rgba(0, 0, 0, 0.3);
+    transition: all 0.2s ease;
+  }
 
   &:hover {
-    background: #f0f0f0;
-    color: #000;
+    background: #efefef;
+    color: #000 !important;
+    padding-left: 42px;
+    
+    &::before {
+      color: #000;
+      left: 26px;
+    }
   }
 
   &:active {
-    background: #e8e8e8;
+    background: #e5e5e5;
   }
   
   @media (max-width: 480px) {
-    padding: 10px 18px 10px 36px;
-    font-size: 0.85rem;
+    padding: 12px 20px 12px 36px;
+    font-size: 0.9rem;
+    
+    &::before {
+      left: 20px;
+    }
+    
+    &:hover {
+      padding-left: 38px;
+      
+      &::before {
+        left: 22px;
+      }
+    }
   }
 }
 
@@ -566,6 +676,100 @@
   
   .innerHeader {
     min-height: 40px;
+  }
+}
+
+// Mobile Search Overlay & Container
+.searchOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 99998;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.2s ease;
+  touch-action: none;
+  pointer-events: auto;
+}
+
+.mobileSearchContainer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  z-index: 99999;
+  padding: 0.8rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  animation: slideDown 0.3s ease;
+  pointer-events: auto;
+  
+  @media (max-width: 480px) {
+    padding: 0.6rem;
+  }
+}
+
+.closeSearchButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  transition: color 0.2s ease, background 0.2s ease;
+  border-radius: 6px;
+  min-width: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+
+  &:hover {
+    color: #000;
+    background: rgba(0, 0, 0, 0.05);
+  }
+  
+  &:active {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+.mobileSearchWrapper {
+  flex: 1;
+  
+  .searchContainer {
+    max-width: 100%;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
   }
 }
 

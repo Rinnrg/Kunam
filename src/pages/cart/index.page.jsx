@@ -216,13 +216,16 @@ function CartPage() {
       });
       return;
     }
-    // TODO: Implement checkout logic
-    showAlert({
-      type: 'success',
-      title: 'Checkout',
-      message: 'Proses checkout akan segera dimulai...',
-    });
-  }, [selectedItems, showAlert]);
+    
+    // Get selected cart items
+    const selectedCartItems = cart.filter(item => selectedItems.includes(item.id));
+    
+    // Store checkout items in localStorage for payment page
+    localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
+    
+    // Navigate to payment page
+    router.push('/pembayaran');
+  }, [selectedItems, cart, showAlert, router]);
 
   const handleUpdateQuantity = useCallback(
     async (cartId, newQuantity) => {
@@ -320,9 +323,6 @@ function CartPage() {
       <CustomHead title="Keranjang - Kunam" description="Keranjang belanja Anda" />
       <main className={styles.container}>
         <Breadcrumb items={[{ label: 'Cart', href: null }]} />
-        <div className={styles.header}>
-          <h1>Keranjang Saya</h1>
-        </div>
 
         {cart.length === 0 ? (
           <div className={styles.empty}>

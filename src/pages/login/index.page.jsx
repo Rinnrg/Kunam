@@ -4,7 +4,6 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
-import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from './login.module.scss';
 
 function LoginPage() {
@@ -161,9 +160,6 @@ function LoginPage() {
       </Head>
 
       <div className={styles.container}>
-        <div style={{ padding: '0 2rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
-          <Breadcrumb items={[{ label: 'Login', href: null }]} />
-        </div>
         <div className={styles.card}>
           {/* Logo */}
           <div className={styles.logoContainer}>

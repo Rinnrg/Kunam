@@ -195,9 +195,6 @@ function OrderDetailPage() {
           { label: 'Pesanan', href: '/pesanan' },
           { label: order.orderNumber, href: null }
         ]} />
-        <div className={styles.header}>
-          <h1>Detail Pesanan</h1>
-        </div>
 
         <div className={styles.orderDetail}>
           {/* Order Info Card */}

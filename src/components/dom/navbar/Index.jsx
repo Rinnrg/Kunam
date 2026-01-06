@@ -19,6 +19,7 @@ function Navbar() {
   const [lenis] = useStore(useShallow((state) => [state.lenis]));
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGuestMenuOpen, setIsGuestMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const scrollToPosition = useCallback(
     (position, duration = 1.5) => {
@@ -41,6 +42,22 @@ function Navbar() {
       scrollToPosition(0);
     }
   }, [router.pathname, scrollToPosition]);
+
+  // Lock scroll when mobile menu is open
+  useEffect(() => {
+    if (isGuestMenuOpen || isMobileSearchOpen) {
+      document.body.style.overflow = 'hidden';
+      if (lenis) lenis.stop();
+    } else {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+      if (lenis) lenis.start();
+    };
+  }, [isGuestMenuOpen, isMobileSearchOpen, lenis]);
 
   useEffect(() => {
     if (!lenis) return undefined;
@@ -125,12 +142,17 @@ function Navbar() {
               return (
                 <>
                   {/* Search Icon - Mobile */}
-                  <Link href="/produk" className={styles.mobileIconButton} aria-label="Cari">
+                  <button 
+                    type="button"
+                    className={styles.mobileIconButton} 
+                    onClick={() => setIsMobileSearchOpen(true)}
+                    aria-label="Cari"
+                  >
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                       <path d="M21 21L16.65 16.65" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
-                  </Link>
+                  </button>
                   
                   {/* Wishlist Icon - Mobile */}
                   <Link href="/wishlist" className={styles.mobileIconButton} aria-label="Wishlist">
@@ -242,6 +264,35 @@ function Navbar() {
                 </div>
               ))}
             </nav>
+          </div>
+        </>
+      )}
+
+      {/* Mobile Search Bar */}
+      {isMobile && isMobileSearchOpen && (
+        <>
+          <div 
+            className={styles.searchOverlay} 
+            onClick={() => setIsMobileSearchOpen(false)}
+            onKeyDown={(e) => e.key === 'Escape' && setIsMobileSearchOpen(false)}
+            role="button"
+            tabIndex={0}
+            aria-label="Tutup pencarian"
+          />
+          <div className={styles.mobileSearchContainer}>
+            <button 
+              type="button" 
+              className={styles.closeSearchButton}
+              onClick={() => setIsMobileSearchOpen(false)}
+              aria-label="Tutup"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 18L9 12L15 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </button>
+            <div className={styles.mobileSearchWrapper}>
+              <SearchDropdown onClose={() => setIsMobileSearchOpen(false)} />
+            </div>
           </div>
         </>
       )}

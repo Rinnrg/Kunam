@@ -12,6 +12,7 @@ import { useRef } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import { useWindowSize } from '@darkroom.engineering/hamo';
+import Image from 'next/image';
 
 const Time = dynamic(() => import('@src/components/dom/Time'), { ssr: false });
 
@@ -23,35 +24,12 @@ function Footer() {
 
   useIsomorphicLayoutEffect(() => {
     if (!isLoading) {
-      const setupFooterAnimation = () => {
-        gsap.set(footerRef.current, { height: 'auto' });
-        const allSections = document.querySelectorAll('#mainContainer section');
-        if (allSections.length > 1) {
-          const lastSection = allSections[allSections.length - 2];
-          if (footerRef.current.offsetHeight <= windowSize.height) {
-            gsap.set(footerRef.current, { yPercent: -50 });
-            const uncover = gsap.timeline({ paused: true });
-            gsap.set(footerRef.current, { height: '100.5svh' });
-            uncover.to(footerRef.current, {
-              yPercent: 0,
-              ease: 'none',
-            });
-            ScrollTrigger.create({
-              id: 'footerTrigger',
-              trigger: lastSection,
-              start: 'bottom bottom',
-              end: '+=100%',
-              animation: uncover,
-              scrub: true,
-              scroller: document?.querySelector('main'),
-            });
-          } else {
-            gsap.set(footerRef.current, { transform: 'translate(0%, 0%)', height: 'auto' });
-          }
-        }
-      };
-
-      setupFooterAnimation(footerRef, windowSize);
+      // Footer animation disabled to fix positioning
+      gsap.set(footerRef.current, { 
+        height: 'auto',
+        yPercent: 0,
+        transform: 'translate(0%, 0%)'
+      });
     }
 
     return () => {
@@ -76,15 +54,13 @@ function Footer() {
               dambaaan. Kami menjadikan Anda sebagai pusatnya.
             </p>
             <p className={styles.tagline}>
-              <strong>Bersama KUNAM, You Own Now.</strong>
+              KUNAM | Stand Out Loud.
             </p>
           </div>
           <div className={styles.contactInfo}>
             <h6 className={styles.title}>Layanan Pengaduan Konsumen KUNAM</h6>
-            <p>E-mail: customer@kunam.com</p>
-            <p>Telepon: 021-29490100</p>
-            <p>Direktorat Jenderal Perlindungan Konsumen dan Tertib Niaga Kementerian Perdagangan RI</p>
-            <p>WhatsApp: +62 853 1111 1010</p>
+            <p>E-mail: <a href="mailto:kunamcloth@gmail.com">kunamcloth@gmail.com</a></p>
+            <p>WhatsApp: <a href="https://wa.me/6285190650113" target="_blank" rel="noopener noreferrer">+62 851 9065 0113</a></p>
           </div>
         </AppearTitle>
       </div>
@@ -125,7 +101,13 @@ function Footer() {
             {footerLinks.social.map((link) => (
               <div key={link.title} className={styles.socialIconContainer}>
                 <LinkText target className={styles.socialLink} title={link.title} href={link.href}>
-                  <span className={styles.iconPlaceholder}>{link.icon.charAt(0).toUpperCase()}</span>
+                  <Image 
+                    src={`/logo/${link.icon}-white.svg`} 
+                    alt={link.title}
+                    width={32}
+                    height={32}
+                    className={styles.socialIcon}
+                  />
                 </LinkText>
               </div>
             ))}

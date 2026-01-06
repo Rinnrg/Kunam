@@ -34,10 +34,6 @@ const menuLinks = [
     ],
   },
   {
-    title: 'About',
-    href: '/about',
-  },
-  {
     title: 'Platform',
     href: undefined,
     submenu: [

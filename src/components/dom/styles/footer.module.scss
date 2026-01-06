@@ -1,11 +1,13 @@
 @import '@src/styles/functions';
 
 .root {
+  position: relative;
   height: auto;
   width: 100%;
-  translate: inherit !important;
+  translate: none !important;
+  transform: none !important;
   box-shadow: none;
-  background-color: var(--black);
+  background-color: #000;
   padding: calc(var(--layout-columns-gap) * 3) var(--layout-margin) calc(var(--layout-columns-gap) * 2) var(--layout-margin);
 
   @include mobile {
@@ -40,6 +42,7 @@
     .companyDescription {
       color: var(--white);
       font-size: 0.85vw;
+      font-weight: 400;
       line-height: 1.6;
       margin-bottom: calc(var(--layout-columns-gap) * 1);
       max-width: 90%;
@@ -51,16 +54,18 @@
 
       p {
         margin-bottom: calc(var(--layout-columns-gap) * 0.5);
+        font-weight: 400;
       }
 
       .tagline {
-        font-weight: 600;
+        font-weight: 400;
       }
     }
 
     .contactInfo {
       color: var(--white);
       font-size: 0.85vw;
+      font-weight: 400;
       line-height: 1.6;
 
       @include mobile {
@@ -69,7 +74,7 @@
 
       .title {
         font-size: 1vw;
-        font-weight: 600;
+        font-weight: 400;
         margin-bottom: calc(var(--layout-columns-gap) * 0.5);
         color: var(--white);
 
@@ -80,6 +85,34 @@
 
       p {
         margin: calc(var(--layout-columns-gap) * 0.25) 0;
+        font-weight: 400;
+
+        a {
+          color: var(--white);
+          text-decoration: none;
+          position: relative;
+          transition: color 0.3s ease;
+
+          &::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--white);
+            transition: width 0.3s ease;
+          }
+
+          &:hover {
+            color: var(--fillColor);
+
+            &::after {
+              width: 100%;
+              background-color: var(--fillColor);
+            }
+          }
+        }
       }
     }
   }

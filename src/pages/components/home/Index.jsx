@@ -40,16 +40,12 @@ function Home() {
         <p className={styles.subtitle}>Discover premium clothing that defines your unique identity</p>
         <div className={styles.ctaContainer}>
           <button type="button" className={styles.primaryButton}>
-            Shop Collection
+            Product Collection
           </button>
           <button type="button" className={styles.secondaryButton}>
             View Lookbook
           </button>
         </div>
-      </div>
-
-      <div ref={infiniteTextRef} className={styles.infiniteContainer}>
-        <InfiniteText text="New Arrivals — Limited Edition" length={5} />
       </div>
     </section>
   );

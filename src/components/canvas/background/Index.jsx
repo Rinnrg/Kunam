@@ -1,4 +1,4 @@
-// Simple black background - no complex rendering needed
+// Simple white background - no complex rendering needed
 function Index() {
   return (
     <div
@@ -8,7 +8,7 @@ function Index() {
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: '#000000',
+        backgroundColor: '#ffffff',
         zIndex: -1,
       }}
     />
