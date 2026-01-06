@@ -129,6 +129,7 @@ model reviews {
 model users {
   id         Int         @id @default(autoincrement())
   email      String      @unique
+  username   String?     @unique
   password   String?
   name       String?
   phone      String?
@@ -136,13 +137,14 @@ model users {
   provider   String      @default("credentials")
   providerId String?
   createdAt  DateTime    @default(now())
-  updatedAt  DateTime
+  updatedAt  DateTime    @updatedAt
   carts      carts[]
   orders     orders[]
   reviews    reviews[]
   wishlists  wishlists[]
 
   @@index([email])
+  @@index([username])
 }
 
 model wishlists {

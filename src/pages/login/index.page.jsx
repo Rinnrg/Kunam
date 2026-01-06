@@ -18,8 +18,8 @@ function LoginPage() {
     email: '',
     password: '',
     name: '',
+    username: '',
     phone: '',
-    birthday: '',
     confirmPassword: '',
   });
   const [loading, setLoading] = useState(false);
@@ -86,8 +86,30 @@ function LoginPage() {
       setLoading(true);
       setError('');
 
+      // Validasi password
       if (formData.password.length < 6) {
         setError('Password minimal 6 karakter');
+        setLoading(false);
+        return;
+      }
+
+      // Validasi konfirmasi password
+      if (formData.password !== formData.confirmPassword) {
+        setError('Password dan konfirmasi password tidak cocok');
+        setLoading(false);
+        return;
+      }
+
+      // Validasi nama lengkap
+      if (!formData.name || formData.name.trim().length < 3) {
+        setError('Nama lengkap minimal 3 karakter');
+        setLoading(false);
+        return;
+      }
+
+      // Validasi username
+      if (!formData.username || formData.username.trim().length < 3) {
+        setError('Username minimal 3 karakter');
         setLoading(false);
         return;
       }
@@ -100,6 +122,7 @@ function LoginPage() {
             email: formData.email,
             password: formData.password,
             name: formData.name,
+            username: formData.username,
             phone: formData.phone,
           }),
         });
@@ -111,7 +134,7 @@ function LoginPage() {
         } else {
           setSuccess('Registrasi berhasil! Silakan login.');
           setActiveTab('login');
-          setFormData({ email: formData.email, password: '', name: '', phone: '', birthday: '', confirmPassword: '' });
+          setFormData({ email: formData.email, password: '', name: '', username: '', phone: '', confirmPassword: '' });
         }
       } catch (err) {
         setError('Terjadi kesalahan. Silakan coba lagi.');
@@ -134,8 +157,8 @@ function LoginPage() {
       email: '',
       password: '',
       name: '',
+      username: '',
       phone: '',
-      birthday: '',
       confirmPassword: '',
     });
     setRememberMe(false);
@@ -250,7 +273,16 @@ function LoginPage() {
             ) : (
               <form className={styles.form} onSubmit={handleRegister}>
                 <div className={styles.inputGroup}>
+                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Nama Lengkap *" required className={styles.input} />
+                </div>
+                <div className={styles.inputGroup}>
+                  <input type="text" name="username" value={formData.username} onChange={handleInputChange} placeholder="Username *" required className={styles.input} />
+                </div>
+                <div className={styles.inputGroup}>
                   <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="Alamat Email *" required className={styles.input} />
+                </div>
+                <div className={styles.inputGroup}>
+                  <input type="tel" name="phone" value={formData.phone} onChange={handleInputChange} placeholder="Nomor Telepon *" required className={styles.input} />
                 </div>
                 <div className={styles.inputGroup}>
                   <div className={styles.passwordWrapper}>
@@ -272,10 +304,23 @@ function LoginPage() {
                   </div>
                 </div>
                 <div className={styles.inputGroup}>
-                  <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Nama Depan *" className={styles.input} />
-                </div>
-                <div className={styles.inputGroup}>
-                  <input type="date" name="birthday" value={formData.birthday} onChange={handleInputChange} placeholder="Hari Ulang Tahun (opsional)" className={styles.input} />
+                  <div className={styles.passwordWrapper}>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleInputChange}
+                      placeholder="Ulangi Kata Sandi *"
+                      required
+                      className={styles.input}
+                    />
+                    <button type="button" className={styles.eyeButton} onClick={() => setShowPassword(!showPassword)} aria-label="Toggle password visibility">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 12C1 12 5 4 12 4C19 4 23 12 23 12C23 12 19 20 12 20C5 20 1 12 1 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
 
                 <div className={styles.checkboxGroup}>

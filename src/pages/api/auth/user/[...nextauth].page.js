@@ -23,7 +23,7 @@ export const userAuthOptions = {
             return null;
           }
 
-          const user = await prisma.user.findUnique({
+          const user = await prisma.users.findUnique({
             where: {
               email: credentials.email.toLowerCase(),
             },
@@ -75,13 +75,13 @@ export const userAuthOptions = {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
         try {
-          const existingUser = await prisma.user.findUnique({
+          const existingUser = await prisma.users.findUnique({
             where: { email: user.email.toLowerCase() },
           });
 
           if (existingUser) {
             // Update user info if already exists
-            await prisma.user.update({
+            await prisma.users.update({
               where: { id: existingUser.id },
               data: {
                 name: user.name,
@@ -91,7 +91,7 @@ export const userAuthOptions = {
             });
           } else {
             // Create new user
-            await prisma.user.create({
+            await prisma.users.create({
               data: {
                 email: user.email.toLowerCase(),
                 name: user.name,
@@ -116,7 +116,7 @@ export const userAuthOptions = {
       if (user) {
         // For Google OAuth, we need to get the user ID from database
         if (account?.provider === 'google') {
-          const dbUser = await prisma.user.findUnique({
+          const dbUser = await prisma.users.findUnique({
             where: { email: user.email.toLowerCase() },
             select: { id: true, image: true },
           });
@@ -133,7 +133,7 @@ export const userAuthOptions = {
       
       // Update token on session update
       if (trigger === 'update') {
-        const dbUser = await prisma.user.findUnique({
+        const dbUser = await prisma.users.findUnique({
           where: { id: parseInt(token.id, 10) },
           select: { name: true, image: true, email: true },
         });
@@ -150,7 +150,7 @@ export const userAuthOptions = {
       if (token && session.user) {
         // Always fetch fresh image from database
         try {
-          const dbUser = await prisma.user.findUnique({
+          const dbUser = await prisma.users.findUnique({
             where: { id: parseInt(token.id, 10) },
             select: { image: true },
           });

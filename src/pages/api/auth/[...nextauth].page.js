@@ -32,7 +32,7 @@ export const authOptions = {
             return null;
           }
 
-          const admin = await prisma.admin.findUnique({
+          const admin = await prisma.Admin.findUnique({
             where: {
               email: credentials.email,
             },
@@ -81,7 +81,7 @@ export const authOptions = {
             return null;
           }
 
-          const user = await prisma.user.findUnique({
+          const user = await prisma.users.findUnique({
             where: {
               email: credentials.email.toLowerCase(),
             },
@@ -134,12 +134,12 @@ export const authOptions = {
       // Handle Google OAuth for users
       if (account?.provider === 'google') {
         try {
-          const existingUser = await prisma.user.findUnique({
+          const existingUser = await prisma.users.findUnique({
             where: { email: user.email.toLowerCase() },
           });
 
           if (existingUser) {
-            await prisma.user.update({
+            await prisma.users.update({
               where: { id: existingUser.id },
               data: {
                 name: user.name,
@@ -148,7 +148,7 @@ export const authOptions = {
               },
             });
           } else {
-            await prisma.user.create({
+            await prisma.users.create({
               data: {
                 email: user.email.toLowerCase(),
                 name: user.name,
@@ -173,7 +173,7 @@ export const authOptions = {
       if (user) {
         // For Google OAuth, get user ID from database
         if (account?.provider === 'google') {
-          const dbUser = await prisma.user.findUnique({
+          const dbUser = await prisma.users.findUnique({
             where: { email: user.email.toLowerCase() },
             select: { id: true },
           });
@@ -200,24 +200,35 @@ export const authOptions = {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Check if the redirect URL is for admin pages
-      if (url.includes('/admin') || url.startsWith('/admin')) {
-        return url.startsWith('/') ? `${baseUrl}${url}` : url;
-      }
-      
       // Always redirect to home after logout
       if (url.includes('signout') || url.includes('logout')) {
         return baseUrl;
       }
       
-      // For regular users, redirect to home
+      // Check if the redirect URL is for admin pages
+      if (url.includes('/admin') || url.startsWith('/admin')) {
+        return url.startsWith('/') ? `${baseUrl}${url}` : url;
+      }
+      
+      // Prevent redirect to /api/auth/signin
+      if (url.includes('/api/auth/signin')) {
+        return `${baseUrl}/login`;
+      }
+      
+      // After successful login, redirect to home
+      if (url.includes('/api/auth/callback')) {
+        return baseUrl;
+      }
+      
+      // For regular users, redirect to home by default
       if (url.startsWith('/')) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
       return baseUrl;
     },
   },
   pages: {
-    // Don't set default sign in page, let each page handle its own redirect
+    signIn: '/login',
+    error: '/login',
   },
   session: {
     strategy: 'jwt',
