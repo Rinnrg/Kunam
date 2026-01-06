@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import styles from './SectionsEditor.module.scss';
 
 /**
  * Component untuk mengedit product sections di admin panel
  * Memungkinkan admin untuk menambah, edit, dan hapus sections
  */
-const SectionsEditor = ({ sections = [], onChange }) => {
+export default function SectionsEditor({ sections = [], onChange }) {
   const [sectionList, setSectionList] = useState(sections);
 
   // Tambah section baru
@@ -141,7 +142,7 @@ const SectionsEditor = ({ sections = [], onChange }) => {
               
               {section.gambar && (
                 <div className={styles.imagePreview}>
-                  <img src={section.gambar} alt="Preview" />
+                  <Image src={section.gambar} alt="Preview" width={300} height={200} style={{ width: '100%', height: 'auto' }} />
                 </div>
               )}
             </div>
@@ -150,6 +151,4 @@ const SectionsEditor = ({ sections = [], onChange }) => {
       ))}
     </div>
   );
-};
-
-export default SectionsEditor;
+}

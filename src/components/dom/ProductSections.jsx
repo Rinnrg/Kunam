@@ -8,7 +8,7 @@ import styles from './ProductSections.module.scss';
  * 
  * @param {Array} sections - Array of section objects with judul, deskripsi, and optional gambar
  */
-const ProductSections = ({ sections }) => {
+export default function ProductSections({ sections }) {
   if (!sections || sections.length === 0) {
     return null;
   }
@@ -43,6 +43,4 @@ const ProductSections = ({ sections }) => {
       ))}
     </div>
   );
-};
-
-export default ProductSections;
+}

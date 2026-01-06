@@ -59,18 +59,17 @@ async function createProduk(req, res) {
 
     // Validasi setiap section
     if (sections) {
-      for (const section of sections) {
-        if (!section.judul || !section.deskripsi) {
-          return res.status(400).json({
-            message: 'Setiap section harus memiliki judul dan deskripsi',
-          });
-        }
+      const hasInvalidSection = sections.some((section) => !section.judul || !section.deskripsi);
+      if (hasInvalidSection) {
+        return res.status(400).json({
+          message: 'Setiap section harus memiliki judul dan deskripsi',
+        });
       }
     }
 
     // Generate unique ID from nama (slug format) and timestamp
-    const generateId = (nama) => {
-      const slug = nama
+    const generateId = (productName) => {
+      const slug = productName
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
