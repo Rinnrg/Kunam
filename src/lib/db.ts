@@ -43,7 +43,7 @@ if (typeof window === 'undefined') {
  * Wrapper function to safely execute Prisma queries with automatic retry
  */
 export async function executePrismaQuery<T>(
-  queryFn: (prisma: PrismaClient) => Promise<T>
+  queryFn: (client: PrismaClient) => Promise<T>
 ): Promise<T> {
   try {
     const result = await queryFn(prisma);
