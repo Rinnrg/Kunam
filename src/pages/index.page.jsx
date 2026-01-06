@@ -46,14 +46,8 @@ export async function getServerSideProps() {
   try {
     const prisma = (await import('../lib/prisma')).default;
 
-    // Fetch products
+    // Fetch latest products for "Koleksi Terbaru" section
     const produk = await prisma.produk.findMany({
-      where: {
-        OR: [
-          { produkUnggulan: true },
-          { urutanTampilan: { gt: 0 } },
-        ],
-      },
       select: {
         id: true,
         nama: true,
@@ -68,8 +62,8 @@ export async function getServerSideProps() {
         tanggalDibuat: true,
         tanggalDiubah: true,
       },
-      orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
-      take: 20, // Limit to 20 products for homepage
+      orderBy: { tanggalDibuat: 'desc' },
+      take: 8, // Get 8 latest products, component will show 4
     });
 
     // Fetch home sections
