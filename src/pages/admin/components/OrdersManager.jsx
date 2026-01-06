@@ -26,15 +26,6 @@ export default function OrdersManager() {
     { value: 'cancel', label: 'Dibatalkan', color: '#6b7280' },
   ];
 
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  useEffect(() => {
-    filterOrders();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [statusFilter, searchQuery, orders]);
-
   const fetchOrders = async () => {
     try {
       setIsLoading(true);
@@ -73,6 +64,16 @@ export default function OrdersManager() {
 
     setFilteredOrders(filtered);
   };
+
+  useEffect(() => {
+    fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    filterOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, searchQuery, orders]);
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
@@ -242,8 +243,19 @@ export default function OrdersManager() {
       )}
 
       {selectedOrder && (
-        <div className={styles.modal} onClick={() => setSelectedOrder(null)}>
-          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+        <div 
+          className={styles.modal} 
+          onClick={() => setSelectedOrder(null)}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Escape' && setSelectedOrder(null)}
+        >
+          <div 
+            className={styles.modalContent} 
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
             <button type="button" className={styles.closeButton} onClick={() => setSelectedOrder(null)}>
               ×
             </button>

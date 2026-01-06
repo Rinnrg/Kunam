@@ -41,7 +41,7 @@ export default function RevenueChart({ data }) {
     // Draw grid lines
     ctx.strokeStyle = '#e2e8f0';
     ctx.lineWidth = 1;
-    for (let i = 0; i <= 5; i++) {
+    for (let i = 0; i <= 5; i += 1) {
       const y = padding.top + (chartHeight / 5) * i;
       ctx.beginPath();
       ctx.moveTo(padding.left, y);
@@ -53,7 +53,7 @@ export default function RevenueChart({ data }) {
     ctx.fillStyle = '#64748b';
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'right';
-    for (let i = 0; i <= 5; i++) {
+    for (let i = 0; i <= 5; i += 1) {
       const value = maxValue - (maxValue / 5) * i;
       const y = padding.top + (chartHeight / 5) * i;
       ctx.fillText(`${(value / 1000).toFixed(0)}K`, padding.left - 10, y + 4);

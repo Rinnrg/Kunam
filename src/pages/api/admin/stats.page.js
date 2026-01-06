@@ -49,6 +49,7 @@ export default async function handler(req, res) {
         },
       });
 
+      // eslint-disable-next-line no-underscore-dangle
       const totalRevenue = revenueData._sum.totalAmount || 0;
 
       // Get pending revenue (pending payment)
@@ -61,6 +62,7 @@ export default async function handler(req, res) {
         },
       });
 
+      // eslint-disable-next-line no-underscore-dangle
       const pendingRevenue = pendingRevenueData._sum.totalAmount || 0;
 
       // Get recent orders (last 10)
@@ -111,6 +113,7 @@ export default async function handler(req, res) {
           });
           return {
             ...product,
+            // eslint-disable-next-line no-underscore-dangle
             totalSold: item._sum.quantity,
           };
         })
@@ -139,6 +142,7 @@ export default async function handler(req, res) {
         if (!acc[month]) {
           acc[month] = 0;
         }
+        // eslint-disable-next-line no-underscore-dangle
         acc[month] += item._sum.totalAmount || 0;
         return acc;
       }, {});

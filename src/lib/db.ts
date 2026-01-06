@@ -43,17 +43,19 @@ if (typeof window === 'undefined') {
  * Wrapper function to safely execute Prisma queries with automatic retry
  */
 export async function executePrismaQuery<T>(
+  // eslint-disable-next-line no-unused-vars
   queryFn: (prismaClient: PrismaClient) => Promise<T>
 ): Promise<T> {
   try {
     const result = await queryFn(prisma);
     return result;
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const err = error as { message?: string };
     // If max clients error, try to reconnect
     if (
-      error.message?.includes('max clients') ||
-      error.message?.includes('MaxClientsInSessionMode') ||
-      error.message?.includes('Too many connections')
+      err.message?.includes('max clients') ||
+      err.message?.includes('MaxClientsInSessionMode') ||
+      err.message?.includes('Too many connections')
     ) {
       console.warn('Database connection issue, attempting to reconnect...');
       try {
