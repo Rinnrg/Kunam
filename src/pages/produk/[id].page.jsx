@@ -156,34 +156,6 @@ function ProdukDetailPage({ produk, error }) {
     }
   }, [session, isLiked, currentProduk, wishlist, setWishlist, router, showAlert]);
 
-  const handleAddToCart = useCallback(async () => {
-    if (!session?.user) {
-      showAlert({
-        type: 'warning',
-        title: 'Login Diperlukan',
-        message: 'Anda harus login terlebih dahulu untuk menambahkan produk ke keranjang.',
-        confirmText: 'Login Sekarang',
-        showCancel: true,
-        onConfirm: () => {
-          router.push('/login');
-        },
-      });
-      return;
-    }
-
-    if (!selectedSize || !selectedColor) {
-      showAlert({
-        type: 'warning',
-        title: 'Pilihan Belum Lengkap',
-        message: 'Mohon pilih ukuran dan warna terlebih dahulu.',
-      });
-      return;
-    }
-
-    // Proceed to add to cart (API will handle duplicates by updating quantity)
-    await addToCartAction();
-  }, [session, currentProduk, quantity, selectedSize, selectedColor, cart, setCart, router, showAlert]);
-
   const addToCartAction = useCallback(async () => {
     try {
       const res = await fetch('/api/user/cart', {
@@ -223,6 +195,34 @@ function ProdukDetailPage({ produk, error }) {
       });
     }
   }, [currentProduk, quantity, selectedSize, selectedColor, cart, setCart, showAlert]);
+
+  const handleAddToCart = useCallback(async () => {
+    if (!session?.user) {
+      showAlert({
+        type: 'warning',
+        title: 'Login Diperlukan',
+        message: 'Anda harus login terlebih dahulu untuk menambahkan produk ke keranjang.',
+        confirmText: 'Login Sekarang',
+        showCancel: true,
+        onConfirm: () => {
+          router.push('/login');
+        },
+      });
+      return;
+    }
+
+    if (!selectedSize || !selectedColor) {
+      showAlert({
+        type: 'warning',
+        title: 'Pilihan Belum Lengkap',
+        message: 'Mohon pilih ukuran dan warna terlebih dahulu.',
+      });
+      return;
+    }
+
+    // Proceed to add to cart (API will handle duplicates by updating quantity)
+    await addToCartAction();
+  }, [session, selectedSize, selectedColor, addToCartAction, router, showAlert]);
 
   const handleBuyNow = useCallback(async () => {
     await handleAddToCart();
