@@ -44,34 +44,36 @@ function Page({ produk, homeSections }) {
 
 export async function getServerSideProps() {
   try {
-    const prisma = (await import('../lib/prisma')).default;
+    const { executePrismaQuery } = await import('../lib/prisma');
 
-    // Fetch latest products for "Koleksi Terbaru" section
-    const produk = await prisma.produk.findMany({
-      select: {
-        id: true,
-        nama: true,
-        kategori: true,
-        harga: true,
-        diskon: true,
-        stok: true,
-        gambar: true,
-        produkUnggulan: true,
-        urutanTampilan: true,
-        jumlahTerjual: true,
-        tanggalDibuat: true,
-        tanggalDiubah: true,
-      },
-      orderBy: { tanggalDibuat: 'desc' },
-      take: 8, // Get 8 latest products, component will show 4
-    });
-
-    // Fetch home sections
-    const homeSections = await prisma.homeSections.findMany({
-      orderBy: {
-        urutan: 'asc',
-      },
-    });
+    // Fetch data using the helper to manage connections better
+    const [produk, homeSections] = await Promise.all([
+      // Fetch latest products for "Koleksi Terbaru" section
+      executePrismaQuery((prisma) => prisma.produk.findMany({
+        select: {
+          id: true,
+          nama: true,
+          kategori: true,
+          harga: true,
+          diskon: true,
+          stok: true,
+          gambar: true,
+          produkUnggulan: true,
+          urutanTampilan: true,
+          jumlahTerjual: true,
+          tanggalDibuat: true,
+          tanggalDiubah: true,
+        },
+        orderBy: { tanggalDibuat: 'desc' },
+        take: 8, // Get 8 latest products, component will show 4
+      })),
+      // Fetch home sections
+      executePrismaQuery((prisma) => prisma.homeSections.findMany({
+        orderBy: {
+          urutan: 'asc',
+        },
+      })),
+    ]);
 
     // Serialize dates for products
     const serializedProduk = produk.map((item) => ({

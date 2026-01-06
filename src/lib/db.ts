@@ -2,29 +2,74 @@ import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
-export const prisma =
-  globalForPrisma.prisma ||
-  new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-    datasources: {
-      db: {
-        url: process.env.DATABASE_URL,
-      },
+// Configure Prisma Client with optimized settings
+const prismaClientOptions = {
+  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
     },
-  });
+  },
+};
 
-if (process.env.NODE_ENV !== 'production') {
-  globalForPrisma.prisma = prisma;
-} else {
-  // In production, cache the Prisma instance globally
-  globalForPrisma.prisma = prisma;
+// Create singleton instance
+export const prisma = (() => {
+  if (process.env.NODE_ENV === 'production') {
+    return new PrismaClient(prismaClientOptions);
+  }
+  // In development, use a global variable to preserve the client across hot reloads
+  if (!globalForPrisma.prisma) {
+    globalForPrisma.prisma = new PrismaClient(prismaClientOptions);
+  }
+  return globalForPrisma.prisma;
+})();
+
+// Graceful shutdown
+if (typeof window === 'undefined') {
+  const cleanup = async () => {
+    try {
+      await prisma.$disconnect();
+    } catch (error) {
+      // Silently fail during cleanup
+    }
+  };
+
+  process.on('beforeExit', cleanup);
+  process.on('SIGINT', cleanup);
+  process.on('SIGTERM', cleanup);
 }
 
-// Gracefully disconnect in serverless environments
-if (typeof window === 'undefined') {
-  process.on('beforeExit', async () => {
-    await prisma.$disconnect();
-  });
+/**
+ * Wrapper function to safely execute Prisma queries with automatic retry
+ */
+export async function executePrismaQuery<T>(
+  queryFn: (prisma: PrismaClient) => Promise<T>
+): Promise<T> {
+  try {
+    const result = await queryFn(prisma);
+    return result;
+  } catch (error: any) {
+    // If max clients error, try to reconnect
+    if (
+      error.message?.includes('max clients') ||
+      error.message?.includes('MaxClientsInSessionMode') ||
+      error.message?.includes('Too many connections')
+    ) {
+      console.warn('Database connection issue, attempting to reconnect...');
+      try {
+        await prisma.$disconnect();
+        // eslint-disable-next-line no-promise-executor-return
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        await prisma.$connect();
+        const result = await queryFn(prisma);
+        return result;
+      } catch (retryError: any) {
+        console.error('Failed to reconnect:', retryError.message);
+        throw retryError;
+      }
+    }
+    throw error;
+  }
 }
 
 export default prisma;
