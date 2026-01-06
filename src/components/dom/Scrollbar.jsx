@@ -10,7 +10,7 @@ function Scrollbar() {
   const progressBar = useRef();
   const scrollbarRef = useRef();
   const fadeTimeout = useRef(null);
-  const [isLoading, isMenuOpen, introOut] = useStore(useShallow((state) => [state.isLoading, state.isMenuOpen, state.introOut]));
+  const [isLoading, introOut] = useStore(useShallow((state) => [state.isLoading, state.introOut]));
 
   const updateScrollbar = (scroll, limit) => {
     const progress = scroll / limit;
@@ -21,7 +21,7 @@ function Scrollbar() {
   };
 
   useScroll(({ scroll, limit }) => {
-    if (!isLoading && !isMenuOpen) {
+    if (!isLoading) {
       gsap.to(scrollbarRef.current, { opacity: 1, duration: 0.3 });
       updateScrollbar(scroll, limit);
 

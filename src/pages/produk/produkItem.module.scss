@@ -1,25 +1,109 @@
 @import '@src/styles/functions';
 
 .root {
-  position: relative;
-  padding-top: 0px;
+  padding: 2rem 0;
+  min-height: 100vh;
+  background-color: var(--white);
+}
 
-  .leftContainer {
-    height: 100svh;
-    grid-column: 1 / 7;
-    box-shadow:
-      0 0 0 var(--layout-columns-gap) var(--white),
-      0 calc(var(--layout-columns-gap) * 10) 0 0 var(--white);
-    @include mobile {
-      height: auto;
-      box-shadow: 0 0 0 var(--layout-columns-gap) var(--white);
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 2rem;
+
+  @include mobile {
+    padding: 0 1rem;
+  }
+}
+
+.itemCard {
+  aspect-ratio: 3 / 4;
+  position: relative;
+  overflow: hidden;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  border-radius: 8px;
+
+  &:hover {
+    .imageContainer img {
+      transform: scale(1.05);
+    }
+
+    .overlay {
+      opacity: 1;
     }
   }
 
-  .rightContainer {
-    grid-column: 7 / 17;
-    @include mobile {
-      grid-column: 1 / 7;
+  .imageContainer {
+    position: relative;
+    width: 100%;
+    height: 100%;
+
+    img {
+      object-fit: cover;
+      transition: transform 0.3s ease;
     }
+  }
+
+  .overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    opacity: 0;
+    transition: opacity 0.3s ease;
+
+    .productName {
+      color: var(--white);
+      font-size: 1rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    .productPrice {
+      color: var(--white);
+      font-size: 0.875rem;
+    }
+  }
+
+  .wishlistBtn {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    transition: background 0.2s ease;
+    z-index: 2;
+
+    &:hover {
+      background: var(--white);
+    }
+
+    &.active {
+      color: #ff4444;
+    }
+  }
+
+  .discountBadge {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    background: #ff4444;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 4px;
+    z-index: 2;
   }
 }

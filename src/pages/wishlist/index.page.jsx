@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from './wishlist.module.scss';
 
 function WishlistPage() {
@@ -111,12 +112,8 @@ function WishlistPage() {
     <>
       <CustomHead title="Wishlist - Kunam" description="Produk yang Anda sukai" />
       <main className={styles.container}>
+        <Breadcrumb items={[{ label: 'Wishlist', href: null }]} />
         <div className={styles.header}>
-          <button type="button" onClick={() => router.back()} className={styles.backButton} aria-label="Kembali">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
           <h1>Wishlist Saya</h1>
         </div>
 

@@ -144,11 +144,17 @@ function UserNavbar() {
             <p className={styles.profileName}>{session.user.name || 'User'}</p>
             <p className={styles.profileEmail}>{session.user.email}</p>
           </div>
-          <Link href="/profile" className={styles.profileItem}>
+          <Link href="/profil" className={styles.profileItem}>
             Profil Saya
           </Link>
-          <Link href="/orders" className={styles.profileItem}>
+          <Link href="/pesanan" className={styles.profileItem}>
             Pesanan Saya
+          </Link>
+          <Link href="/wishlist" className={styles.profileItem}>
+            Wishlist
+          </Link>
+          <Link href="/cart" className={styles.profileItem}>
+            Keranjang
           </Link>
           <button type="button" className={`${styles.profileItem} ${styles.logout}`} onClick={handleLogout}>
             Keluar

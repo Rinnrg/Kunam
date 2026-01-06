@@ -84,6 +84,7 @@ export default async function handler(req, res) {
           where: { id: existing.id },
           data: {
             quantity: existing.quantity + quantity,
+            updatedAt: new Date(),
           },
           include: {
             produk: true,
@@ -98,6 +99,7 @@ export default async function handler(req, res) {
             quantity,
             ukuran: ukuran || null,
             warna: warna || null,
+            updatedAt: new Date(),
           },
           include: {
             produk: true,
@@ -135,7 +137,10 @@ export default async function handler(req, res) {
 
       const cartItem = await prisma.carts.update({
         where: { id: cartId },
-        data: { quantity },
+        data: { 
+          quantity,
+          updatedAt: new Date(),
+        },
         include: {
           produk: true,
         },

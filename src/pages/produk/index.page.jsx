@@ -48,8 +48,6 @@ export async function getServerSideProps(context) {
     console.log('[Produk Page] Fetching products with whereClause:', whereClause);
     console.log('[Produk Page] Database URL exists:', !!process.env.DATABASE_URL);
 
-    // Optimized query with field selection
-    // Prisma Client automatically manages connections in serverless environments
     const produk = await prisma.produk.findMany({
       where: whereClause,
       select: {
@@ -68,14 +66,12 @@ export async function getServerSideProps(context) {
         urutanTampilan: true,
         tanggalDibuat: true,
         tanggalDiubah: true,
-        // jumlahTerjual will be added after Prisma Client regenerates in Vercel
       },
       orderBy: [{ produkUnggulan: 'desc' }, { urutanTampilan: 'asc' }, { tanggalDibuat: 'desc' }],
     });
 
     console.log(`[Produk Page] Found ${produk.length} products`);
 
-    // Serialize dates
     const serializedProduk = produk.map((item) => ({
       ...item,
       tanggalDibuat: item.tanggalDibuat.toISOString(),
@@ -89,7 +85,6 @@ export async function getServerSideProps(context) {
       },
     };
   } catch (error) {
-    // Log error for debugging in production
     console.error('[Produk Page] Error fetching produk:', error);
     console.error('[Produk Page] Error details:', {
       name: error.name,
@@ -97,7 +92,6 @@ export async function getServerSideProps(context) {
       stack: error.stack,
     });
     
-    // Return empty array on error to prevent page crash
     return {
       props: {
         produk: [],

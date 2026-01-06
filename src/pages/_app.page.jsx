@@ -14,7 +14,6 @@ import Layout from '@src/components/dom/Layout';
 import Lenis from 'lenis';
 import Loader from '@src/components/dom/Loader';
 import Navbar from '@src/components/dom/navbar/Index';
-import MenuLinks from '@src/components/dom/navbar/components/MenuLinks';
 import AlertDialog from '@src/components/dom/AlertDialog';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Scrollbar from '@src/components/dom/Scrollbar';
@@ -43,6 +42,21 @@ if (typeof window !== 'undefined') {
   window.scrollTo(0, 0);
   window.history.scrollRestoration = 'manual';
   ScrollTrigger.clearScrollMemory(window.history.scrollRestoration);
+  
+  // Suppress expected Next.js router errors
+  const originalConsoleError = console.error;
+  console.error = (...args) => {
+    // Ignore abort/cancellation errors as they're expected when navigating quickly
+    const errorMessage = args[0]?.toString() || '';
+    if (
+      errorMessage.includes('Abort fetching component') ||
+      errorMessage.includes('Loading initial props cancelled') ||
+      errorMessage.includes('cancelled')
+    ) {
+      return;
+    }
+    originalConsoleError.apply(console, args);
+  };
 }
 
 function MyApp({ Component, pageProps, router }) {
@@ -142,6 +156,8 @@ function MyApp({ Component, pageProps, router }) {
     // Initial page load - instant, no animation
     gsap.set(overlay, { opacity: 0 });
 
+    let shouldScrollToTop = false;
+
     // Handle route changes
     const handleRouteChangeStart = (url) => {
       // Skip transition for same-section navigation (e.g., produk to produk detail)
@@ -154,38 +170,53 @@ function MyApp({ Component, pageProps, router }) {
       if (isSameSectionNavigation) {
         // No overlay for same section - instant
         gsap.set(overlay, { opacity: 0 });
+        shouldScrollToTop = false;
         return;
       }
+      
+      // Different section - should scroll to top
+      shouldScrollToTop = true;
       
       // Very quick fade in only for different sections
       gsap.to(overlay, {
         opacity: 1,
-        duration: 0.15,
+        duration: 0.1,
         ease: 'power2.in',
       });
     };
 
     const handleRouteChangeComplete = () => {
-      // Scroll to top after route change
-      if (lenis) {
-        lenis.scrollTo(0, { immediate: true });
-      } else {
-        window.scrollTo(0, 0);
+      // Only scroll to top if navigating to different section
+      if (shouldScrollToTop) {
+        if (lenis) {
+          lenis.scrollTo(0, { immediate: true });
+        } else {
+          window.scrollTo(0, 0);
+        }
       }
+      
+      // Reset flag
+      shouldScrollToTop = false;
       
       // Quick fade out
       gsap.to(overlay, {
         opacity: 0,
-        duration: 0.15,
+        duration: 0.1,
         ease: 'power2.out',
         delay: 0
       });
     };
 
-    const handleRouteChangeError = () => {
+    const handleRouteChangeError = (err) => {
+      // Ignore cancellation errors
+      if (err.cancelled || err.message?.includes('Abort fetching')) {
+        return;
+      }
+      
+      shouldScrollToTop = false;
       gsap.to(overlay, {
         opacity: 0,
-        duration: 0.15,
+        duration: 0.1,
         ease: 'power2.out'
       });
     };
@@ -269,7 +300,6 @@ function MyApp({ Component, pageProps, router }) {
       <div ref={transitionOverlayRef} className="page-transition-overlay" />
       
       <div className={styles.root}>
-        {!isAdminPage && <MenuLinks />}
         {domElements}
         <div ref={layoutRef} id="layout" className={styles.layout}>
           {canvasElements}

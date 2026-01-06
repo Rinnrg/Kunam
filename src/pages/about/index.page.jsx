@@ -4,6 +4,7 @@ import Overview from '@src/pages/about/components/overview/Overview';
 import Services from '@src/pages/about/components/services/Services';
 import Process from '@src/pages/about/components/process/Process';
 import CustomHead from '@src/components/dom/CustomHead';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 
 const seo = {
   title: 'Kunam - About',
@@ -26,7 +27,9 @@ function Page() {
   return (
     <>
       <CustomHead {...seo} />
-
+      <div style={{ padding: '0 2rem', maxWidth: '1400px', margin: '0 auto' }}>
+        <Breadcrumb items={[{ label: 'About', href: null }]} />
+      </div>
       <Hero />
       <Overview />
       <Services />

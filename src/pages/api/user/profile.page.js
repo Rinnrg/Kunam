@@ -14,14 +14,16 @@ export default async function handler(req, res) {
   // GET - Get user's profile information
   if (req.method === 'GET') {
     try {
-      const user = await prisma.user.findUnique({
+      const user = await prisma.users.findUnique({
         where: { id: userId },
         select: {
           id: true,
           name: true,
           email: true,
+          phone: true,
           image: true,
-          emailVerified: true,
+          provider: true,
+          createdAt: true,
         },
       });
 
@@ -33,6 +35,35 @@ export default async function handler(req, res) {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('[Profile GET] Error:', error);
+      return res.status(500).json({ message: 'Terjadi kesalahan server' });
+    }
+  }
+
+  // PUT - Update user's profile information
+  if (req.method === 'PUT') {
+    try {
+      const { name, phone } = req.body;
+
+      const updatedUser = await prisma.users.update({
+        where: { id: userId },
+        data: {
+          name,
+          phone,
+          updatedAt: new Date(),
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          image: true,
+        },
+      });
+
+      return res.status(200).json({ user: updatedUser, message: 'Profil berhasil diperbarui' });
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('[Profile PUT] Error:', error);
       return res.status(500).json({ message: 'Terjadi kesalahan server' });
     }
   }

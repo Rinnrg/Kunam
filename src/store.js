@@ -6,8 +6,6 @@ export const useStore = create((set) => ({
   setLenis: (lenis) => set({ lenis }),
   introOut: false,
   setIntroOut: (introOut) => set({ introOut }),
-  isMenuOpen: false,
-  setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
   isLoading: true,
   setIsLoading: (isLoading) => set({ isLoading }),
   fluidColor: '#d7d7d4',

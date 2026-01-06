@@ -1,6 +1,9 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+// eslint-disable-next-line import/extensions
+import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from './form.module.scss';
 
 export default function CreateProduk() {
@@ -15,13 +18,17 @@ export default function CreateProduk() {
     stok: '0',
     ukuran: [],
     warna: [],
+    thumbnail: '',
     images: [],
     videos: [],
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [imageFiles, setImageFiles] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]);
+  const [productImages, setProductImages] = useState({
+    thumbnail: null,
+    gallery: [],
+    allImages: []
+  });
   const [videoFiles, setVideoFiles] = useState([]);
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -89,23 +96,8 @@ export default function CreateProduk() {
     return stok - totalUkuran;
   };
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImageFiles(files);
-
-    // Create preview URLs
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setImagePreviews(previews);
-  };
-
-  const removeImage = (index) => {
-    const newFiles = imageFiles.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImageFiles(newFiles);
-    setImagePreviews(newPreviews);
-
-    // Revoke the URL to free memory
-    URL.revokeObjectURL(imagePreviews[index]);
+  const handleImagesChange = (imageData) => {
+    setProductImages(imageData);
   };
 
   const handleVideoChange = (e) => {
@@ -128,12 +120,14 @@ export default function CreateProduk() {
   };
 
   const uploadImages = async () => {
-    if (imageFiles.length === 0) return [];
+    const newImages = productImages.allImages.filter(img => img instanceof File);
+    
+    if (newImages.length === 0) return [];
 
     setIsUploading(true);
 
     try {
-      const uploadPromises = imageFiles.map(async (file) => {
+      const uploadPromises = newImages.map(async (file) => {
         const uploadFormData = new FormData();
         uploadFormData.append('file', file);
 
@@ -211,10 +205,23 @@ export default function CreateProduk() {
       // Upload images and videos first
       const uploadedImageUrls = await uploadImages();
       const uploadedVideoUrls = await uploadVideos();
+      
+      // Determine thumbnail URL
+      let thumbnailUrl = '';
+      if (productImages.thumbnail) {
+        // Find the index of thumbnail in allImages array
+        const thumbnailIndex = productImages.allImages.findIndex(img => img === productImages.thumbnail);
+        if (thumbnailIndex !== -1) {
+          thumbnailUrl = uploadedImageUrls[thumbnailIndex];
+        }
+      } else if (uploadedImageUrls.length > 0) {
+        thumbnailUrl = uploadedImageUrls[0];
+      }
 
       // Prepare form data with uploaded URLs
       const dataToSubmit = {
         ...formData,
+        thumbnail: thumbnailUrl,
         images: uploadedImageUrls,
         videos: uploadedVideoUrls,
       };
@@ -250,6 +257,10 @@ export default function CreateProduk() {
 
   return (
     <div className={styles.container}>
+      <Breadcrumb items={[
+        { label: 'Admin', href: '/admin' },
+        { label: 'Tambah Produk', href: null }
+      ]} />
       <div className={styles.header}>
         <h1 className={styles.title}>Tambah Produk Baru</h1>
         <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
@@ -373,25 +384,11 @@ export default function CreateProduk() {
           </label>
         </div>
 
-        <div className={styles.formGroup}>
-          <label htmlFor="images" className={styles.label}>
-            Gambar Produk *
-            <input id="images" name="images" type="file" accept="image/*" multiple onChange={handleImageChange} className={styles.fileInput} />
-          </label>
-          {imagePreviews.length > 0 && (
-            <div className={styles.imagePreviewContainer}>
-              {imagePreviews.map((preview) => (
-                <div key={preview} className={styles.imagePreview}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={preview} alt={`Preview ${preview}`} />
-                  <button type="button" onClick={() => removeImage(imagePreviews.indexOf(preview))} className={styles.removeImageButton}>
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <MultipleImageUpload
+          images={productImages.allImages}
+          thumbnail={productImages.thumbnail}
+          onChange={handleImagesChange}
+        />
 
         <div className={styles.formGroup}>
           <label htmlFor="videos" className={styles.label}>

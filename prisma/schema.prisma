@@ -75,7 +75,8 @@ model produk {
   deskripsi      String?
   ukuran         String[]
   warna          String[]
-  gambar         String[]
+  gambar         String[]      // Main product images (gallery)
+  thumbnail      String?       // Primary thumbnail for product card
   video          String[]
   produkUnggulan Boolean       @default(false)
   urutanTampilan Int           @default(0)

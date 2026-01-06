@@ -20,7 +20,7 @@ async function getProduk(req, res, id) {
 
 async function updateProduk(req, res, id) {
   try {
-    const { nama, deskripsi, kategori, harga, diskon, stok, ukuran, warna, images, videos } = req.body;
+    const { nama, deskripsi, kategori, harga, diskon, stok, ukuran, warna, thumbnail, images, videos } = req.body;
 
     const produk = await prisma.produk.update({
       where: { id },
@@ -33,6 +33,7 @@ async function updateProduk(req, res, id) {
         stok: parseInt(stok, 10),
         ukuran,
         warna,
+        thumbnail: thumbnail || null,
         gambar: images,
         video: videos,
       },

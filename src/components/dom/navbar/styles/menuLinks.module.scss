@@ -12,9 +12,18 @@
   overflow: hidden;
   background-color: transparent;
   pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  
   @include mobile {
     width: 100vw;
     background-color: var(--black);
+  }
+  
+  // Active state when menu is open
+  &.menuOpen {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
   }
 }
 

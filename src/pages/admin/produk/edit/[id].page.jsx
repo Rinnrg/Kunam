@@ -1,6 +1,9 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+// eslint-disable-next-line import/extensions
+import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from '../form.module.scss';
 
 export default function EditProduk() {
@@ -16,15 +19,18 @@ export default function EditProduk() {
     stok: '0',
     ukuran: [],
     warna: [],
+    thumbnail: '',
     images: [],
     videos: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
-  const [imageFiles, setImageFiles] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]);
-  const [existingImages, setExistingImages] = useState([]);
+  const [productImages, setProductImages] = useState({
+    thumbnail: null,
+    gallery: [],
+    allImages: []
+  });
   const [videoFiles, setVideoFiles] = useState([]);
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [existingVideos, setExistingVideos] = useState([]);
@@ -46,13 +52,21 @@ export default function EditProduk() {
           stok: data.stok.toString(),
           ukuran: data.ukuran || [],
           warna: data.warna || [],
+          thumbnail: data.thumbnail || '',
           images: data.gambar || data.images || [],
           videos: data.video || data.videos || [],
         });
+        
         const imagesArray = data.gambar || data.images || [];
         const videosArray = data.video || data.videos || [];
 
-        setExistingImages(imagesArray);
+        // Set existing images for MultipleImageUpload component
+        setProductImages({
+          thumbnail: data.thumbnail || (imagesArray.length > 0 ? imagesArray[0] : null),
+          gallery: imagesArray,
+          allImages: imagesArray
+        });
+        
         setExistingVideos(videosArray);
 
         // Parse existing ukuran data (format: "S:3", "M:4")
@@ -142,28 +156,8 @@ export default function EditProduk() {
     return stok - totalUkuran;
   };
 
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    setImageFiles(files);
-
-    // Create preview URLs
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setImagePreviews(previews);
-  };
-
-  const removeNewImage = (index) => {
-    const newFiles = imageFiles.filter((_, i) => i !== index);
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImageFiles(newFiles);
-    setImagePreviews(newPreviews);
-
-    // Revoke the URL to free memory
-    URL.revokeObjectURL(imagePreviews[index]);
-  };
-
-  const removeExistingImage = (index) => {
-    const newExisting = existingImages.filter((_, i) => i !== index);
-    setExistingImages(newExisting);
+  const handleImagesChange = (imageData) => {
+    setProductImages(imageData);
   };
 
   const handleVideoChange = (e) => {
@@ -191,12 +185,14 @@ export default function EditProduk() {
   };
 
   const uploadImages = async () => {
-    if (imageFiles.length === 0) return [];
+    const newImages = productImages.allImages.filter(img => img instanceof File);
+    
+    if (newImages.length === 0) return [];
 
     setIsUploading(true);
 
     try {
-      const uploadPromises = imageFiles.map(async (file) => {
+      const uploadPromises = newImages.map(async (file) => {
         const uploadFormData = new FormData();
         uploadFormData.append('file', file);
 
@@ -275,13 +271,34 @@ export default function EditProduk() {
       const uploadedImageUrls = await uploadImages();
       const uploadedVideoUrls = await uploadVideos();
 
+      // Get existing image URLs (strings, not File objects)
+      const existingImageUrls = productImages.allImages.filter(img => typeof img === 'string');
+      
       // Combine existing with newly uploaded ones
-      const allImages = [...existingImages, ...uploadedImageUrls];
+      const allImages = [...existingImageUrls, ...uploadedImageUrls];
       const allVideos = [...existingVideos, ...uploadedVideoUrls];
+      
+      // Determine thumbnail URL
+      let thumbnailUrl = '';
+      if (productImages.thumbnail) {
+        if (typeof productImages.thumbnail === 'string') {
+          thumbnailUrl = productImages.thumbnail;
+        } else {
+          // Find the uploaded URL for the thumbnail file
+          const thumbnailIndex = productImages.allImages.findIndex(img => img === productImages.thumbnail);
+          const newImageStartIndex = existingImageUrls.length;
+          if (thumbnailIndex >= newImageStartIndex) {
+            thumbnailUrl = uploadedImageUrls[thumbnailIndex - newImageStartIndex];
+          }
+        }
+      } else if (allImages.length > 0) {
+        thumbnailUrl = allImages[0];
+      }
 
       // Prepare form data with all media
       const dataToSubmit = {
         ...formData,
+        thumbnail: thumbnailUrl,
         images: allImages,
         videos: allVideos,
       };
@@ -317,6 +334,10 @@ export default function EditProduk() {
 
   return (
     <div className={styles.container}>
+      <Breadcrumb items={[
+        { label: 'Admin', href: '/admin' },
+        { label: 'Edit Produk', href: null }
+      ]} />
       <div className={styles.header}>
         <h1 className={styles.title}>Edit Produk</h1>
         <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
@@ -442,72 +463,11 @@ export default function EditProduk() {
           </label>
         </div>
 
-        <div className={styles.formGroup}>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label className={styles.label}>Gambar Produk</label>
-
-          {/* Debug Info */}
-          {!isLoading && (
-            <p className={styles.sectionLabel} style={{ fontSize: '12px', color: '#666' }}>
-              Debug: {existingImages.length} gambar existing
-            </p>
-          )}
-
-          {/* Existing Images */}
-          {existingImages.length > 0 ? (
-            <>
-              <p className={styles.sectionLabel}>Gambar Saat Ini ({existingImages.length}):</p>
-              <div className={styles.imagePreviewContainer}>
-                {existingImages.map((image, index) => (
-                  <div key={image} className={styles.imagePreview}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={image}
-                      alt={`Existing ${index + 1}`}
-                      style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                    <button type="button" onClick={() => removeExistingImage(index)} className={styles.removeImageButton}>
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          ) : (
-            !isLoading && (
-              <p className={styles.sectionLabel} style={{ color: '#999', fontStyle: 'italic' }}>
-                Belum ada gambar. Upload gambar baru di bawah.
-              </p>
-            )
-          )}
-
-          {/* Add New Images */}
-          <label htmlFor="images" className={styles.label} style={{ marginTop: '16px' }}>
-            Tambah Gambar Baru
-            <input id="images" name="images" type="file" accept="image/*" multiple onChange={handleImageChange} className={styles.fileInput} />
-          </label>
-
-          {/* New Image Previews */}
-          {imagePreviews.length > 0 && (
-            <>
-              <p className={styles.sectionLabel}>Preview Gambar Baru:</p>
-              <div className={styles.imagePreviewContainer}>
-                {imagePreviews.map((preview, index) => (
-                  <div key={preview} className={styles.imagePreview}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={preview} alt={`Preview ${index + 1}`} />
-                    <button type="button" onClick={() => removeNewImage(index)} className={styles.removeImageButton}>
-                      ×
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        <MultipleImageUpload
+          images={productImages.allImages}
+          thumbnail={productImages.thumbnail}
+          onChange={handleImagesChange}
+        />
 
         <div className={styles.formGroup}>
           {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}

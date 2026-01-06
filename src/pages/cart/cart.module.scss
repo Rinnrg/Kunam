@@ -27,33 +27,16 @@
 .header {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  justify-content: center;
   margin-bottom: 2rem;
   max-width: 1200px;
   margin-left: auto;
   margin-right: auto;
+  padding: 1rem 0;
 
   h1 {
     font-size: 2rem;
     font-weight: 700;
-  }
-}
-
-.backButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border: 2px solid #000;
-  border-radius: 50%;
-  background: transparent;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #000;
-    color: #fff;
   }
 }
 
@@ -258,6 +241,33 @@
   align-items: center;
 }
 
+.wishlistBtn,
+.deleteBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: 1px solid #e5e5e5;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-size: 1.2rem;
+
+  &:hover {
+    background: #fef2f2;
+    border-color: #dc2626;
+    color: #dc2626;
+  }
+
+  &:active {
+    transform: scale(0.9);
+  }
+}
+
 .wishlistButton {
   display: flex;
   align-items: center;
@@ -331,6 +341,50 @@
   font-size: 0.8rem;
   color: #888;
   margin-bottom: 0.25rem;
+}
+
+.variantRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  
+  &:last-of-type {
+    border-bottom: none;
+  }
+}
+
+.variantInfo {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  
+  .variant {
+    margin-bottom: 0;
+    padding: 0.25rem 0.5rem;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+    font-weight: 500;
+    color: #333;
+  }
+}
+
+.subtotalRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 2px solid #e5e5e5;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.subtotalPrice {
+  color: #000;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
 .price {

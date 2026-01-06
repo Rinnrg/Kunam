@@ -1,6 +1,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from './dashboard.module.scss';
 
 export default function AdminDashboard() {
@@ -80,6 +81,7 @@ export default function AdminDashboard() {
     <div className={styles.container}>
       <header className={styles.header}>
         <div className={styles.headerContent}>
+          <Breadcrumb items={[{ label: 'Admin', href: null }]} />
           <h1 className={styles.title}>Admin Dashboard</h1>
           <div className={styles.userInfo}>
             <span className={styles.userName}>{session.user.name || session.user.email}</span>

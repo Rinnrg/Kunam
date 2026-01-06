@@ -3,27 +3,40 @@
 /* eslint-disable import/extensions */
 import { useMemo, useEffect, useCallback, useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import clsx from 'clsx';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
-import AddToCartDialog from '@src/components/dom/AddToCartDialog';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from '@src/pages/produk/produkDetail.module.scss';
+import prisma from '@src/lib/db';
 
-function Page({ produk, error }) {
-  const currentProduk = produk;
+function ProdukDetailPage({ produk, error }) {
   const { data: session } = useSession();
   const router = useRouter();
   const [wishlist, cart, setWishlist, setCart, showAlert] = useStore(
     useShallow((state) => [state.wishlist, state.cart, state.setWishlist, state.setCart, state.showAlert]),
   );
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // State management
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState('');
+  const [quantity, setQuantity] = useState(1);
+  const [expandedSections, setExpandedSections] = useState({
+    description: true,
+    features: true,
+    care: true,
+    shipping: true,
+  });
+
+  const currentProduk = produk;
   const isLiked = useMemo(() => wishlist.some((item) => item.produkId === currentProduk?.id), [wishlist, currentProduk]);
 
-  // Enable scrolling on this page (override global body overflow hidden)
+  // Enable scrolling on this page
   useEffect(() => {
     document.body.style.overflow = 'auto';
     document.body.style.height = 'auto';
@@ -34,6 +47,59 @@ function Page({ produk, error }) {
       document.body.style.height = '';
       document.documentElement.style.overflow = '';
     };
+  }, []);
+
+  // Set default size and color
+  useEffect(() => {
+    if (currentProduk) {
+      if (currentProduk.ukuran?.length > 0 && !selectedSize) {
+        // Always clean the first size - remove stock number if present
+        const firstSize = currentProduk.ukuran[0];
+        const cleanSize = firstSize.includes(':') ? firstSize.split(':')[0] : firstSize;
+        setSelectedSize(cleanSize);
+      }
+      if (currentProduk.warna?.length > 0 && !selectedColor) {
+        setSelectedColor(currentProduk.warna[0]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentProduk]);
+
+  // Image gallery - combine all images
+  const allImages = useMemo(() => {
+    if (!currentProduk?.gambar) return [];
+    return Array.isArray(currentProduk.gambar) ? currentProduk.gambar : [currentProduk.gambar];
+  }, [currentProduk]);
+
+  // Calculate final price
+  const finalPrice = useMemo(() => {
+    if (!currentProduk) return 0;
+    return currentProduk.diskon > 0
+      ? currentProduk.harga * (1 - currentProduk.diskon / 100)
+      : currentProduk.harga;
+  }, [currentProduk]);
+
+  // Stock status
+  const stockStatus = useMemo(() => {
+    if (!currentProduk) return 'out';
+    if (currentProduk.stok === 0) return 'out';
+    if (currentProduk.stok <= 5) return 'low';
+    return 'available';
+  }, [currentProduk]);
+
+  // Handlers
+  const handleQuantityChange = useCallback((delta) => {
+    setQuantity((prev) => {
+      const newQty = prev + delta;
+      return Math.max(1, Math.min(newQty, currentProduk?.stok || 1));
+    });
+  }, [currentProduk]);
+
+  const toggleSection = useCallback((section) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   }, []);
 
   const handleLike = useCallback(async () => {
@@ -81,7 +147,6 @@ function Page({ produk, error }) {
         }
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Error updating wishlist:', err);
       showAlert({
         type: 'error',
@@ -106,360 +171,410 @@ function Page({ produk, error }) {
       return;
     }
 
-    // Open dialog instead of directly adding to cart
-    setIsDialogOpen(true);
-  }, [session, router, showAlert]);
-
-  const handleConfirmAddToCart = useCallback(
-    async (cartData) => {
-      try {
-        const res = await fetch('/api/user/cart', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(cartData),
-        });
-        const data = await res.json();
-        if (data.cartItem) {
-          const existingIndex = cart.findIndex((item) => item.produkId === currentProduk.id && item.ukuran === cartData.ukuran && item.warna === cartData.warna);
-          if (existingIndex >= 0) {
-            const newCart = [...cart];
-            newCart[existingIndex] = data.cartItem;
-            setCart(newCart);
-          } else {
-            setCart([...cart, data.cartItem]);
-          }
-          showAlert({
-            type: 'success',
-            title: 'Ditambahkan ke Keranjang',
-            message: 'Produk berhasil ditambahkan ke keranjang Anda.',
-          });
-        }
-      } catch (err) {
-        // eslint-disable-next-line no-console
-        console.error('Error adding to cart:', err);
-        showAlert({
-          type: 'error',
-          title: 'Terjadi Kesalahan',
-          message: 'Gagal menambahkan produk ke keranjang. Silakan coba lagi.',
-        });
-      }
-    },
-    [currentProduk, cart, setCart, showAlert],
-  );
-
-  const handleBuy = useCallback(async () => {
-    if (!session?.user) {
+    if (!selectedSize || !selectedColor) {
       showAlert({
         type: 'warning',
-        title: 'Login Diperlukan',
-        message: 'Anda harus login terlebih dahulu untuk membeli produk.',
-        confirmText: 'Login Sekarang',
-        showCancel: true,
-        onConfirm: () => {
-          router.push('/login');
-        },
+        title: 'Pilihan Belum Lengkap',
+        message: 'Mohon pilih ukuran dan warna terlebih dahulu.',
       });
       return;
     }
 
-    // Logic untuk membeli langsung - bisa redirect ke checkout atau proses lainnya
-    showAlert({
-      type: 'info',
-      title: 'Fitur Beli',
-      message: 'Fitur pembelian langsung akan segera hadir!',
-    });
-  }, [session, router, showAlert]);
+    // Proceed to add to cart (API will handle duplicates by updating quantity)
+    await addToCartAction();
+  }, [session, currentProduk, quantity, selectedSize, selectedColor, cart, setCart, router, showAlert]);
 
+  const addToCartAction = useCallback(async () => {
+    try {
+      const res = await fetch('/api/user/cart', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          produkId: currentProduk.id,
+          quantity,
+          ukuran: selectedSize,
+          warna: selectedColor,
+        }),
+      });
+      const data = await res.json();
+      if (data.cartItem) {
+        const existingIndex = cart.findIndex(
+          (item) => item.produkId === currentProduk.id && item.ukuran === selectedSize && item.warna === selectedColor
+        );
+        if (existingIndex >= 0) {
+          const newCart = [...cart];
+          newCart[existingIndex] = data.cartItem;
+          setCart(newCart);
+        } else {
+          setCart([...cart, data.cartItem]);
+        }
+        showAlert({
+          type: 'success',
+          title: 'Ditambahkan ke Keranjang',
+          message: 'Produk berhasil ditambahkan ke keranjang Anda.',
+        });
+      }
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+      showAlert({
+        type: 'error',
+        title: 'Terjadi Kesalahan',
+        message: 'Gagal menambahkan produk ke keranjang. Silakan coba lagi.',
+      });
+    }
+  }, [currentProduk, quantity, selectedSize, selectedColor, cart, setCart, showAlert]);
+
+  const handleBuyNow = useCallback(async () => {
+    await handleAddToCart();
+    router.push('/cart');
+  }, [handleAddToCart, router]);
+
+  // SEO
   const seo = useMemo(
     () => ({
-      title: currentProduk ? `Kunam - ${currentProduk.nama}` : 'Kunam - Produk Tidak Ditemukan',
-      description: currentProduk
-        ? `${currentProduk.nama} - ${currentProduk.kategori}. ${currentProduk.deskripsi || 'Produk clothing berkualitas dari Kunam.'} Harga: Rp ${currentProduk.harga.toLocaleString('id-ID')}`
-        : 'Produk tidak ditemukan',
-      keywords: currentProduk
-        ? [
-            `${currentProduk.nama}`,
-            `${currentProduk.kategori}`,
-            `Kunam ${currentProduk.kategori}`,
-            `Beli ${currentProduk.nama}`,
-            `${currentProduk.kategori} Online`,
-            'Kunam Clothing',
-            'Fashion Indonesia',
-          ]
-        : [],
+      title: `${currentProduk?.nama || 'Produk'} - Kunam`,
+      description: currentProduk?.deskripsi || `Beli ${currentProduk?.nama} di Kunam`,
+      keywords: [currentProduk?.nama, currentProduk?.kategori, 'Kunam', 'Fashion', 'Clothing'],
+      image: allImages[0] || '/logo/logo 1 black.svg',
     }),
-    [currentProduk],
+    [currentProduk, allImages]
   );
 
-  // Show error message if failed to load
-  if (error) {
+  if (error || !currentProduk) {
     return (
-      <div style={{ 
-        minHeight: '100vh', 
-        display: 'flex', 
-        flexDirection: 'column',
-        alignItems: 'center', 
-        justifyContent: 'center',
-        padding: '2rem',
-        textAlign: 'center'
-      }}>
-        <h2 style={{ marginBottom: '1rem', color: 'var(--black)' }}>Gagal Memuat Produk</h2>
-        <p style={{ marginBottom: '1.5rem', color: 'rgba(0, 0, 0, 0.6)' }}>{error}</p>
-        <button 
-          type="button"
-          onClick={() => router.back()} 
-          style={{ 
-            padding: '0.75rem 1.5rem', 
-            background: 'var(--black)', 
-            color: 'var(--white)', 
-            border: 'none', 
-            borderRadius: '0.5rem',
-            cursor: 'pointer'
-          }}
-        >
-          Kembali
-        </button>
-      </div>
+      <>
+        <CustomHead {...seo} />
+        <div className={styles.root}>
+          <div className={styles.container}>
+            <div style={{ textAlign: 'center', padding: '4rem 0' }}>
+              <h1>Produk tidak ditemukan</h1>
+              <p>{error || 'Produk yang Anda cari tidak tersedia.'}</p>
+              <Link href="/produk">
+                <button type="button" style={{ marginTop: '1rem', padding: '0.75rem 2rem' }}>
+                  Kembali ke Produk
+                </button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </>
     );
-  }
-
-  if (!currentProduk) {
-    return <div>Produk tidak ditemukan</div>;
   }
 
   return (
     <>
       <CustomHead {...seo} />
-      <main className={styles.container}>
-        {/* Header with Back Button and Title */}
-        <div className={styles.headerSection}>
-          <button type="button" onClick={() => window.history.back()} className={styles.backButton} aria-label="Kembali">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-          <h1 className={styles.projectTitle}>{currentProduk.nama}</h1>
-        </div>
+      <div className={styles.root}>
+        <div className={styles.container}>
+          {/* Breadcrumb */}
+          <Breadcrumb items={[
+            { label: 'Produk', href: '/produk' },
+            { label: currentProduk.kategori, href: `/produk?kategori=${currentProduk.kategori}` },
+            { label: currentProduk.nama, href: null }
+          ]} />
 
-        {/* Hero Product Images */}
-        <div className={styles.heroMockup}>
-          <div className={styles.mockupContainer}>
-            {currentProduk.gambar && (
-              <Image src={Array.isArray(currentProduk.gambar) ? currentProduk.gambar[0] : currentProduk.gambar} alt={currentProduk.nama} fill priority className={styles.mockupImage} />
-            )}
-          </div>
-        </div>
+          {/* Main Product Layout */}
+          <div className={styles.productLayout}>
+            {/* Left Column: Image Gallery + Product Details */}
+            <div className={styles.leftColumn}>
+              {/* Image Gallery */}
+              <div className={styles.imageGallery}>
+                {/* Main Image */}
+                <div className={styles.mainImage}>
+                  <Image
+                    src={allImages[selectedImageIndex] || allImages[0]}
+                    alt={currentProduk.nama}
+                    fill
+                    priority
+                    quality={90}
+                    sizes="(max-width: 768px) 100vw, 60vw"
+                  />
+                </div>
 
-        {/* Content Section */}
-        <div className={styles.contentWrapper}>
-          <div className={styles.contentInner}>
-            {/* Product Info */}
-            <div className={styles.descriptionSection}>
-              <h2 className={styles.descriptionTitle}>
-                {currentProduk.nama} - {currentProduk.kategori}
-              </h2>
-              <div className={styles.priceSection}>
-                <div className={styles.priceWrapper}>
-                  {currentProduk.diskon > 0 ? (
-                    <>
-                      <p className={styles.priceOriginal}>Rp {currentProduk.harga.toLocaleString('id-ID')}</p>
-                      <p className={styles.price}>Rp {(currentProduk.harga * (1 - currentProduk.diskon / 100)).toLocaleString('id-ID')}</p>
-                      <span className={styles.discountBadge}>{currentProduk.diskon}% OFF</span>
-                    </>
-                  ) : (
-                    <p className={styles.price}>Rp {currentProduk.harga.toLocaleString('id-ID')}</p>
-                  )}
-                </div>
-                <div className={styles.stockWrapper}>
-                  <div className={styles.stockInfo}>
-                    <p className={styles.stock}>Stok: {currentProduk.stok}</p>
-                    {currentProduk?.jumlahTerjual && currentProduk.jumlahTerjual > 0 && (
-                      <p className={styles.soldCount}>
-                        <span className={styles.separator}>•</span>
-                        {currentProduk.jumlahTerjual.toLocaleString('id-ID')} Terjual
-                      </p>
-                    )}
-                  </div>
-                  <button type="button" className={clsx(styles.wishlistIcon, isLiked && styles.liked)} onClick={handleLike} aria-label={isLiked ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill={isLiked ? 'currentColor' : 'none'} xmlns="http://www.w3.org/2000/svg">
-                      <path
-                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              
-              {/* Jumlah Terjual Badge */}
-              {currentProduk?.jumlahTerjual && currentProduk.jumlahTerjual > 0 && (
-                <div className={styles.soldBadge}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path
-                      d="M20 12V22H4V12"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M22 7H2V12H22V7Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 22V7"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 7H7.5C6.83696 7 6.20107 6.73661 5.73223 6.26777C5.26339 5.79893 5 5.16304 5 4.5C5 3.83696 5.26339 3.20107 5.73223 2.73223C6.20107 2.26339 6.83696 2 7.5 2C11 2 12 7 12 7Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                    <path
-                      d="M12 7H16.5C17.163 7 17.7989 6.73661 18.2678 6.26777C18.7366 5.79893 19 5.16304 19 4.5C19 3.83696 18.7366 3.20107 18.2678 2.73223C17.7989 2.26339 17.163 2 16.5 2C13 2 12 7 12 7Z"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <span>{currentProduk.jumlahTerjual.toLocaleString('id-ID')} Terjual</span>
-                </div>
-              )}
-              
-              {currentProduk.deskripsi && (
-                <div className={styles.descriptionWrapper}>
-                  <h3 className={styles.descriptionLabel}>Deskripsi Produk</h3>
-                  <p className={styles.description}>{currentProduk.deskripsi}</p>
-                </div>
-              )}
-
-              {currentProduk.ukuran && currentProduk.ukuran.length > 0 && (
-                <div className={styles.sizeSection}>
-                  <p className={styles.label}>Ukuran tersedia:</p>
-                  <div className={styles.sizes}>
-                    {currentProduk.ukuran.map((size) => (
-                      <span key={size} className={styles.sizeTag}>
-                        {size}
-                      </span>
+                {/* Thumbnail Grid */}
+                {allImages.length > 1 && (
+                  <div className={styles.thumbnailGrid}>
+                    {allImages.map((img, index) => (
+                      <div
+                        key={index}
+                        className={clsx(styles.thumbnail, { [styles.active]: index === selectedImageIndex })}
+                        onClick={() => setSelectedImageIndex(index)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') setSelectedImageIndex(index);
+                        }}
+                      >
+                        <Image src={img} alt={`${currentProduk.nama} ${index + 1}`} fill sizes="150px" />
+                      </div>
                     ))}
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
+              {/* Product Details */}
+              <div className={styles.productDetails}>
+                {/* Description */}
+                <div className={styles.detailSection}>
+                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                  <div className={styles.detailHeader} onClick={() => toggleSection('description')}>
+                    <h3>Deskripsi Produk</h3>
+                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.description })}>
+                      ▼
+                    </span>
+                  </div>
+                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.description })}>
+                    <p>{currentProduk.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
+                  </div>
+                </div>
+
+                {/* Features */}
+                <div className={styles.detailSection}>
+                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                  <div className={styles.detailHeader} onClick={() => toggleSection('features')}>
+                    <h3>Fitur & Material</h3>
+                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.features })}>
+                      ▼
+                    </span>
+                  </div>
+                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.features })}>
+                    <ul>
+                      <li>Bahan berkualitas tinggi</li>
+                      <li>Nyaman dipakai</li>
+                      <li>Desain modern dan stylish</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Care Instructions */}
+                <div className={styles.detailSection}>
+                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                  <div className={styles.detailHeader} onClick={() => toggleSection('care')}>
+                    <h3>Cara Perawatan</h3>
+                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.care })}>
+                      ▼
+                    </span>
+                  </div>
+                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.care })}>
+                    <ul>
+                      <li>Cuci dengan mesin air dingin</li>
+                      <li>Jangan gunakan pemutih</li>
+                      <li>Keringkan dengan suhu rendah</li>
+                      <li>Setrika dengan suhu sedang</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Shipping & Returns */}
+                <div className={styles.detailSection}>
+                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                  <div className={styles.detailHeader} onClick={() => toggleSection('shipping')}>
+                    <h3>Pengiriman & Pengembalian</h3>
+                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.shipping })}>
+                      ▼
+                    </span>
+                  </div>
+                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.shipping })}>
+                    <p>Gratis ongkir untuk pembelian di atas Rp 500.000</p>
+                    <p>Pengembalian gratis dalam 30 hari</p>
+                    <p>Garansi uang kembali jika produk tidak sesuai</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Product Info (Sticky) */}
+            <div className={styles.productInfo}>
+              {/* Product Name */}
+              <div className={styles.productHeader}>
+                <h1 className={styles.productName}>{currentProduk.nama}</h1>
+              </div>
+
+              {/* Color Selector */}
               {currentProduk.warna && currentProduk.warna.length > 0 && (
                 <div className={styles.colorSection}>
-                  <p className={styles.label}>Warna tersedia:</p>
-                  <div className={styles.colors}>
+                  <div className={styles.sectionLabel}>
+                    Warna: <span>{selectedColor}</span>
+                  </div>
+                  <div className={styles.colorGrid}>
                     {currentProduk.warna.map((color) => (
-                      <span key={color} className={styles.colorTag}>
-                        {color}
-                      </span>
+                      <div
+                        key={color}
+                        className={clsx(styles.colorOption, { [styles.selected]: selectedColor === color })}
+                        onClick={() => setSelectedColor(color)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') setSelectedColor(color);
+                        }}
+                        title={color}
+                      >
+                        <div
+                          className={styles.colorSwatch}
+                          style={{
+                            backgroundColor: color.toLowerCase(),
+                            border: ['white', 'putih', '#fff', '#ffffff'].includes(color.toLowerCase())
+                              ? '1px solid #e0e0e0'
+                              : 'none',
+                          }}
+                        />
+                      </div>
                     ))}
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Bottom Section */}
-            <div className={styles.bottomSection}>
-              <div className={styles.categoryTag}>
-                <span className={styles.categoryLabel}>{currentProduk.kategori}</span>
-                <p className={styles.categoryInfo}>Kunam Clothing - Premium Quality</p>
+              {/* Size Selector */}
+              {currentProduk.ukuran && currentProduk.ukuran.length > 0 && (
+                <div className={styles.sizeSection}>
+                  <div className={styles.sectionLabel}>
+                    Ukuran: <span>{selectedSize}</span>
+                  </div>
+                  <div className={styles.sizeGrid}>
+                    {currentProduk.ukuran.map((size) => {
+                      const sizeLabel = size.includes(':') ? size.split(':')[0] : size;
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          className={clsx(styles.sizeOption, { [styles.selected]: selectedSize === sizeLabel })}
+                          onClick={() => setSelectedSize(sizeLabel)}
+                        >
+                          {sizeLabel}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Price Section - Moved after size */}
+              <div className={styles.priceSection}>
+                {currentProduk.diskon > 0 && (
+                  <div className={styles.originalPriceContainer}>
+                    <span className={styles.originalPrice}>
+                      Rp {currentProduk.harga.toLocaleString('id-ID')}
+                    </span>
+                    <span className={styles.discountBadge}>-{currentProduk.diskon}%</span>
+                  </div>
+                )}
+                <div className={styles.priceContainer}>
+                  <span className={styles.currentPrice}>
+                    Rp {finalPrice.toLocaleString('id-ID')}
+                  </span>
+                </div>
+                <div className={styles.rating}>
+                  ★★★★★ <span>4.8</span> (197)
+                </div>
               </div>
-            </div>
 
-            {/* Action Buttons */}
-            <div className={styles.actionButtonsContainer}>
-              <button type="button" className={clsx(styles.actionBtn, styles.cartBtn)} onClick={handleAddToCart}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path
-                    d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path
-                    d="M16 10C16 11.0609 15.5786 12.0783 14.8284 12.8284C14.0783 13.5786 13.0609 14 12 14C10.9391 14 9.92172 13.5786 9.17157 12.8284C8.42143 12.0783 8 11.0609 8 10"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                TAMBAH KE KERANJANG
-              </button>
-              <button type="button" className={clsx(styles.actionBtn, styles.buyBtn)} onClick={handleBuy}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                BELI SEKARANG
-              </button>
+              {/* Stock Info - Only show if low stock or out of stock */}
+              {(stockStatus === 'low' || stockStatus === 'out') && (
+                <div className={clsx(styles.stockInfo, {
+                  [styles.lowStock]: stockStatus === 'low',
+                  [styles.outOfStock]: stockStatus === 'out',
+                })}>
+                  {stockStatus === 'out' && 'Stok habis'}
+                  {stockStatus === 'low' && `Hanya tersisa ${currentProduk.stok} item`}
+                </div>
+              )}
+
+              {/* Quantity & Buy Button Row */}
+              <div className={styles.quantityBuyRow}>
+                <div className={styles.quantityControl}>
+                  <button
+                    type="button"
+                    className={styles.quantityButton}
+                    onClick={() => handleQuantityChange(-1)}
+                    disabled={quantity <= 1}
+                  >
+                    −
+                  </button>
+                  <span className={styles.quantityValue}>{quantity}</span>
+                  <button
+                    type="button"
+                    className={styles.quantityButton}
+                    onClick={() => handleQuantityChange(1)}
+                    disabled={quantity >= currentProduk.stok}
+                  >
+                    +
+                  </button>
+                </div>
+                <button
+                  type="button"
+                  className={styles.buyNowButton}
+                  onClick={handleBuyNow}
+                  disabled={stockStatus === 'out'}
+                >
+                  Beli Sekarang
+                </button>
+              </div>
+
+              {/* Wishlist + Add to Cart Row */}
+              <div className={styles.cartWishlistRow}>
+                <button
+                  type="button"
+                  className={clsx(styles.wishlistButton, { [styles.active]: isLiked })}
+                  onClick={handleLike}
+                  aria-label={isLiked ? 'Remove from wishlist' : 'Add to wishlist'}
+                >
+                  {isLiked ? '♥' : '♡'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.addToCartButton}
+                  onClick={handleAddToCart}
+                  disabled={stockStatus === 'out'}
+                >
+                  ADD TO CART
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Add to Cart Dialog */}
-        <AddToCartDialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)} produk={currentProduk} onConfirm={handleConfirmAddToCart} />
-      </main>
+      </div>
     </>
   );
 }
 
 export async function getServerSideProps(context) {
-  const { params } = context;
-
-  // Import prisma hanya di server side
-  const prisma = (await import('../../lib/prisma')).default;
+  const { id } = context.params;
 
   try {
-    // Add timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Database query timeout')), 10000); // 10 second timeout
+    const produk = await prisma.produk.findUnique({
+      where: { id },
     });
-
-    const queryPromise = prisma.produk.findUnique({
-      where: { id: params.id },
-    });
-
-    const produk = await Promise.race([queryPromise, timeoutPromise]);
 
     if (!produk) {
-      return { notFound: true };
+      return {
+        props: {
+          produk: null,
+          error: 'Produk tidak ditemukan',
+        },
+      };
     }
+
+    const serializedProduk = {
+      ...produk,
+      tanggalDibuat: produk.tanggalDibuat.toISOString(),
+      tanggalDiubah: produk.tanggalDiubah.toISOString(),
+    };
 
     return {
       props: {
-        produk: JSON.parse(JSON.stringify(produk)),
+        produk: serializedProduk,
+        error: null,
       },
     };
   } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Error in getServerSideProps:', error.message || error);
-    
-    // Return error page instead of 404
+    console.error('[Product Detail] Error:', error);
     return {
       props: {
-        error: 'Failed to load product. Please try again.',
         produk: null,
+        error: 'Terjadi kesalahan saat memuat produk',
       },
     };
   }
 }
 
-export default Page;
+export default ProdukDetailPage;

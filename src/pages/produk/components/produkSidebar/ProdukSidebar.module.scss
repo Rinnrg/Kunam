@@ -1,415 +1,81 @@
+@import '@src/styles/functions';
+
 .sidebar {
-  width: 260px;
-  min-width: 260px;
-  background: transparent;
-  height: fit-content;
-  max-height: calc(100vh - 140px);
-  overflow-y: auto;
-  position: sticky;
-  top: 120px;
-  padding: 0 1rem 2rem 1.5rem;
-  
-  // Custom scrollbar for sidebar
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 2px;
-  }
-  
-  @media (max-width: 992px) {
-    display: none;
-  }
-}
-
-.sidebarHeader {
-  display: none;
-}
-
-.sidebarTitle {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #000;
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.clearButton {
-  font-size: 0.85rem;
-  color: #0078d4;
-  background: none;
-  border: none;
-  cursor: pointer;
+  width: 100%;
   padding: 0;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #005a9e;
-    text-decoration: underline;
-  }
 }
 
-// Filter Section - Card Style
-.filterSection {
-  background: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-  margin-bottom: 12px;
-  overflow: hidden;
+.section {
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.filterHeader {
+.sectionHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  padding: 14px 16px;
-  background: #fff;
+  padding: 1.25rem 0;
+  background: none;
   border: none;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: opacity 0.2s ease;
 
   &:hover {
-    background-color: #fafafa;
+    opacity: 0.7;
   }
 }
 
-.filterTitle {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #000;
-}
-
-.chevron {
+.toggleIcon {
+  font-size: 0.75rem;
   transition: transform 0.3s ease;
-  color: #333;
+  color: #666;
 
-  &.open {
+  &.expanded {
     transform: rotate(180deg);
   }
 }
 
-.filterContent {
-  padding: 0 16px 16px;
-  max-height: 300px;
-  overflow-y: auto;
-  
-  // Custom scrollbar
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
+.sectionContent {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
 
-  &::-webkit-scrollbar-track {
-    background: #f5f5f5;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 2px;
+  &.expanded {
+    max-height: 500px;
+    padding-bottom: 1.25rem;
   }
 }
 
-// Search Input
-.searchInputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
+.categoryList,
+.priceList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.searchIcon {
-  position: absolute;
-  left: 10px;
-  color: #999;
-  pointer-events: none;
-}
-
-.searchInput {
+.categoryItem,
+.priceItem {
+  display: block;
   width: 100%;
-  padding: 10px 35px 10px 35px;
-  font-size: 0.85rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.2s ease;
-
-  &:focus {
-    border-color: #000;
-  }
-
-  &::placeholder {
-    color: #999;
-  }
-}
-
-.clearInputButton {
-  position: absolute;
-  right: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
+  padding: 0.5rem 0;
   background: none;
   border: none;
-  cursor: pointer;
-  color: #999;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #000;
-  }
-}
-
-// View All Link (like Zalora "Lihat semua brand")
-.viewAllLink {
-  display: block;
-  margin-top: 12px;
-  font-size: 0.8rem;
-  color: #0078d4;
-  text-decoration: none;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #005a9e;
-    text-decoration: underline;
-  }
-}
-
-// Filter List
-.filterList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-// Checkbox styles
-.checkboxLabel,
-.radioLabel {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 0;
-  cursor: pointer;
-  transition: color 0.2s ease;
-
-  &:hover {
-    .labelText {
-      color: #000;
-    }
-  }
-}
-
-.checkbox,
-.radio {
-  display: none;
-}
-
-.checkmark {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #ccc;
-  border-radius: 3px;
-  position: relative;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 6px;
-    width: 4px;
-    height: 9px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .checkbox:checked + & {
-    background-color: #000;
-    border-color: #000;
-
-    &::after {
-      opacity: 1;
-    }
-  }
-}
-
-.radioMark {
-  width: 18px;
-  height: 18px;
-  border: 1px solid #ccc;
-  border-radius: 50%;
-  position: relative;
-  flex-shrink: 0;
-  transition: all 0.2s ease;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    background-color: #000;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0;
-    transition: opacity 0.2s ease;
-  }
-
-  .radio:checked + & {
-    border-color: #000;
-
-    &::after {
-      opacity: 1;
-    }
-  }
-}
-
-.labelText {
-  font-size: 0.85rem;
-  color: #333;
-  flex: 1;
-  transition: color 0.2s ease;
-}
-
-.count {
-  font-size: 0.8rem;
-  color: #999;
-}
-
-// Price inputs section
-.priceInputs {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.priceInput {
-  flex: 1;
-  padding: 8px 10px;
-  font-size: 0.8rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
-  outline: none;
-  transition: border-color 0.2s ease;
-  max-width: 90px;
-
-  &:focus {
-    border-color: #000;
-  }
-
-  &::placeholder {
-    color: #999;
-  }
-
-  // Hide number input arrows
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    appearance: none;
-    margin: 0;
-  }
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.priceSeparator {
+  text-align: left;
+  font-size: 0.875rem;
   color: #666;
-  font-size: 0.9rem;
-}
-
-// Price Range Options
-.priceRangeOptions {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-// Color Grid
-.colorGrid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.colorTag {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
-  font-size: 0.75rem;
-  color: #333;
-  background: #fff;
-  border: 1px solid #e0e0e0;
-  border-radius: 4px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease;
 
   &:hover {
-    border-color: #999;
-  }
-
-  &.selected {
-    border-color: #000;
-    background-color: #f5f5f5;
-  }
-}
-
-.colorBox {
-  width: 16px;
-  height: 16px;
-  border-radius: 2px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  flex-shrink: 0;
-}
-
-// Mobile Sidebar Toggle (for future implementation)
-.mobileSidebarToggle {
-  display: none;
-  
-  @media (max-width: 992px) {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    font-size: 0.9rem;
-    font-weight: 500;
     color: #000;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 4px;
-    cursor: pointer;
-    margin-bottom: 1rem;
-  }
-}
-
-// Scrollbar styling
-.filterList {
-  &::-webkit-scrollbar {
-    width: 4px;
   }
 
-  &::-webkit-scrollbar-track {
-    background: #f5f5f5;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #ccc;
-    border-radius: 2px;
-  }
-
-  &::-webkit-scrollbar-thumb:hover {
-    background: #999;
+  &.active {
+    color: #000;
+    font-weight: 500;
   }
 }

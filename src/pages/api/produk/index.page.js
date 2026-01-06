@@ -20,6 +20,7 @@ async function getProduk(req, res) {
         deskripsi: true,
         ukuran: true,
         warna: true,
+        thumbnail: true,
         gambar: true,
         video: true,
         produkUnggulan: true,
@@ -39,7 +40,7 @@ async function getProduk(req, res) {
 
 async function createProduk(req, res) {
   try {
-    const { nama, deskripsi, kategori, harga, diskon, stok, ukuran, warna, images, videos, featured, order } = req.body;
+    const { nama, deskripsi, kategori, harga, diskon, stok, ukuran, warna, thumbnail, images, videos, featured, order } = req.body;
 
     // Validasi input
     if (!nama || !kategori || harga === undefined) {
@@ -58,6 +59,7 @@ async function createProduk(req, res) {
         stok: parseInt(stok, 10) || 0,
         ukuran: ukuran || [],
         warna: warna || [],
+        thumbnail: thumbnail || null,
         gambar: images || [],
         video: videos || [],
         produkUnggulan: featured || false,

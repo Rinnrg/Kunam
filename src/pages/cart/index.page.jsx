@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from './cart.module.scss';
 
 function CartPage() {
@@ -80,6 +81,22 @@ function CartPage() {
     const selectedCartItems = cart.filter(item => selectedItems.includes(item.id));
     return calculateTotal(selectedCartItems);
   }, [cart, selectedItems, calculateTotal]);
+
+  // Group cart items by product ID
+  const groupedCart = useCallback(() => {
+    const grouped = {};
+    cart.forEach(item => {
+      if (!grouped[item.produkId]) {
+        grouped[item.produkId] = {
+          produk: item.produk,
+          produkId: item.produkId,
+          variants: []
+        };
+      }
+      grouped[item.produkId].variants.push(item);
+    });
+    return Object.values(grouped);
+  }, [cart]);
 
   const calculateDiscount = useCallback(() => {
     if (!selectedCoupon) return 0;
@@ -302,12 +319,8 @@ function CartPage() {
     <>
       <CustomHead title="Keranjang - Kunam" description="Keranjang belanja Anda" />
       <main className={styles.container}>
+        <Breadcrumb items={[{ label: 'Cart', href: null }]} />
         <div className={styles.header}>
-          <button type="button" onClick={() => router.back()} className={styles.backButton} aria-label="Kembali">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
           <h1>Keranjang Saya</h1>
         </div>
 
@@ -338,26 +351,49 @@ function CartPage() {
                 </label>
               </div>
 
-              {cart.map((item) => {
-                const isInWishlist = wishlist.some(w => w.produkId === item.produkId);
-                const isSelected = selectedItems.includes(item.id);
+              {groupedCart().map((group) => {
+                const allVariantsSelected = group.variants.every(v => selectedItems.includes(v.id));
+                const someVariantsSelected = group.variants.some(v => selectedItems.includes(v.id));
+                
+                const handleSelectGroup = () => {
+                  if (allVariantsSelected) {
+                    // Unselect all variants
+                    setSelectedItems(prev => prev.filter(id => !group.variants.some(v => v.id === id)));
+                  } else {
+                    // Select all variants
+                    setSelectedItems(prev => {
+                      const newSelected = [...prev];
+                      group.variants.forEach(v => {
+                        if (!newSelected.includes(v.id)) {
+                          newSelected.push(v.id);
+                        }
+                      });
+                      return newSelected;
+                    });
+                  }
+                };
+                
+                const isInWishlist = wishlist.some(w => w.produkId === group.produkId);
                 
                 return (
-                  <div key={item.id} className={`${styles.card} ${isSelected ? styles.selected : ''}`}>
+                  <div key={group.produkId} className={`${styles.card} ${allVariantsSelected ? styles.selected : ''}`}>
                     <label className={styles.checkboxContainer}>
                       <input 
                         type="checkbox" 
-                        checked={isSelected}
-                        onChange={() => handleSelectItem(item.id)}
+                        checked={allVariantsSelected}
+                        ref={input => {
+                          if (input) input.indeterminate = someVariantsSelected && !allVariantsSelected;
+                        }}
+                        onChange={handleSelectGroup}
                         className={styles.checkbox}
                       />
                     </label>
                     
-                    <Link href={`/produk/${item.produkId}`} className={styles.imageContainer}>
-                      {item.produk?.gambar && (
+                    <Link href={`/produk/${group.produkId}`} className={styles.imageContainer}>
+                      {group.produk?.gambar && (
                         <Image
-                          src={Array.isArray(item.produk.gambar) ? item.produk.gambar[0] : item.produk.gambar}
-                          alt={item.produk.nama}
+                          src={Array.isArray(group.produk.gambar) ? group.produk.gambar[0] : group.produk.gambar}
+                          alt={group.produk.nama}
                           fill
                           sizes="120px"
                           className={styles.image}
@@ -366,78 +402,62 @@ function CartPage() {
                     </Link>
 
                     <div className={styles.info}>
-                      <Link href={`/produk/${item.produkId}`} className={styles.name}>
-                        {item.produk?.nama}
+                      <Link href={`/produk/${group.produkId}`} className={styles.name}>
+                        {group.produk?.nama}
                       </Link>
                       
-                      <p className={styles.kategori}>{item.produk?.kategori}</p>
-                      {item.ukuran && <p className={styles.variant}>Size: {item.ukuran}</p>}
-                      {item.warna && <p className={styles.variant}>Color: {item.warna}</p>}
+                      <p className={styles.kategori}>{group.produk?.kategori}</p>
 
-                      <div className={styles.priceAndQuantity}>
-                        <div className={styles.price}>
-                          {item.produk?.diskon > 0 ? (
-                            <>
-                              <span className={styles.priceFinal}>
-                                Rp {(item.produk.harga * (1 - item.produk.diskon / 100)).toLocaleString('id-ID')}
-                              </span>
-                              <span className={styles.priceOriginal}>Rp {item.produk.harga.toLocaleString('id-ID')}</span>
-                              {item.produk.diskon > 0 && (
-                                <span className={styles.saleLabel}>Diskon</span>
+                      {/* Display all variants */}
+                      {group.variants.map((item, index) => (
+                        <div key={item.id} className={styles.variantRow}>
+                          <div className={styles.variantInfo}>
+                            {item.ukuran && <span className={styles.variant}>Size: {item.ukuran}</span>}
+                            {item.warna && <span className={styles.variant}>Color: {item.warna}</span>}
+                          </div>
+
+                          <div className={styles.priceAndQuantity}>
+                            <div className={styles.price}>
+                              {item.produk?.diskon > 0 ? (
+                                <>
+                                  <span className={styles.priceFinal}>
+                                    Rp {(item.produk.harga * (1 - item.produk.diskon / 100)).toLocaleString('id-ID')}
+                                  </span>
+                                  <span className={styles.priceOriginal}>Rp {item.produk.harga.toLocaleString('id-ID')}</span>
+                                  {item.produk.diskon > 0 && (
+                                    <span className={styles.saleLabel}>DISKON</span>
+                                  )}
+                                </>
+                              ) : (
+                                <span className={styles.priceFinal}>Rp {item.produk?.harga?.toLocaleString('id-ID')}</span>
                               )}
-                            </>
-                          ) : (
-                            <span className={styles.priceFinal}>Rp {item.produk?.harga?.toLocaleString('id-ID')}</span>
-                          )}
-                        </div>
+                            </div>
 
-                        <div className={styles.quantityControl}>
-                          <button type="button" onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} aria-label="Kurangi">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </button>
-                          <span>{item.quantity}</span>
-                          <button type="button" onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} aria-label="Tambah">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                          </button>
+                            <div className={styles.quantityControl}>
+                              <button type="button" onClick={() => handleUpdateQuantity(item.id, item.quantity - 1)} aria-label="Kurangi">
+                                −
+                              </button>
+                              <span>{item.quantity}</span>
+                              <button type="button" onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} aria-label="Tambah">
+                                +
+                              </button>
+                            </div>
+                          </div>
                         </div>
+                      ))}
+
+                      <div className={styles.subtotalRow}>
+                        <span>Subtotal:</span>
+                        <span className={styles.subtotalPrice}>
+                          Rp {group.variants.reduce((sum, item) => {
+                            const price = item.produk.harga * (1 - item.produk.diskon / 100);
+                            return sum + (price * item.quantity);
+                          }, 0).toLocaleString('id-ID')}
+                        </span>
                       </div>
-
-                      {item.produk?.diskon > 0 && (
-                        <div className={styles.subtotal}>
-                          Subtotal: <span className={styles.priceFinal}>
-                            Rp {((item.produk.harga * (1 - item.produk.diskon / 100)) * item.quantity).toLocaleString('id-ID')}
-                          </span>
-                        </div>
-                      )}
                     </div>
 
-                    <div className={styles.actions}>
-                      <button 
-                        type="button" 
-                        className={`${styles.wishlistButton} ${isInWishlist ? styles.active : ''}`}
-                        onClick={() => handleToggleWishlist(item)}
-                        aria-label={isInWishlist ? "Hapus dari wishlist" : "Tambah ke wishlist"}
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill={isInWishlist ? "currentColor" : "none"} xmlns="http://www.w3.org/2000/svg">
-                          <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-
-                      <button 
-                        type="button" 
-                        className={styles.removeButton} 
-                        onClick={() => handleRemove(item.id)}
-                        aria-label="Hapus dari keranjang"
-                      >
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M3 6H21M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
-                    </div>
+                    {/* Removed actions div with wishlist and delete buttons */}
                   </div>
                 );
               })}

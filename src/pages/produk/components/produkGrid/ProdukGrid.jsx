@@ -1,353 +1,270 @@
-import { useCallback, useMemo, useState } from 'react';
-import Link from 'next/link';
+/* eslint-disable import/no-unresolved */
+/* eslint-disable import/extensions */
+import { useState, useMemo, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import clsx from 'clsx';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/router';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
-import { useRouter } from 'next/router';
-import ProdukSidebar from '../produkSidebar/ProdukSidebar';
-import styles from './styles/produkGrid.module.scss';
+import Breadcrumb from '@src/components/dom/Breadcrumb';
+import styles from './ProdukGrid.module.scss';
 
 function ProdukGrid({ produk = [], kategori = null, error = null }) {
   const { data: session } = useSession();
   const router = useRouter();
-  const [wishlist, cart, setWishlist, setCart, setIsAuthModalOpen] = useStore(
-    useShallow((state) => [state.wishlist, state.cart, state.setWishlist, state.setCart, state.setIsAuthModalOpen]),
+  const [wishlist, setWishlist, showAlert] = useStore(
+    useShallow((state) => [state.wishlist, state.setWishlist, state.showAlert]),
   );
-  
-  // Filter state
-  const [filters, setFilters] = useState({
-    search: router.query.search || '',
-    categories: router.query.kategori ? [router.query.kategori] : [],
-    colors: [],
-    discount: router.query.diskon || '',
-    priceMin: '',
-    priceMax: '',
-  });
 
-  // Apply filters to products - memoized properly
+  // Filter and sort state
+  const [sortBy, setSortBy] = useState('newest');
+  const [filterKategori, setFilterKategori] = useState(kategori || '');
+  // eslint-disable-next-line no-unused-vars
+  const [priceRange, setPriceRange] = useState({ min: 0, max: Infinity });
+
+  // Get unique categories
+  const categories = useMemo(() => {
+    const cats = [...new Set(produk.map((p) => p.kategori))];
+    return cats.filter(Boolean);
+  }, [produk]);
+
+  // Filter and sort products
   const filteredProduk = useMemo(() => {
-    if (!produk || produk.length === 0) return [];
-    
-    let result = produk;
+    let result = [...produk];
 
-    // Search filter
-    if (filters.search) {
-      const searchLower = filters.search.toLowerCase();
-      result = result.filter((item) =>
-        item.nama.toLowerCase().includes(searchLower) ||
-        item.kategori?.toLowerCase().includes(searchLower) ||
-        item.deskripsi?.toLowerCase().includes(searchLower)
-      );
+    // Filter by category
+    if (filterKategori) {
+      result = result.filter((p) => p.kategori === filterKategori);
     }
 
-    // Category filter
-    if (filters.categories.length > 0) {
-      result = result.filter((item) => filters.categories.includes(item.kategori));
-    }
+    // Filter by price range
+    result = result.filter((p) => {
+      const price = p.diskon > 0 ? p.harga * (1 - p.diskon / 100) : p.harga;
+      return price >= priceRange.min && price <= priceRange.max;
+    });
 
-    // Color filter
-    if (filters.colors.length > 0) {
-      result = result.filter((item) =>
-        item.warna && item.warna.some((color) => filters.colors.includes(color))
-      );
-    }
-
-    // Discount filter
-    if (filters.discount) {
-      const minDiscount = parseInt(filters.discount, 10);
-      result = result.filter((item) => item.diskon >= minDiscount);
-    }
-
-    // Price filter
-    if (filters.priceMin) {
-      const min = parseFloat(filters.priceMin);
-      result = result.filter((item) => {
-        const finalPrice = item.diskon > 0 ? item.harga * (1 - item.diskon / 100) : item.harga;
-        return finalPrice >= min;
-      });
-    }
-    if (filters.priceMax) {
-      const max = parseFloat(filters.priceMax);
-      result = result.filter((item) => {
-        const finalPrice = item.diskon > 0 ? item.harga * (1 - item.diskon / 100) : item.harga;
-        return finalPrice <= max;
-      });
+    // Sort
+    switch (sortBy) {
+      case 'price-low':
+        result.sort((a, b) => {
+          const priceA = a.diskon > 0 ? a.harga * (1 - a.diskon / 100) : a.harga;
+          const priceB = b.diskon > 0 ? b.harga * (1 - b.diskon / 100) : b.harga;
+          return priceA - priceB;
+        });
+        break;
+      case 'price-high':
+        result.sort((a, b) => {
+          const priceA = a.diskon > 0 ? a.harga * (1 - a.diskon / 100) : a.harga;
+          const priceB = b.diskon > 0 ? b.harga * (1 - b.diskon / 100) : b.harga;
+          return priceB - priceA;
+        });
+        break;
+      case 'name-az':
+        result.sort((a, b) => a.nama.localeCompare(b.nama));
+        break;
+      case 'name-za':
+        result.sort((a, b) => b.nama.localeCompare(a.nama));
+        break;
+      case 'newest':
+      default:
+        result.sort((a, b) => new Date(b.tanggalDibuat) - new Date(a.tanggalDibuat));
+        break;
     }
 
     return result;
-  }, [produk, filters.search, filters.categories, filters.colors, filters.discount, filters.priceMin, filters.priceMax]);
+  }, [produk, filterKategori, priceRange, sortBy]);
 
-  // Handle filter change from sidebar
-  const handleFilterChange = useCallback((newFilters) => {
-    setFilters(newFilters);
-  }, []);
+  // Handle wishlist toggle
+  const handleWishlistToggle = useCallback(async (e, productId) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-  const wishlistIds = useMemo(() => new Set(wishlist.map((item) => item.produkId)), [wishlist]);
-  // eslint-disable-next-line no-unused-vars
-  const cartIds = useMemo(() => new Set(cart.map((item) => item.produkId)), [cart]);
+    if (!session?.user) {
+      showAlert({
+        type: 'warning',
+        title: 'Login Diperlukan',
+        message: 'Anda harus login terlebih dahulu untuk menambahkan produk ke wishlist.',
+        confirmText: 'Login Sekarang',
+        showCancel: true,
+        onConfirm: () => {
+          router.push('/login');
+        },
+      });
+      return;
+    }
 
-  const handleLike = useCallback(
-    async (e, produkId) => {
-      e.preventDefault();
-      e.stopPropagation();
+    const isLiked = wishlist.some((item) => item.produkId === productId);
 
-      if (!session?.user) {
-        setIsAuthModalOpen(true);
-        return;
-      }
-
-      const isLiked = wishlistIds.has(produkId);
-
-      try {
-        if (isLiked) {
-          await fetch('/api/user/wishlist', {
-            method: 'DELETE',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ produkId }),
-          });
-          setWishlist(wishlist.filter((item) => item.produkId !== produkId));
-        } else {
-          const res = await fetch('/api/user/wishlist', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ produkId }),
-          });
-          const data = await res.json();
-          if (data.wishlistItem) {
-            setWishlist([...wishlist, data.wishlistItem]);
-          }
-        }
-      } catch (err) {
-        // Silently handle error to avoid console spam
-      }
-    },
-    [session, wishlist, wishlistIds, setWishlist, setIsAuthModalOpen],
-  );
-
-  const handleAddToCart = useCallback(
-    async (e, produkId) => {
-      e.preventDefault();
-      e.stopPropagation();
-
-      if (!session?.user) {
-        setIsAuthModalOpen(true);
-        return;
-      }
-
-      try {
-        const res = await fetch('/api/user/cart', {
+    try {
+      if (isLiked) {
+        await fetch('/api/user/wishlist', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ produkId: productId }),
+        });
+        setWishlist(wishlist.filter((item) => item.produkId !== productId));
+      } else {
+        const res = await fetch('/api/user/wishlist', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ produkId, quantity: 1 }),
+          body: JSON.stringify({ produkId: productId }),
         });
         const data = await res.json();
-        if (data.cartItem) {
-          const existingIndex = cart.findIndex((item) => item.produkId === produkId);
-          if (existingIndex >= 0) {
-            const newCart = [...cart];
-            newCart[existingIndex] = data.cartItem;
-            setCart(newCart);
-          } else {
-            setCart([...cart, data.cartItem]);
-          }
+        if (data.wishlistItem) {
+          setWishlist([...wishlist, data.wishlistItem]);
         }
-      } catch (err) {
-        // Silently handle error to avoid console spam
       }
-    },
-    [session, cart, setCart, setIsAuthModalOpen],
-  );
+    } catch (err) {
+      console.error('Error updating wishlist:', err);
+      showAlert({
+        type: 'error',
+        title: 'Terjadi Kesalahan',
+        message: 'Gagal memperbarui wishlist. Silakan coba lagi.',
+      });
+    }
+  }, [session, wishlist, setWishlist, router, showAlert]);
 
-  if (!produk || produk.length === 0) {
+  if (error) {
     return (
-      <section className={styles.root}>
-        <div className={styles.pageContainer}>
-          <ProdukSidebar produkList={produk} onFilterChange={handleFilterChange} />
-          <div className={styles.mainContent}>
-            <div style={{ padding: '2rem', textAlign: 'center' }}>
-              <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>{kategori ? `${kategori}` : 'Semua Produk'}</h1>
-              {error ? (
-                <>
-                  <p style={{ fontSize: '1.2rem', color: '#e91e63', marginBottom: '0.5rem' }}>Terjadi kesalahan saat memuat produk</p>
-                  <p style={{ fontSize: '0.9rem', color: '#666' }}>{error}</p>
-                  <button
-                    type="button"
-                    onClick={() => window.location.reload()}
-                    style={{
-                      marginTop: '1rem',
-                      padding: '0.75rem 1.5rem',
-                      fontSize: '1rem',
-                      color: '#fff',
-                      backgroundColor: '#000',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
-                  >
-                    Coba Lagi
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p style={{ fontSize: '1.2rem', color: '#666' }}>{kategori ? `Belum ada produk ${kategori} tersedia.` : 'Belum ada produk tersedia.'}</p>
-                  {kategori && (
-                    <Link href="/produk" style={{ marginTop: '1rem', display: 'inline-block', color: '#000', textDecoration: 'underline' }}>
-                      Lihat semua produk
-                    </Link>
-                  )}
-                </>
-              )}
-            </div>
+      <div className={styles.root}>
+        <div className={styles.container}>
+          <div className={styles.errorState}>
+            <h2>Terjadi Kesalahan</h2>
+            <p>{error}</p>
+            <button type="button" onClick={() => window.location.reload()}>
+              Coba Lagi
+            </button>
           </div>
         </div>
-      </section>
+      </div>
     );
   }
 
-  // Get search term from URL for breadcrumb display
-  const searchTerm = router.query.search || filters.search;
-  // eslint-disable-next-line no-nested-ternary
-  const displayTitle = searchTerm ? `Pencarian untuk "${searchTerm}"` : kategori || 'Semua Produk';
-
   return (
-    <section className={styles.root}>
-      <div className={styles.pageContainer}>
-        {/* Left Sidebar */}
-        <ProdukSidebar produkList={produk} onFilterChange={handleFilterChange} />
+    <div className={styles.root}>
+      <div className={styles.container}>
+        {/* Breadcrumb */}
+        <Breadcrumb items={
+          filterKategori 
+            ? [
+                { label: 'Produk', href: '/produk' },
+                { label: filterKategori, href: null }
+              ]
+            : [{ label: 'Produk', href: null }]
+        } />
         
-        {/* Main Content */}
-        <div className={styles.mainContent}>
-          {/* Breadcrumb & Results Count */}
-          <div className={styles.pageHeader}>
-            <div className={styles.breadcrumb}>
-              <Link href="/">Home</Link>
-              <span className={styles.separator}>&gt;</span>
-              <Link href="/produk">Produk</Link>
-              {(kategori || searchTerm) && (
-                <>
-                  <span className={styles.separator}>&gt;</span>
-                  <span className={styles.current}>{displayTitle}</span>
-                </>
-              )}
-            </div>
-            <div className={styles.resultsInfo}>
-              <h1 className={styles.resultsTitle}>{displayTitle}</h1>
-              <span className={styles.resultsCount}>{filteredProduk.length} Barang ditemukan</span>
-            </div>
+        {/* Header */}
+        <div className={styles.header}>
+          <h1 className={styles.title}>
+            {filterKategori || 'Semua Produk'}
+          </h1>
+          <span className={styles.count}>
+            {filteredProduk.length} produk
+          </span>
+        </div>
+
+        {/* Filters & Sort Bar */}
+        <div className={styles.filterBar}>
+          <div className={styles.filters}>
+            {/* Category Filter */}
+            <select
+              value={filterKategori}
+              onChange={(e) => setFilterKategori(e.target.value)}
+              className={styles.select}
+            >
+              <option value="">Semua Kategori</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
 
-          {/* Product Grid */}
-          <div className={styles.gridContainer}>
-            {filteredProduk.map((item) => (
-          <Link key={item.id} href={`/produk/${item.id}`} className={styles.projectCard} aria-label={`View ${item.nama}`}>
-            <div className={styles.cardHeader}>
-              <h2 className={clsx(styles.projectTitle, 'h2')}>{item.nama}</h2>
-            </div>
+          {/* Sort */}
+          <div className={styles.sortContainer}>
+            <label htmlFor="sort">Urutkan:</label>
+            <select
+              id="sort"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className={styles.select}
+            >
+              <option value="newest">Terbaru</option>
+              <option value="price-low">Harga Terendah</option>
+              <option value="price-high">Harga Tertinggi</option>
+              <option value="name-az">Nama A-Z</option>
+              <option value="name-za">Nama Z-A</option>
+            </select>
+          </div>
+        </div>
 
-            <div className={styles.imageContainer}>
-              {item.gambar && (
-                <Image 
-                  src={Array.isArray(item.gambar) ? item.gambar[0] : item.gambar} 
-                  alt={item.nama} 
-                  fill 
-                  sizes="(max-width: 480px) 100vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw" 
-                  className={styles.projectImage}
-                  quality={75}
-                  priority={false}
-                />
-              )}
-              
-              {/* Discount Badge */}
-              {item.diskon > 0 && (
-                <div className={styles.discountBadge}>
-                  -{item.diskon}%
-                </div>
-              )}
-              
-              {/* Action Buttons */}
-              <div className={styles.actionButtons}>
-                <button
-                  type="button"
-                  className={clsx(styles.actionButton, wishlistIds.has(item.id) && styles.liked)}
-                  onClick={(e) => handleLike(e, item.id)}
-                  aria-label={wishlistIds.has(item.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+        {/* Product Grid */}
+        {filteredProduk.length === 0 ? (
+          <div className={styles.emptyState}>
+            <h3>Tidak ada produk ditemukan</h3>
+            <p>Coba ubah filter atau kategori yang dipilih.</p>
+          </div>
+        ) : (
+          <div className={styles.grid}>
+            {filteredProduk.map((item) => {
+              const isLiked = wishlist.some((w) => w.produkId === item.id);
+              const finalPrice = item.diskon > 0
+                ? item.harga * (1 - item.diskon / 100)
+                : item.harga;
+
+              return (
+                <Link
+                  key={item.id}
+                  href={`/produk/${item.id}`}
+                  className={styles.card}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill={wishlistIds.has(item.id) ? 'currentColor' : 'none'} xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.cardFooter}>
-              <div className={styles.produkInfo}>
-                <div className={styles.labelContainer}>
-                  <span className={styles.kategoriLabel}>{item.kategori}</span>
-                  {/* Temporarily disabled - will be re-enabled after Prisma Client regenerates
-                  {item.jumlahTerjual && item.jumlahTerjual > 0 && (
-                    <span className={styles.terjualLabel}>
-                      {item.jumlahTerjual.toLocaleString('id-ID')} Terjual
-                    </span>
-                  )}
-                  */}
-                </div>
-                <div className={styles.produkHeader}>
-                  <h3 className={styles.produkNama}>{item.nama}</h3>
+                  {/* Wishlist Button */}
                   <button
                     type="button"
-                    className={clsx(styles.wishlistIcon, wishlistIds.has(item.id) && styles.liked)}
-                    onClick={(e) => handleLike(e, item.id)}
-                    aria-label={wishlistIds.has(item.id) ? 'Remove from wishlist' : 'Add to wishlist'}
+                    className={clsx(styles.wishlistBtn, { [styles.active]: isLiked })}
+                    onClick={(e) => handleWishlistToggle(e, item.id)}
+                    aria-label={isLiked ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}
                   >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill={wishlistIds.has(item.id) ? 'currentColor' : 'none'} xmlns="http://www.w3.org/2000/svg">
-                      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+                    {isLiked ? '♥' : '♡'}
                   </button>
-                </div>
-                <div className={styles.priceContainer}>
-                  {item.diskon > 0 ? (
-                    <>
-                      <span className={styles.harga}>Rp {(item.harga * (1 - item.diskon / 100)).toLocaleString('id-ID')}</span>
-                      <span className={styles.hargaAsli}>Rp {item.harga.toLocaleString('id-ID')}</span>
-                    </>
-                  ) : (
-                    <span className={styles.harga}>Rp {item.harga.toLocaleString('id-ID')}</span>
-                  )}
-                </div>
-              </div>
-              <button type="button" className={styles.viewButton} onClick={(e) => handleAddToCart(e, item.id)}>
-                <span>Masukkan ke Tas</span>
-              </button>
-            </div>
-          </Link>
-        ))}
-          </div>
 
-          {/* No results in filtered */}
-          {filteredProduk.length === 0 && produk.length > 0 && (
-            <div className={styles.noResults}>
-              <p>Tidak ada produk yang sesuai dengan filter.</p>
-              <button
-                type="button"
-                className={styles.resetButton}
-                onClick={() => setFilters({
-                  search: '',
-                  categories: [],
-                  colors: [],
-                  discount: '',
-                  priceMin: '',
-                  priceMax: '',
-                })}
-              >
-                Reset Filter
-              </button>
-            </div>
-          )}
-        </div>
+                  {/* Discount Badge */}
+                  {item.diskon > 0 && (
+                    <span className={styles.discountBadge}>-{item.diskon}%</span>
+                  )}
+
+                  {/* Image */}
+                  <div className={styles.imageContainer}>
+                    <Image
+                      src={item.gambar?.[0] || '/logo/logo 1 black.svg'}
+                      alt={item.nama}
+                      fill
+                      sizes="(max-width: 768px) 50vw, 25vw"
+                    />
+                  </div>
+
+                  {/* Content */}
+                  <div className={styles.cardContent}>
+                    <h3 className={styles.productName}>{item.nama}</h3>
+                    <div className={styles.priceContainer}>
+                      <span className={styles.currentPrice}>
+                        Rp {finalPrice.toLocaleString('id-ID')}
+                      </span>
+                      {item.diskon > 0 && (
+                        <span className={styles.originalPrice}>
+                          Rp {item.harga.toLocaleString('id-ID')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
       </div>
-    </section>
+    </div>
   );
 }
 
