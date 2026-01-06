@@ -18,10 +18,6 @@ export default function HomeSectionManager() {
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchSections();
-  }, []);
-
   const fetchSections = async () => {
     try {
       const response = await fetch('/api/admin/home-sections');
@@ -29,9 +25,30 @@ export default function HomeSectionManager() {
       setSections(data.sections || []);
     } catch (error) {
       console.error('Error fetching sections:', error);
+      // eslint-disable-next-line no-alert
       alert('Gagal mengambil data sections');
     }
   };
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      images: [],
+      layoutType: 'slider',
+      columns: 3,
+      autoplay: true,
+      interval: 3000,
+      order: 0,
+      isActive: true,
+    });
+    setSelectedFiles([]);
+    setPreviewUrls([]);
+    setEditingId(null);
+  };
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -94,14 +111,17 @@ export default function HomeSectionManager() {
       const result = await response.json();
 
       if (response.ok) {
+        // eslint-disable-next-line no-alert
         alert(editingId ? 'Section berhasil diupdate!' : 'Section berhasil ditambahkan!');
         resetForm();
         fetchSections();
       } else {
+        // eslint-disable-next-line no-alert
         alert(result.error || 'Gagal menyimpan section');
       }
     } catch (error) {
       console.error('Error saving section:', error);
+      // eslint-disable-next-line no-alert
       alert('Terjadi kesalahan saat menyimpan section');
     } finally {
       setLoading(false);
@@ -124,6 +144,7 @@ export default function HomeSectionManager() {
   };
 
   const handleDelete = async (id) => {
+    // eslint-disable-next-line no-alert, no-restricted-globals
     if (!confirm('Yakin ingin menghapus section ini?')) return;
 
     try {
@@ -132,13 +153,16 @@ export default function HomeSectionManager() {
       });
 
       if (response.ok) {
+        // eslint-disable-next-line no-alert
         alert('Section berhasil dihapus!');
         fetchSections();
       } else {
+        // eslint-disable-next-line no-alert
         alert('Gagal menghapus section');
       }
     } catch (error) {
       console.error('Error deleting section:', error);
+      // eslint-disable-next-line no-alert
       alert('Terjadi kesalahan saat menghapus section');
     }
   };
@@ -203,7 +227,7 @@ export default function HomeSectionManager() {
                   max="6"
                   value={formData.columns}
                   onChange={(e) =>
-                    setFormData({ ...formData, columns: parseInt(e.target.value) })
+                    setFormData({ ...formData, columns: parseInt(e.target.value, 10) })
                   }
                   className={styles.input}
                 />
@@ -233,7 +257,7 @@ export default function HomeSectionManager() {
                       step="500"
                       value={formData.interval}
                       onChange={(e) =>
-                        setFormData({ ...formData, interval: parseInt(e.target.value) })
+                        setFormData({ ...formData, interval: parseInt(e.target.value, 10) })
                       }
                       className={styles.input}
                     />
@@ -255,6 +279,7 @@ export default function HomeSectionManager() {
               <div className={styles.previewGrid}>
                 {previewUrls.map((url, index) => (
                   <div key={index} className={styles.previewItem}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={url} alt={`Preview ${index + 1}`} />
                     <button
                       type="button"
@@ -273,7 +298,7 @@ export default function HomeSectionManager() {
               type="number"
               value={formData.order}
               onChange={(e) =>
-                setFormData({ ...formData, order: parseInt(e.target.value) })
+                setFormData({ ...formData, order: parseInt(e.target.value, 10) })
               }
               className={styles.input}
             />
@@ -292,7 +317,7 @@ export default function HomeSectionManager() {
 
           <div className={styles.buttonGroup}>
             <button type="submit" className={styles.submitBtn} disabled={loading}>
-              {loading ? 'Menyimpan...' : editingId ? 'Update' : 'Tambah'}
+              {loading ? 'Menyimpan...' : (editingId ? 'Update' : 'Tambah')}
             </button>
             {editingId && (
               <button
@@ -317,6 +342,7 @@ export default function HomeSectionManager() {
               <div key={section.id} className={styles.sectionCard}>
                 <div className={styles.sectionImages}>
                   {section.images?.slice(0, 3).map((img, idx) => (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img key={idx} src={img} alt={`${section.title} ${idx + 1}`} />
                   ))}
                   {section.images?.length > 3 && (
@@ -355,12 +381,14 @@ export default function HomeSectionManager() {
                   </p>
                   <div className={styles.actionButtons}>
                     <button
+                      type="button"
                       onClick={() => handleEdit(section)}
                       className={styles.editBtn}
                     >
                       Edit
                     </button>
                     <button
+                      type="button"
                       onClick={() => handleDelete(section.id)}
                       className={styles.deleteBtn}
                     >

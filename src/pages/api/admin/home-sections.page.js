@@ -78,17 +78,17 @@ export default async function handler(req, res) {
 
       const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
       const layoutType = Array.isArray(fields.layoutType) ? fields.layoutType[0] : fields.layoutType || 'slider';
-      const columns = parseInt(Array.isArray(fields.columns) ? fields.columns[0] : fields.columns) || 3;
+      const columns = parseInt(Array.isArray(fields.columns) ? fields.columns[0] : fields.columns, 10) || 3;
       const autoplay = (Array.isArray(fields.autoplay) ? fields.autoplay[0] : fields.autoplay) === 'true';
-      const interval = parseInt(Array.isArray(fields.interval) ? fields.interval[0] : fields.interval) || 3000;
-      const order = parseInt(Array.isArray(fields.order) ? fields.order[0] : fields.order) || 0;
+      const interval = parseInt(Array.isArray(fields.interval) ? fields.interval[0] : fields.interval, 10) || 3000;
+      const order = parseInt(Array.isArray(fields.order) ? fields.order[0] : fields.order, 10) || 0;
       const isActive = (Array.isArray(fields.isActive) ? fields.isActive[0] : fields.isActive) === 'true';
 
       // Handle uploaded images
       const uploadedImages = [];
       const imageFiles = Array.isArray(files.images) ? files.images : [files.images];
 
-      for (const file of imageFiles) {
+      imageFiles.forEach((file) => {
         if (file && file.filepath) {
           const filename = `${Date.now()}-${Math.floor(Math.random() * 1000000000)}${path.extname(file.originalFilename || '.jpg')}`;
           const newPath = path.join(uploadDir, filename);
@@ -96,7 +96,7 @@ export default async function handler(req, res) {
           fs.renameSync(file.filepath, newPath);
           uploadedImages.push(`/uploads/${filename}`);
         }
-      }
+      });
 
       const section = await prisma.homeSection.create({
         data: {
@@ -125,10 +125,10 @@ export default async function handler(req, res) {
 
       const title = Array.isArray(fields.title) ? fields.title[0] : fields.title;
       const layoutType = Array.isArray(fields.layoutType) ? fields.layoutType[0] : fields.layoutType || 'slider';
-      const columns = parseInt(Array.isArray(fields.columns) ? fields.columns[0] : fields.columns) || 3;
+      const columns = parseInt(Array.isArray(fields.columns) ? fields.columns[0] : fields.columns, 10) || 3;
       const autoplay = (Array.isArray(fields.autoplay) ? fields.autoplay[0] : fields.autoplay) === 'true';
-      const interval = parseInt(Array.isArray(fields.interval) ? fields.interval[0] : fields.interval) || 3000;
-      const order = parseInt(Array.isArray(fields.order) ? fields.order[0] : fields.order) || 0;
+      const interval = parseInt(Array.isArray(fields.interval) ? fields.interval[0] : fields.interval, 10) || 3000;
+      const order = parseInt(Array.isArray(fields.order) ? fields.order[0] : fields.order, 10) || 0;
       const isActive = (Array.isArray(fields.isActive) ? fields.isActive[0] : fields.isActive) === 'true';
 
       // Get existing images
@@ -140,9 +140,10 @@ export default async function handler(req, res) {
 
       // Handle new uploaded images
       const newImages = [];
-      const imageFiles = Array.isArray(files.images) ? files.images : files.images ? [files.images] : [];
+      const imageFilesArray = Array.isArray(files.images) ? files.images : files.images ? [files.images] : [];
+      const imageFiles = imageFilesArray;
 
-      for (const file of imageFiles) {
+      imageFiles.forEach((file) => {
         if (file && file.filepath) {
           const filename = `${Date.now()}-${Math.floor(Math.random() * 1000000000)}${path.extname(file.originalFilename || '.jpg')}`;
           const newPath = path.join(uploadDir, filename);
@@ -150,7 +151,7 @@ export default async function handler(req, res) {
           fs.renameSync(file.filepath, newPath);
           newImages.push(`/uploads/${filename}`);
         }
-      }
+      });
 
       const allImages = [...existingImages, ...newImages];
 
@@ -186,12 +187,12 @@ export default async function handler(req, res) {
 
       if (section) {
         // Delete image files
-        for (const imagePath of section.images) {
+        section.images.forEach((imagePath) => {
           const fullPath = path.join(process.cwd(), 'public', imagePath);
           if (fs.existsSync(fullPath)) {
             fs.unlinkSync(fullPath);
           }
-        }
+        });
 
         // Delete database record
         await prisma.homeSection.delete({

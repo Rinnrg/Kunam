@@ -4,10 +4,7 @@ import styles from './HomeSections.module.scss';
 export default function HomeSections() {
   const [sections, setSections] = useState([]);
   const [currentSlides, setCurrentSlides] = useState({});
-
-  useEffect(() => {
-    fetchSections();
-  }, []);
+  const carouselRefs = useRef({});
 
   const fetchSections = async () => {
     try {
@@ -28,6 +25,10 @@ export default function HomeSections() {
       console.error('Error fetching sections:', error);
     }
   };
+
+  useEffect(() => {
+    fetchSections();
+  }, []);
 
   // Auto-advance slides
   useEffect(() => {
@@ -85,18 +86,21 @@ export default function HomeSections() {
                 transform: `translateX(-${currentIndex * 100}%)`,
               }}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image} alt={`${section.title} ${index + 1}`} />
             </div>
           ))}
         </div>
 
         <button
+          type="button"
           className={`${styles.navBtn} ${styles.prevBtn}`}
           onClick={() => prevSlide(section.id, section.images.length)}
         >
           ‹
         </button>
         <button
+          type="button"
           className={`${styles.navBtn} ${styles.nextBtn}`}
           onClick={() => nextSlide(section.id, section.images.length)}
         >
@@ -106,6 +110,7 @@ export default function HomeSections() {
         <div className={styles.dots}>
           {section.images.map((_, index) => (
             <button
+              type="button"
               key={index}
               className={`${styles.dot} ${
                 index === currentIndex ? styles.active : ''
@@ -128,6 +133,7 @@ export default function HomeSections() {
       >
         {section.images.map((image, index) => (
           <div key={index} className={styles.gridItem}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={image} alt={`${section.title} ${index + 1}`} />
           </div>
         ))}
@@ -140,6 +146,7 @@ export default function HomeSections() {
       <div className={styles.masonryContainer}>
         {section.images.map((image, index) => (
           <div key={index} className={styles.masonryItem}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={image} alt={`${section.title} ${index + 1}`} />
           </div>
         ))}
@@ -148,33 +155,38 @@ export default function HomeSections() {
   };
 
   const renderCarousel = (section) => {
-    const scrollRef = useRef(null);
-
-    const scroll = (direction) => {
-      if (scrollRef.current) {
+    const scroll = (direction, sectionId) => {
+      const scrollRef = carouselRefs.current[sectionId];
+      if (scrollRef) {
         const scrollAmount = direction === 'left' ? -300 : 300;
-        scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        scrollRef.scrollBy({ left: scrollAmount, behavior: 'smooth' });
       }
     };
 
     return (
       <div className={styles.carouselContainer}>
         <button
+          type="button"
           className={`${styles.carouselBtn} ${styles.carouselPrev}`}
-          onClick={() => scroll('left')}
+          onClick={() => scroll('left', section.id)}
         >
           ‹
         </button>
-        <div className={styles.carouselWrapper} ref={scrollRef}>
+        <div 
+          className={styles.carouselWrapper} 
+          ref={(el) => { carouselRefs.current[section.id] = el; }}
+        >
           {section.images.map((image, index) => (
             <div key={index} className={styles.carouselItem}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image} alt={`${section.title} ${index + 1}`} />
             </div>
           ))}
         </div>
         <button
+          type="button"
           className={`${styles.carouselBtn} ${styles.carouselNext}`}
-          onClick={() => scroll('right')}
+          onClick={() => scroll('right', section.id)}
         >
           ›
         </button>

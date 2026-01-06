@@ -1,6 +1,5 @@
 import { useRef } from 'react';
 
-import InfiniteText from '@src/components/animationComponents/infiniteText/Index';
 import clsx from 'clsx';
 import { gsap } from 'gsap';
 import styles from '@src/pages/components/home/styles/home.module.scss';

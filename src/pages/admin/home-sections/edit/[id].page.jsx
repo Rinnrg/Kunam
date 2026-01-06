@@ -19,19 +19,6 @@ export default function EditHomeSection() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (status === 'unauthenticated') {
-      router.push('/admin/login');
-    }
-  }, [status, router]);
-
-  useEffect(() => {
-    if (id && status === 'authenticated') {
-      fetchSection();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, status]);
-
   const fetchSection = async () => {
     try {
       const response = await fetch(`/api/home-sections/${id}`);
@@ -48,6 +35,22 @@ export default function EditHomeSection() {
     } catch (err) {
       setError('Gagal memuat data section');
     } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/admin/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
+    if (id && status === 'authenticated') {
+      fetchSection();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, status]);
       setIsLoading(false);
     }
   };
@@ -174,6 +177,7 @@ export default function EditHomeSection() {
                 <p>Gambar yang sudah ada:</p>
                 <div className={styles.imageGrid}>
                   {existingImages.map((img, index) => (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img key={index} src={img} alt={`Existing ${index}`} className={styles.thumbnail} />
                   ))}
                 </div>
