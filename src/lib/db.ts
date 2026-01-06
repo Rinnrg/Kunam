@@ -4,7 +4,7 @@ const globalForPrisma = global as unknown as { prisma: PrismaClient };
 
 // Configure Prisma Client with optimized settings
 const prismaClientOptions = {
-  log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  log: (process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error']) as Array<'error' | 'warn' | 'info' | 'query'>,
   datasources: {
     db: {
       url: process.env.DATABASE_URL,
@@ -43,7 +43,7 @@ if (typeof window === 'undefined') {
  * Wrapper function to safely execute Prisma queries with automatic retry
  */
 export async function executePrismaQuery<T>(
-  queryFn: (client: PrismaClient) => Promise<T>
+  queryFn: (prismaClient: PrismaClient) => Promise<T>
 ): Promise<T> {
   try {
     const result = await queryFn(prisma);
