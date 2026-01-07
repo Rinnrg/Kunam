@@ -22,11 +22,12 @@ function ProdukDetailPage({ produk, error }) {
   );
 
   // State management
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [expandedSections, setExpandedSections] = useState({});
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   const currentProduk = produk;
   const isLiked = useMemo(() => wishlist.some((item) => item.produkId === currentProduk?.id), [wishlist, currentProduk]);
@@ -50,16 +51,26 @@ function ProdukDetailPage({ produk, error }) {
     }
   }, [currentProduk]);
 
-  // Enable scrolling on this page
+  // Enable scrolling on this page - Let Lenis handle it on desktop
   useEffect(() => {
-    document.body.style.overflow = 'auto';
-    document.body.style.height = 'auto';
-    document.documentElement.style.overflow = 'auto';
+    // Check if mobile
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    
+    // Only force native scroll on mobile devices
+    if (isMobile || isTouch) {
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      document.documentElement.style.overflow = 'auto';
+    }
+    // On desktop, Lenis will handle scrolling - don't override
 
     return () => {
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.overflow = '';
+      if (isMobile || isTouch) {
+        document.body.style.overflow = '';
+        document.body.style.height = '';
+        document.documentElement.style.overflow = '';
+      }
     };
   }, []);
 
@@ -293,6 +304,26 @@ function ProdukDetailPage({ produk, error }) {
     [currentProduk, allImages]
   );
 
+  // Image modal handlers
+  const openImageModal = useCallback((index) => {
+    setModalImageIndex(index);
+    setIsImageModalOpen(true);
+    document.body.style.overflow = 'hidden';
+  }, []);
+
+  const closeImageModal = useCallback(() => {
+    setIsImageModalOpen(false);
+    document.body.style.overflow = 'auto';
+  }, []);
+
+  const nextImage = useCallback(() => {
+    setModalImageIndex((prev) => (prev + 1) % allImages.length);
+  }, [allImages.length]);
+
+  const prevImage = useCallback(() => {
+    setModalImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
+  }, [allImages.length]);
+
   if (error || !currentProduk) {
     return (
       <>
@@ -332,33 +363,47 @@ function ProdukDetailPage({ produk, error }) {
             <div className={styles.leftColumn}>
               {/* Image Gallery */}
               <div className={styles.imageGallery}>
-                {/* Main Image */}
-                <div className={styles.mainImage}>
-                  <Image
-                    src={allImages[selectedImageIndex] || allImages[0]}
-                    alt={currentProduk.nama}
-                    fill
-                    priority
-                    quality={90}
-                    sizes="(max-width: 768px) 100vw, 60vw"
-                  />
-                </div>
-
-                {/* Thumbnail Grid */}
-                {allImages.length > 1 && (
-                  <div className={styles.thumbnailGrid}>
+                {allImages.length === 1 ? (
+                  // Single image layout
+                  <div 
+                    className={styles.singleImage}
+                    onClick={() => openImageModal(0)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') openImageModal(0);
+                    }}
+                  >
+                    <Image
+                      src={allImages[0]}
+                      alt={currentProduk.nama}
+                      fill
+                      priority
+                      quality={90}
+                      sizes="(max-width: 768px) 100vw, 60vw"
+                    />
+                  </div>
+                ) : (
+                  // Multiple images grid layout (2x2)
+                  <div className={styles.imageGrid}>
                     {allImages.map((img, index) => (
                       <div
                         key={index}
-                        className={clsx(styles.thumbnail, { [styles.active]: index === selectedImageIndex })}
-                        onClick={() => setSelectedImageIndex(index)}
+                        className={styles.gridImage}
+                        onClick={() => openImageModal(index)}
                         role="button"
                         tabIndex={0}
                         onKeyDown={(e) => {
-                          if (e.key === 'Enter') setSelectedImageIndex(index);
+                          if (e.key === 'Enter') openImageModal(index);
                         }}
                       >
-                        <Image src={img} alt={`${currentProduk.nama} ${index + 1}`} fill sizes="150px" />
+                        <Image
+                          src={img}
+                          alt={`${currentProduk.nama} ${index + 1}`}
+                          fill
+                          quality={85}
+                          sizes="(max-width: 768px) 50vw, 30vw"
+                        />
                       </div>
                     ))}
                   </div>
@@ -621,6 +666,89 @@ function ProdukDetailPage({ produk, error }) {
             </div>
           </div>
         </div>
+
+        {/* Image Modal Popup */}
+        {isImageModalOpen && (
+          // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
+          <div className={styles.imageModal} onClick={closeImageModal}>
+            <button 
+              type="button"
+              className={styles.modalClose} 
+              onClick={closeImageModal}
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+            
+            {allImages.length > 1 && (
+              <>
+                <button 
+                  type="button"
+                  className={styles.modalPrev} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    prevImage();
+                  }}
+                  aria-label="Previous image"
+                >
+                  ‹
+                </button>
+                <button 
+                  type="button"
+                  className={styles.modalNext} 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    nextImage();
+                  }}
+                  aria-label="Next image"
+                >
+                  ›
+                </button>
+              </>
+            )}
+
+            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+            <div 
+              className={styles.modalContent}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.modalImageWrapper}>
+                <Image
+                  src={allImages[modalImageIndex]}
+                  alt={`${currentProduk.nama} ${modalImageIndex + 1}`}
+                  fill
+                  quality={100}
+                  sizes="90vw"
+                  style={{ objectFit: 'contain' }}
+                />
+              </div>
+              
+              {allImages.length > 1 && (
+                <div className={styles.modalThumbnails}>
+                  {allImages.map((img, index) => (
+                    <div
+                      key={index}
+                      className={clsx(styles.modalThumbnail, { [styles.active]: index === modalImageIndex })}
+                      onClick={() => setModalImageIndex(index)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') setModalImageIndex(index);
+                      }}
+                    >
+                      <Image 
+                        src={img} 
+                        alt={`Thumbnail ${index + 1}`} 
+                        fill 
+                        sizes="80px"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

@@ -112,15 +112,28 @@ function MyApp({ Component, pageProps, router }) {
       touchMultiplier: 2,
       infinite: false,
       normalizeWheel: true,
+      autoResize: true,  // Enable auto resize
     });
 
     setLenis(lenis);
+    
+    // Force Lenis to recalculate dimensions
+    const resizeObserver = new ResizeObserver(() => {
+      if (lenis) {
+        lenis.resize();
+      }
+    });
+    
+    if (mainContainerRef.current) {
+      resizeObserver.observe(mainContainerRef.current);
+    }
     
     // Safeguard: Ensure lenis starts
     setTimeout(() => {
       if (lenis) {
         console.log('Starting Lenis from timeout');
         lenis.start();
+        lenis.resize();
       }
     }, 100);
     
@@ -129,11 +142,13 @@ function MyApp({ Component, pageProps, router }) {
       if (lenis && !lenis.isScrolling) {
         console.log('Fallback: Starting Lenis');
         lenis.start();
+        lenis.resize();
       }
     }, 3000);
 
     return () => {
       clearTimeout(fallbackTimer);
+      resizeObserver.disconnect();
       lenis.destroy();
       setLenis(null);
     };
@@ -198,6 +213,14 @@ function MyApp({ Component, pageProps, router }) {
         } else {
           window.scrollTo(0, 0);
         }
+      }
+      
+      // Force Lenis to recalculate dimensions after route change
+      if (lenis) {
+        setTimeout(() => {
+          lenis.resize();
+          ScrollTrigger.refresh();
+        }, 100);
       }
       
       // Reset flag

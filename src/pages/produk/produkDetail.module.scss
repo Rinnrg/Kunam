@@ -90,6 +90,64 @@
   }
 }
 
+// Single image layout
+.singleImage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background-color: #f5f5f5;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 8px;
+
+  img {
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.02);
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
+}
+
+// Grid layout for multiple images (2x2)
+.imageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    gap: 0.4rem;
+  }
+}
+
+.gridImage {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background-color: #f5f5f5;
+  overflow: hidden;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+
+  img {
+    object-fit: cover;
+  }
+
+  &:hover {
+    transform: scale(0.98);
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 4px;
+  }
+}
+
 .mainImage {
   position: relative;
   width: 100%;
@@ -670,5 +728,193 @@
     height: 44px;
     font-size: 0.8rem;
     letter-spacing: 0.3px;
+  }
+}
+
+// ===== IMAGE MODAL POPUP =====
+.imageModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}
+
+.modalClose {
+  position: absolute;
+  top: 2rem;
+  right: 2rem;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 3rem;
+  cursor: pointer;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease;
+  z-index: 10001;
+  line-height: 1;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  @media (max-width: 768px) {
+    top: 1rem;
+    right: 1rem;
+    font-size: 2.5rem;
+    width: 40px;
+    height: 40px;
+  }
+}
+
+.modalPrev,
+.modalNext {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  font-size: 3rem;
+  cursor: pointer;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10001;
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    width: 45px;
+    height: 45px;
+    font-size: 2rem;
+  }
+}
+
+.modalPrev {
+  left: 2rem;
+
+  @media (max-width: 768px) {
+    left: 1rem;
+  }
+}
+
+.modalNext {
+  right: 2rem;
+
+  @media (max-width: 768px) {
+    right: 1rem;
+  }
+}
+
+.modalContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  max-width: 90vw;
+  max-height: 90vh;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
+}
+
+.modalImageWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 1200px;
+  height: calc(90vh - 120px);
+  background-color: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
+
+  img {
+    object-fit: contain !important;
+  }
+
+  @media (max-width: 768px) {
+    height: calc(90vh - 100px);
+    border-radius: 4px;
+  }
+}
+
+.modalThumbnails {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.5rem;
+  max-width: 100%;
+
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  }
+}
+
+.modalThumbnail {
+  position: relative;
+  width: 80px;
+  height: 100px;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  background-color: rgba(255, 255, 255, 0.1);
+
+  img {
+    object-fit: cover;
+  }
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+  }
+
+  &.active {
+    border-color: white;
+  }
+
+  @media (max-width: 768px) {
+    width: 60px;
+    height: 75px;
   }
 }
