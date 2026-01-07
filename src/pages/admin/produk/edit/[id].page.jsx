@@ -390,6 +390,9 @@ export default function EditProduk() {
         <div className={styles.formGroup}>
           <label className={styles.label}>
             Deskripsi / Product Sections
+            <span className={styles.helpText}>
+              (Sections akan ditampilkan sebagai detail produk di bawah gallery foto)
+            </span>
           </label>
           <SectionsEditor
             sections={formData.sections}
@@ -456,11 +459,19 @@ export default function EditProduk() {
           />
         </div>
 
-        <MultipleImageUpload
-          images={productImages.allImages}
-          thumbnail={productImages.thumbnail}
-          onChange={handleImagesChange}
-        />
+        <div className={styles.formGroup}>
+          <label className={styles.label}>
+            Foto Produk
+            <span className={styles.helpText}>
+              (Foto pertama akan menjadi thumbnail, semua foto akan ditampilkan di gallery produk)
+            </span>
+          </label>
+          <MultipleImageUpload
+            images={productImages.allImages}
+            thumbnail={productImages.thumbnail}
+            onChange={handleImagesChange}
+          />
+        </div>
 
         <div className={styles.formGroup}>
           {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}

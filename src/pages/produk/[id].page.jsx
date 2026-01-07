@@ -26,12 +26,26 @@ function ProdukDetailPage({ produk, error }) {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [expandedSections, setExpandedSections] = useState({
-    description: true,
-    features: true,
-    care: true,
-    shipping: true,
-  });
+  const [expandedSections, setExpandedSections] = useState({});
+
+  // Initialize expanded sections based on product data
+  useEffect(() => {
+    if (currentProduk?.sections && Array.isArray(currentProduk.sections)) {
+      const initialExpanded = {};
+      currentProduk.sections.forEach((_, index) => {
+        initialExpanded[`section-${index}`] = true; // All sections expanded by default
+      });
+      setExpandedSections(initialExpanded);
+    } else {
+      // Default sections
+      setExpandedSections({
+        description: true,
+        features: true,
+        care: true,
+        shipping: true,
+      });
+    }
+  }, [currentProduk]);
 
   const currentProduk = produk;
   const isLiked = useMemo(() => wishlist.some((item) => item.produkId === currentProduk?.id), [wishlist, currentProduk]);
@@ -353,72 +367,108 @@ function ProdukDetailPage({ produk, error }) {
 
               {/* Product Details */}
               <div className={styles.productDetails}>
-                {/* Description */}
-                <div className={styles.detailSection}>
-                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                  <div className={styles.detailHeader} onClick={() => toggleSection('description')}>
-                    <h3>Deskripsi Produk</h3>
-                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.description })}>
-                      ▼
-                    </span>
-                  </div>
-                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.description })}>
-                    <p>{currentProduk.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
-                  </div>
-                </div>
+                {/* Dynamic Sections from Database */}
+                {currentProduk.sections && Array.isArray(currentProduk.sections) && currentProduk.sections.length > 0 ? (
+                  currentProduk.sections.map((section, index) => (
+                    <div key={index} className={styles.detailSection}>
+                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                      <div className={styles.detailHeader} onClick={() => toggleSection(`section-${index}`)}>
+                        <h3>{section.judul}</h3>
+                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
+                          ▼
+                        </span>
+                      </div>
+                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
+                        {section.gambar && (
+                          <div className={styles.sectionImage}>
+                            <Image 
+                              src={section.gambar} 
+                              alt={section.judul} 
+                              width={600} 
+                              height={400} 
+                              style={{ width: '100%', height: 'auto' }}
+                            />
+                          </div>
+                        )}
+                        <div className={styles.sectionDescription}>
+                          {section.deskripsi.split('\n').map((paragraph, i) => (
+                            <p key={i}>{paragraph}</p>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    {/* Default sections if no custom sections */}
+                    {/* Description */}
+                    <div className={styles.detailSection}>
+                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                      <div className={styles.detailHeader} onClick={() => toggleSection('description')}>
+                        <h3>Deskripsi Produk</h3>
+                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.description })}>
+                          ▼
+                        </span>
+                      </div>
+                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.description })}>
+                        <p>{currentProduk.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
+                      </div>
+                    </div>
 
-                {/* Features */}
-                <div className={styles.detailSection}>
-                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                  <div className={styles.detailHeader} onClick={() => toggleSection('features')}>
-                    <h3>Fitur & Material</h3>
-                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.features })}>
-                      ▼
-                    </span>
-                  </div>
-                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.features })}>
-                    <ul>
-                      <li>Bahan berkualitas tinggi</li>
-                      <li>Nyaman dipakai</li>
-                      <li>Desain modern dan stylish</li>
-                    </ul>
-                  </div>
-                </div>
+                    {/* Features */}
+                    <div className={styles.detailSection}>
+                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                      <div className={styles.detailHeader} onClick={() => toggleSection('features')}>
+                        <h3>Fitur & Material</h3>
+                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.features })}>
+                          ▼
+                        </span>
+                      </div>
+                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.features })}>
+                        <ul>
+                          <li>Bahan berkualitas tinggi</li>
+                          <li>Nyaman dipakai</li>
+                          <li>Desain modern dan stylish</li>
+                        </ul>
+                      </div>
+                    </div>
 
-                {/* Care Instructions */}
-                <div className={styles.detailSection}>
-                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                  <div className={styles.detailHeader} onClick={() => toggleSection('care')}>
-                    <h3>Cara Perawatan</h3>
-                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.care })}>
-                      ▼
-                    </span>
-                  </div>
-                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.care })}>
-                    <ul>
-                      <li>Cuci dengan mesin air dingin</li>
-                      <li>Jangan gunakan pemutih</li>
-                      <li>Keringkan dengan suhu rendah</li>
-                      <li>Setrika dengan suhu sedang</li>
-                    </ul>
-                  </div>
-                </div>
+                    {/* Care Instructions */}
+                    <div className={styles.detailSection}>
+                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                      <div className={styles.detailHeader} onClick={() => toggleSection('care')}>
+                        <h3>Cara Perawatan</h3>
+                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.care })}>
+                          ▼
+                        </span>
+                      </div>
+                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.care })}>
+                        <ul>
+                          <li>Cuci dengan mesin air dingin</li>
+                          <li>Jangan gunakan pemutih</li>
+                          <li>Keringkan dengan suhu rendah</li>
+                          <li>Setrika dengan suhu sedang</li>
+                        </ul>
+                      </div>
+                    </div>
 
-                {/* Shipping & Returns */}
-                <div className={styles.detailSection}>
-                  {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                  <div className={styles.detailHeader} onClick={() => toggleSection('shipping')}>
-                    <h3>Pengiriman & Pengembalian</h3>
-                    <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.shipping })}>
-                      ▼
-                    </span>
-                  </div>
-                  <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.shipping })}>
-                    <p>Gratis ongkir untuk pembelian di atas Rp 500.000</p>
-                    <p>Pengembalian gratis dalam 30 hari</p>
-                    <p>Garansi uang kembali jika produk tidak sesuai</p>
-                  </div>
-                </div>
+                    {/* Shipping & Returns */}
+                    <div className={styles.detailSection}>
+                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                      <div className={styles.detailHeader} onClick={() => toggleSection('shipping')}>
+                        <h3>Pengiriman & Pengembalian</h3>
+                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.shipping })}>
+                          ▼
+                        </span>
+                      </div>
+                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.shipping })}>
+                        <p>Gratis ongkir untuk pembelian di atas Rp 500.000</p>
+                        <p>Pengembalian gratis dalam 30 hari</p>
+                        <p>Garansi uang kembali jika produk tidak sesuai</p>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 

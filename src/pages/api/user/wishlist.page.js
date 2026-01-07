@@ -3,13 +3,19 @@ import prisma from '@src/lib/db';
 import { userAuthOptions } from '../auth/user/[...nextauth].page';
 
 export default async function handler(req, res) {
-  const session = await getServerSession(req, res, userAuthOptions);
+  try {
+    const session = await getServerSession(req, res, userAuthOptions);
 
-  if (!session || !session.user) {
-    return res.status(401).json({ message: 'Unauthorized' });
-  }
+    if (!session || !session.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
-  const userId = parseInt(session.user.id, 10);
+    const userId = parseInt(session.user.id, 10);
+
+    // Validate userId
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: 'Invalid user ID' });
+    }
 
   // GET - Get user's wishlist
   if (req.method === 'GET') {
@@ -125,4 +131,9 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ message: 'Method not allowed' });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('[Wishlist Handler] Unhandled Error:', error);
+    return res.status(500).json({ message: 'Terjadi kesalahan server' });
+  }
 }

@@ -32,7 +32,10 @@ function Layout({ children, layoutRef, mainRef, router }) {
           onComplete: () => {
             setIsAbout(router.asPath === '/about');
             setIsLoading(false);
-            lenis.start();
+            // Check if lenis exists and has start method before calling
+            if (lenis && typeof lenis.start === 'function') {
+              lenis.start();
+            }
           },
         });
 
@@ -89,7 +92,10 @@ function Layout({ children, layoutRef, mainRef, router }) {
       if (introOut) {
         if (enterTimelineRef.current) enterTimelineRef.current.pause();
 
-        lenis.stop();
+        // Check if lenis exists and has stop method before calling
+        if (lenis && typeof lenis.stop === 'function') {
+          lenis.stop();
+        }
         if (isMenuOpen) {
           setIsMenuOpen(false);
         }
@@ -97,7 +103,10 @@ function Layout({ children, layoutRef, mainRef, router }) {
           const tl = gsap.timeline({
             onComplete: () => {
               setIsLoading(true);
-              lenis.scrollTo(0, { force: true });
+              // Check if lenis exists and has scrollTo method before calling
+              if (lenis && typeof lenis.scrollTo === 'function') {
+                lenis.scrollTo(0, { force: true });
+              }
             },
           });
 
