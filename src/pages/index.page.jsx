@@ -4,6 +4,7 @@ import HomeSections from '@src/pages/components/homeSections/Index';
 import Quote from '@src/pages/components/quote/Index';
 import Produk from '@src/pages/components/produk/Index';
 import CustomHead from '@src/components/dom/CustomHead';
+import { executePrismaQuery } from '@src/lib/prisma';
 
 const seo = {
   title: 'Kunam - Clothing Store',
@@ -42,10 +43,14 @@ function Page({ produk, homeSections }) {
   );
 }
 
-export async function getServerSideProps() {
-  try {
-    const { executePrismaQuery } = await import('../lib/prisma');
+export async function getServerSideProps({ res }) {
+  // Set cache control headers to prevent stale data
+  res.setHeader(
+    'Cache-Control',
+    'public, s-maxage=10, stale-while-revalidate=59'
+  );
 
+  try {
     // Fetch data using the helper to manage connections better
     const [produk, homeSections] = await Promise.all([
       // Fetch latest products for "Koleksi Terbaru" section

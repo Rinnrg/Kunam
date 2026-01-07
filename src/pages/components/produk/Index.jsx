@@ -18,9 +18,8 @@ function Produk({ produk = [] }) {
   );
 
   // Show only 4 newest products on homepage
-  const latestProduk = produk
-    .sort((a, b) => new Date(b.tanggalDibuat) - new Date(a.tanggalDibuat))
-    .slice(0, 4);
+  // Data already sorted by tanggalDibuat DESC from database
+  const latestProduk = produk.slice(0, 4);
 
   // Handle wishlist toggle
   const handleWishlistToggle = useCallback(async (e, productId) => {
