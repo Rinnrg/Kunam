@@ -10,13 +10,18 @@ import styles from './MultipleImageUpload.module.scss';
  * - Drag and drop reordering
  * - Preview existing and new images
  */
-function MultipleImageUpload({ existingImages = [], onChange }) {
-  const [images, setImages] = useState(existingImages.map((url, index) => ({
-    url,
-    isNew: false,
-    isThumbnail: index === 0, // First image is thumbnail by default
-    file: null,
-  })));
+function MultipleImageUpload({ existingImages = [], images: propImages, onChange }) {
+  // Initialize from either existingImages (legacy string array) or propImages (new object array)
+  const initialImages = propImages && propImages.length > 0
+    ? propImages
+    : existingImages.map((url, index) => ({
+        url: typeof url === 'string' ? url : url.url,
+        isNew: false,
+        isThumbnail: index === 0,
+        file: null,
+      }));
+      
+  const [images, setImages] = useState(initialImages);
   const [draggedIndex, setDraggedIndex] = useState(null);
 
   // Handle new file selection
@@ -33,14 +38,19 @@ function MultipleImageUpload({ existingImages = [], onChange }) {
     const updatedImages = [...images, ...newImages];
     setImages(updatedImages);
     
-    // Call onChange with separated thumbnail and gallery
+    // Call onChange with ALL image objects (including isThumbnail flag)
     if (onChange) {
       const thumbnail = updatedImages.find(img => img.isThumbnail);
       const gallery = updatedImages.filter(img => !img.isThumbnail);
       onChange({
         thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
         gallery: gallery.map(img => img.file || img.url),
-        allImages: updatedImages,
+        allImages: updatedImages.map(img => ({
+          url: img.url,
+          file: img.file,
+          isNew: img.isNew,
+          isThumbnail: img.isThumbnail,
+        })),
       });
     }
   }, [images, onChange]);
@@ -59,7 +69,12 @@ function MultipleImageUpload({ existingImages = [], onChange }) {
       onChange({
         thumbnail: thumbnail.file || thumbnail.url,
         gallery: gallery.map(img => img.file || img.url),
-        allImages: updatedImages,
+        allImages: updatedImages.map(img => ({
+          url: img.url,
+          file: img.file,
+          isNew: img.isNew,
+          isThumbnail: img.isThumbnail,
+        })),
       });
     }
   }, [images, onChange]);
@@ -88,7 +103,12 @@ function MultipleImageUpload({ existingImages = [], onChange }) {
       onChange({
         thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
         gallery: gallery.map(img => img.file || img.url),
-        allImages: updatedImages,
+        allImages: updatedImages.map(img => ({
+          url: img.url,
+          file: img.file,
+          isNew: img.isNew,
+          isThumbnail: img.isThumbnail,
+        })),
       });
     }
   }, [images, onChange]);
@@ -116,7 +136,12 @@ function MultipleImageUpload({ existingImages = [], onChange }) {
       onChange({
         thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
         gallery: gallery.map(img => img.file || img.url),
-        allImages: updatedImages,
+        allImages: updatedImages.map(img => ({
+          url: img.url,
+          file: img.file,
+          isNew: img.isNew,
+          isThumbnail: img.isThumbnail,
+        })),
       });
     }
   }, [draggedIndex, images, onChange]);

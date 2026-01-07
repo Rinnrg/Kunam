@@ -64,11 +64,19 @@ export default function EditProduk() {
         const imagesArray = data.gambar || data.images || [];
         const videosArray = data.video || data.videos || [];
 
+        // Convert existing images to proper format with isThumbnail flag
+        const imageObjects = imagesArray.map((url, index) => ({
+          url,
+          file: null,
+          isNew: false,
+          isThumbnail: url === data.thumbnail || (index === 0 && !data.thumbnail),
+        }));
+
         // Set existing images for MultipleImageUpload component
         setProductImages({
           thumbnail: data.thumbnail || (imagesArray.length > 0 ? imagesArray[0] : null),
           gallery: imagesArray,
-          allImages: imagesArray
+          allImages: imageObjects
         });
         
         setExistingVideos(videosArray);
@@ -180,7 +188,10 @@ export default function EditProduk() {
   };
 
   const uploadImages = async () => {
-    const newImages = productImages.allImages.filter(img => img instanceof File);
+    // Filter only File objects from allImages (new uploads)
+    const newImages = productImages.allImages
+      .filter(img => img && img.isNew && img.file instanceof File)
+      .map(img => img.file);
     
     if (newImages.length === 0) return [];
 
@@ -266,27 +277,37 @@ export default function EditProduk() {
       const uploadedImageUrls = await uploadImages();
       const uploadedVideoUrls = await uploadVideos();
 
-      // Get existing image URLs (strings, not File objects)
-      const existingImageUrls = productImages.allImages.filter(img => typeof img === 'string');
+      // Get existing image URLs (objects with url property or strings)
+      const existingImageUrls = productImages.allImages
+        .filter(img => !img.isNew)
+        .map(img => (typeof img === 'string' ? img : img.url));
       
       // Combine existing with newly uploaded ones
       const allImages = [...existingImageUrls, ...uploadedImageUrls];
       const allVideos = [...existingVideos, ...uploadedVideoUrls];
       
-      // Determine thumbnail URL
+      // Determine thumbnail URL - find the image marked as thumbnail
       let thumbnailUrl = '';
-      if (productImages.thumbnail) {
-        if (typeof productImages.thumbnail === 'string') {
-          thumbnailUrl = productImages.thumbnail;
-        } else {
-          // Find the uploaded URL for the thumbnail file
-          const thumbnailIndex = productImages.allImages.findIndex(img => img === productImages.thumbnail);
-          const newImageStartIndex = existingImageUrls.length;
-          if (thumbnailIndex >= newImageStartIndex) {
-            thumbnailUrl = uploadedImageUrls[thumbnailIndex - newImageStartIndex];
+      if (productImages.allImages && productImages.allImages.length > 0) {
+        // Find the thumbnail image
+        const thumbnailImage = productImages.allImages.find(img => img.isThumbnail);
+        if (thumbnailImage) {
+          if (thumbnailImage.isNew) {
+            // It's a new upload - find its index among new images
+            const newImages = productImages.allImages.filter(img => img.isNew);
+            const thumbnailIndexInNew = newImages.findIndex(img => img === thumbnailImage);
+            if (thumbnailIndexInNew !== -1 && uploadedImageUrls[thumbnailIndexInNew]) {
+              thumbnailUrl = uploadedImageUrls[thumbnailIndexInNew];
+            }
+          } else {
+            // It's an existing image
+            thumbnailUrl = typeof thumbnailImage === 'string' ? thumbnailImage : thumbnailImage.url;
           }
         }
-      } else if (allImages.length > 0) {
+      }
+      
+      // Fallback to first image if no thumbnail marked
+      if (!thumbnailUrl && allImages.length > 0) {
         thumbnailUrl = allImages[0];
       }
 

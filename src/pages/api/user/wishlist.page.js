@@ -10,11 +10,13 @@ export default async function handler(req, res) {
       return res.status(401).json({ message: 'Unauthorized' });
     }
 
+    // Parse userId and validate
     const userId = parseInt(session.user.id, 10);
 
-    // Validate userId
-    if (Number.isNaN(userId)) {
-      return res.status(400).json({ message: 'Invalid user ID' });
+    // Validate userId - check if it's a valid number and not NaN
+    if (!userId || Number.isNaN(userId) || userId <= 0) {
+      console.error('[Wishlist API] Invalid userId:', session.user.id);
+      return res.status(400).json({ message: 'Invalid user ID', userId: session.user.id });
     }
 
   // GET - Get user's wishlist

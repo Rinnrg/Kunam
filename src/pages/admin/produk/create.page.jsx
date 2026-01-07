@@ -114,7 +114,10 @@ export default function CreateProduk() {
   };
 
   const uploadImages = async () => {
-    const newImages = productImages.allImages.filter(img => img instanceof File);
+    // Filter only File objects from allImages
+    const newImages = productImages.allImages
+      .filter(img => img.isNew && img.file instanceof File)
+      .map(img => img.file);
     
     if (newImages.length === 0) return [];
 
@@ -200,16 +203,22 @@ export default function CreateProduk() {
       const uploadedImageUrls = await uploadImages();
       const uploadedVideoUrls = await uploadVideos();
       
-      // Determine thumbnail URL
+      // Determine thumbnail URL - use the first image that was marked as thumbnail
       let thumbnailUrl = '';
-      if (productImages.thumbnail) {
-        // Find the index of thumbnail in allImages array
-        const thumbnailIndex = productImages.allImages.findIndex(img => img === productImages.thumbnail);
-        if (thumbnailIndex !== -1) {
-          thumbnailUrl = uploadedImageUrls[thumbnailIndex];
+      if (productImages.allImages && productImages.allImages.length > 0) {
+        // Find the thumbnail image
+        const thumbnailImage = productImages.allImages.find(img => img.isThumbnail);
+        if (thumbnailImage) {
+          // Find its index in the allImages array
+          const thumbnailIndex = productImages.allImages.indexOf(thumbnailImage);
+          if (thumbnailIndex !== -1 && uploadedImageUrls[thumbnailIndex]) {
+            thumbnailUrl = uploadedImageUrls[thumbnailIndex];
+          }
         }
-      } else if (uploadedImageUrls.length > 0) {
-        thumbnailUrl = uploadedImageUrls[0];
+        // Fallback to first image if no thumbnail marked
+        if (!thumbnailUrl && uploadedImageUrls.length > 0) {
+          thumbnailUrl = uploadedImageUrls[0];
+        }
       }
 
       // Prepare form data with uploaded URLs
