@@ -13,7 +13,7 @@ export default async function handler(req, res) {
     const userId = parseInt(session.user.id, 10);
 
     // Validate userId
-    if (isNaN(userId)) {
+    if (Number.isNaN(userId)) {
       return res.status(400).json({ message: 'Invalid user ID' });
     }
 

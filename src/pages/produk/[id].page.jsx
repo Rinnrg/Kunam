@@ -28,6 +28,9 @@ function ProdukDetailPage({ produk, error }) {
   const [quantity, setQuantity] = useState(1);
   const [expandedSections, setExpandedSections] = useState({});
 
+  const currentProduk = produk;
+  const isLiked = useMemo(() => wishlist.some((item) => item.produkId === currentProduk?.id), [wishlist, currentProduk]);
+
   // Initialize expanded sections based on product data
   useEffect(() => {
     if (currentProduk?.sections && Array.isArray(currentProduk.sections)) {
@@ -46,9 +49,6 @@ function ProdukDetailPage({ produk, error }) {
       });
     }
   }, [currentProduk]);
-
-  const currentProduk = produk;
-  const isLiked = useMemo(() => wishlist.some((item) => item.produkId === currentProduk?.id), [wishlist, currentProduk]);
 
   // Enable scrolling on this page
   useEffect(() => {
