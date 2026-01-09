@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import prisma from '@/lib/prisma';
+import prisma from '@src/lib/prisma';
 import {
   getClientIP,
   isIPBlocked,
@@ -8,7 +8,7 @@ import {
   logSecurityEvent,
   sanitizeInput,
   validateRequestOrigin,
-} from '@/lib/security';
+} from '@src/lib/security';
 
 /**
  * Enhanced Admin Login API with Security Features
