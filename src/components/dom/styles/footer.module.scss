@@ -14,7 +14,6 @@
     padding: calc(var(--layout-columns-gap) * 1.5) var(--layout-margin) calc(var(--layout-columns-gap) * 1) var(--layout-margin);
   }
 
-  // Company Info Section
   .companyInfo {
     padding-bottom: calc(var(--layout-columns-gap) * 2);
 
@@ -57,14 +56,6 @@
       p {
         margin-bottom: calc(var(--layout-columns-gap) * 0.5);
         font-weight: 400;
-
-        @include mobile {
-          margin-bottom: calc(var(--layout-columns-gap) * 0.4);
-        }
-      }
-
-      .tagline {
-        font-weight: 400;
       }
     }
 
@@ -72,179 +63,59 @@
       color: var(--white);
       font-size: 0.85vw;
       font-weight: 400;
-      line-height: 1.6;
-
-      @include mobile {
-        font-size: 3.5vw;
-        line-height: 1.5;
-      }
 
       .title {
         font-size: 1vw;
-        font-weight: 400;
         margin-bottom: calc(var(--layout-columns-gap) * 0.5);
         color: var(--white);
-
-        @include mobile {
-          font-size: 4vw;
-          margin-bottom: calc(var(--layout-columns-gap) * 0.3);
-        }
       }
 
-      p {
-        margin: calc(var(--layout-columns-gap) * 0.25) 0;
-        font-weight: 400;
+      a {
+        color: var(--white);
+        text-decoration: none;
+        transition: color 0.3s ease;
 
-        @include mobile {
-          margin: calc(var(--layout-columns-gap) * 0.2) 0;
-        }
-
-        a {
-          color: var(--white);
-          text-decoration: none;
-          position: relative;
-          transition: color 0.3s ease;
-
-          &::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background-color: var(--white);
-            transition: width 0.3s ease;
-          }
-
-          &:hover {
-            color: var(--fillColor);
-
-            &::after {
-              width: 100%;
-              background-color: var(--fillColor);
-            }
-          }
+        &:hover {
+          color: var(--fillColor);
         }
       }
     }
   }
 
-  // Links Grid for mobile 2-column layout
-  .linksGrid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: calc(var(--layout-columns-gap) * 0.8);
-    grid-column: 1 / 7 !important;
-  }
-
-  // Links Container
   .linksContainer {
     padding-top: calc(var(--layout-columns-gap) * 0.5);
-
-    @include mobile {
-      padding-top: 0;
-    }
-
     width: 100%;
-
-    > div {
-      width: 100%;
-    }
 
     .title {
       color: var(--white);
       font-size: 1vw;
       font-weight: 600;
       padding-bottom: calc(var(--layout-columns-gap) * 0.75);
-      letter-spacing: 0.05em;
 
       @include mobile {
         font-size: 4vw;
-        padding-bottom: calc(var(--layout-columns-gap) * 0.4);
       }
     }
 
-    .linkTextContainer {
-      padding-top: calc(var(--layout-columns-gap) * 0.35);
-
-      @include mobile {
-        padding-top: calc(var(--layout-columns-gap) * 0.2);
-      }
-
-      .linkText {
-        cursor: pointer;
-        overflow: unset;
-        display: flex;
-        align-items: center;
-        position: relative;
-        font-size: 0.85vw;
-        transition: all 0.3s ease;
-
-        @include mobile {
-          font-size: 3.5vw;
-        }
-
-        > svg {
-          height: 0.6vw;
-          width: 0.6vw;
-          top: auto;
-          overflow: unset;
-          fill: var(--white);
-          stroke: var(--white);
-
-          @include mobile {
-            height: 2vw;
-            width: 2vw;
-            left: -2vw;
-          }
-        }
-
-        &:hover {
-          color: var(--fillColor);
-
-          svg {
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.1, 1) !important;
-            transform: translate3d(0.8vw, 0, 0) rotate(-150deg) !important;
-
-            @include mobile {
-              transform: translate3d(2vw, 0, 0) rotate(-150deg) !important;
-            }
-          }
-
-          span {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.1, 1) !important;
-            transform: translate3d(0.4vw, 0, 0);
-            color: var(--fillColor);
-
-            @include mobile {
-              transform: translate3d(1.8vw, 0, 0);
-            }
-          }
-        }
-      }
-    }
-
-    // Social Icons
+    // Bagian Social Icons yang sudah diperbaiki
     .socialIcons {
       display: flex;
       flex-wrap: wrap;
       gap: calc(var(--layout-columns-gap) * 0.5);
       margin-top: calc(var(--layout-columns-gap) * 0.5);
 
-      @include mobile {
-        gap: calc(var(--layout-columns-gap) * 0.4);
-        margin-top: calc(var(--layout-columns-gap) * 0.3);
-      }
-
       .socialIconContainer {
+        overflow: visible; // Mencegah cropping
+
         .socialLink {
           display: flex;
           align-items: center;
           justify-content: center;
           width: 2.5vw;
           height: 2.5vw;
-          background-color: rgba(255, 255, 255, 0.1);
-          border-radius: 50%;
+          background-color: transparent !important; // Hilangkan bundaran
+          border-radius: 0 !important; // Hilangkan bentuk lingkaran
+          overflow: visible !important; // Pastikan logo tidak terpotong
           transition: all 0.3s ease;
 
           @include mobile {
@@ -252,63 +123,29 @@
             height: 11vw;
           }
 
-          .iconPlaceholder {
-            color: var(--white);
-            font-size: 1.2vw;
-            font-weight: 600;
-
-            @include mobile {
-              font-size: 4.5vw;
-            }
+          .socialIcon {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: contain !important; // Logo utuh & proporsional
           }
 
           &:hover {
-            background-color: var(--fillColor);
             transform: scale(1.1);
-
-            .iconPlaceholder {
-              color: var(--black);
-            }
           }
         }
       }
     }
   }
 
-  // Bottom Container
   .bottomContainer {
     margin-top: calc(var(--layout-columns-gap) * 2);
     padding-top: calc(var(--layout-columns-gap) * 1.5);
     border-top: 1px solid rgba(255, 255, 255, 0.2);
 
-    @include mobile {
-      margin-top: calc(var(--layout-columns-gap) * 1.2);
-      padding-top: calc(var(--layout-columns-gap) * 0.8);
-    }
-
     .bottomInfo {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: calc(var(--layout-columns-gap) * 0.5);
       color: var(--white);
       font-size: 0.85vw;
-
-      @include mobile {
-        font-size: 3.2vw;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: calc(var(--layout-columns-gap) * 0.2);
-      }
-
-      .bottomText {
-        opacity: 0.7;
-      }
+      opacity: 0.7;
     }
-  }
-
-  div {
-    color: var(--white);
   }
 }

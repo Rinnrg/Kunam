@@ -154,7 +154,7 @@ function Navbar() {
             {(() => {
               // Desktop view
               if (!isMobile) {
-                return session?.user ? <UserNavbar /> : <ButtonLink onClick={handleLoginClick} label="LOGIN" />;
+                return session?.user ? <UserNavbar /> : <ButtonLink onClick={handleLoginClick} label="DAFTAR/LOGIN" />;
               }
               
               // Mobile view - Always show search, wishlist, cart

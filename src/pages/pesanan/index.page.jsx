@@ -13,11 +13,11 @@ import styles from './pesanan.module.scss';
 
 const ORDER_STATUSES = [
   { key: 'all', label: 'Semua', icon: null },
-  { key: 'pending', label: 'Menunggu Pembayaran', icon: '⏳' },
-  { key: 'processing', label: 'Diproses', icon: '📦' },
-  { key: 'shipped', label: 'Dikirim', icon: '🚚' },
-  { key: 'delivered', label: 'Selesai', icon: '✅' },
-  { key: 'cancelled', label: 'Dibatalkan', icon: '❌' },
+  { key: 'pending', label: 'Menunggu Pembayaran'},
+  { key: 'processing', label: 'Diproses',},
+  { key: 'shipped', label: 'Dikirim',},
+  { key: 'delivered', label: 'Selesai',},
+  { key: 'cancelled', label: 'Dibatalkan',},
 ];
 
 const STATUS_LABELS = {
@@ -29,10 +29,10 @@ const STATUS_LABELS = {
 };
 
 const TIMELINE_STEPS = [
-  { key: 'pending', label: 'Pesanan Dibuat', icon: '📝' },
-  { key: 'processing', label: 'Diproses', icon: '📦' },
-  { key: 'shipped', label: 'Dikirim', icon: '🚚' },
-  { key: 'delivered', label: 'Diterima', icon: '✅' },
+  { key: 'pending', label: 'Pesanan Dibuat'},
+  { key: 'processing', label: 'Diproses'},
+  { key: 'shipped', label: 'Dikirim'},
+  { key: 'delivered', label: 'Diterima'},
 ];
 
 function PesananPage() {

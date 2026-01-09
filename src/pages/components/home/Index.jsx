@@ -37,14 +37,14 @@ function Home() {
         <h2 className="h2">Elevate Your</h2>
         <h2 className={clsx('h2', 'bold')}>Style Statement</h2>
         <p className={styles.subtitle}>Discover premium clothing that defines your unique identity</p>
-        <div className={styles.ctaContainer}>
+        {/* <div className={styles.ctaContainer}>
           <button type="button" className={styles.primaryButton}>
             Product Collection
           </button>
           <button type="button" className={styles.secondaryButton}>
             View Lookbook
           </button>
-        </div>
+        </div> */}
       </div>
     </section>
   );
