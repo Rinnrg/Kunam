@@ -9,6 +9,10 @@
   justify-content: center;
   background-color: #fff;
   gap: 2rem;
+  
+  &.blackBackground {
+    background-color: #000;
+  }
 }
 
 .animationText {

@@ -2,9 +2,9 @@ import styles from './LoadingSpinner.module.scss';
 
 function LoadingSpinner({ size = 'medium', fullscreen = false }) {
   const sizeMap = {
-    small: 40,
-    medium: 60,
-    large: 80,
+    small: 30,
+    medium: 40,
+    large: 50,
   };
 
   const containerSize = sizeMap[size] || sizeMap.medium;

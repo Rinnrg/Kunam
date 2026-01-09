@@ -81,11 +81,11 @@ function SuksesPage() {
   useEffect(() => {
     if (!showAnimation1) return undefined;
     
-    // Show animation 1 for 2 seconds
+    // Show animation 1 for 3 seconds
     const timer1 = setTimeout(() => {
       setShowAnimation1(false);
       setShowAnimation2(true);
-    }, 2000);
+    }, 3000);
 
     return () => clearTimeout(timer1);
   }, [showAnimation1]);
@@ -93,11 +93,11 @@ function SuksesPage() {
   useEffect(() => {
     if (!showAnimation2) return undefined;
     
-    // Show animation 2 for 2 seconds
+    // Show animation 2 for 5 seconds before showing receipt
     const timer2 = setTimeout(() => {
       setShowAnimation2(false);
       setShowReceipt(true);
-    }, 2000);
+    }, 5000);
 
     return () => clearTimeout(timer2);
   }, [showAnimation2]);
@@ -185,7 +185,7 @@ function SuksesPage() {
         <CustomHead {...seo} />
         <div className={styles.animationContainer}>
           <DotLottieReact
-            src="https://lottie.host/4c5ce210-69b0-41e1-a3d5-6e0d1c0e6b2a/NUQGGzjl0s.json"
+            src="https://lottie.host/46195a4e-5424-4d18-85f0-f16e8f88e696/f3QvBSLY4H.lottie"
             loop={false}
             autoplay
             style={{ width: '300px', height: '300px' }}
@@ -200,14 +200,13 @@ function SuksesPage() {
     return (
       <>
         <CustomHead {...seo} />
-        <div className={styles.animationContainer}>
+        <div className={`${styles.animationContainer} ${styles.blackBackground}`}>
           <DotLottieReact
-            src="https://lottie.host/b1f9c5f8-8e5a-4f3e-9c5a-8f5e5b5e5b5e/ZpjqX5zJ0P.json"
+            src="https://lottie.host/e1c883f2-fa12-45f5-8379-57109bb3cb01/IdRCZWAxwi.lottie"
             loop={false}
             autoplay
             style={{ width: '300px', height: '300px' }}
           />
-          <p className={styles.animationText}>Memproses pesanan Anda...</p>
         </div>
       </>
     );
