@@ -79,27 +79,27 @@ function SuksesPage() {
 
   // Animation sequence effect
   useEffect(() => {
-    if (showAnimation1) {
-      // Show animation 1 for 2 seconds
-      const timer1 = setTimeout(() => {
-        setShowAnimation1(false);
-        setShowAnimation2(true);
-      }, 2000);
+    if (!showAnimation1) return undefined;
+    
+    // Show animation 1 for 2 seconds
+    const timer1 = setTimeout(() => {
+      setShowAnimation1(false);
+      setShowAnimation2(true);
+    }, 2000);
 
-      return () => clearTimeout(timer1);
-    }
+    return () => clearTimeout(timer1);
   }, [showAnimation1]);
 
   useEffect(() => {
-    if (showAnimation2) {
-      // Show animation 2 for 2 seconds
-      const timer2 = setTimeout(() => {
-        setShowAnimation2(false);
-        setShowReceipt(true);
-      }, 2000);
+    if (!showAnimation2) return undefined;
+    
+    // Show animation 2 for 2 seconds
+    const timer2 = setTimeout(() => {
+      setShowAnimation2(false);
+      setShowReceipt(true);
+    }, 2000);
 
-      return () => clearTimeout(timer2);
-    }
+    return () => clearTimeout(timer2);
   }, [showAnimation2]);
 
   useEffect(() => {
