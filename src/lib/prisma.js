@@ -8,17 +8,9 @@ import { PrismaClient } from '@prisma/client';
 
 const globalForPrisma = global;
 
-// Configure Prisma Client with optimized connection pooling
+// Configure Prisma Client with optimized settings
 const prismaClientOptions = {
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
-  },
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
-  // Add connection pool settings to limit connections
-  // This helps prevent "max clients reached" errors
-  connectionLimit: 10, // Limit concurrent connections
 };
 
 // Create singleton instance
