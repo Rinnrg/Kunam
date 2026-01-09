@@ -166,35 +166,34 @@ function SuksesPage() {
 
   // Additional effect to force scroll when receipt shows
   useEffect(() => {
-    if (showReceipt) {
-      // Add class to body and html
-      document.body.classList.add('receipt-page');
-      document.documentElement.classList.add('receipt-page');
-      
-      // Extra aggressive scroll enable when showing receipt
-      const forceScroll = () => {
-        document.body.style.overflow = 'auto !important';
-        document.body.style.height = 'auto !important';
-        document.documentElement.style.overflow = 'auto !important';
-        window.scrollTo(0, 0);
-        return true;
-      };
-      
-      forceScroll();
-      
-      // Multiple checks to ensure scroll works
-      const timer1 = setTimeout(forceScroll, 100);
-      const timer2 = setTimeout(forceScroll, 300);
-      const timer3 = setTimeout(forceScroll, 500);
-      
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
-        document.body.classList.remove('receipt-page');
-        document.documentElement.classList.remove('receipt-page');
-      };
-    }
+    if (!showReceipt) return undefined;
+    
+    // Add class to body and html
+    document.body.classList.add('receipt-page');
+    document.documentElement.classList.add('receipt-page');
+    
+    // Extra aggressive scroll enable when showing receipt
+    const forceScroll = () => {
+      document.body.style.overflow = 'auto !important';
+      document.body.style.height = 'auto !important';
+      document.documentElement.style.overflow = 'auto !important';
+      window.scrollTo(0, 0);
+    };
+    
+    forceScroll();
+    
+    // Multiple checks to ensure scroll works
+    const timer1 = setTimeout(forceScroll, 100);
+    const timer2 = setTimeout(forceScroll, 300);
+    const timer3 = setTimeout(forceScroll, 500);
+    
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+      clearTimeout(timer3);
+      document.body.classList.remove('receipt-page');
+      document.documentElement.classList.remove('receipt-page');
+    };
   }, [showReceipt]);
 
   // Format date
