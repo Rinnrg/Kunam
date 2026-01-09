@@ -133,7 +133,7 @@ function SuksesPage() {
     }
   }, [status, router, setIsAuthModalOpen, fetchOrderStatus]);
 
-  // Enable scrolling on this page
+  // Enable scrolling on this page and during animations
   useEffect(() => {
     document.body.style.overflow = 'auto';
     document.body.style.height = 'auto';
@@ -144,7 +144,7 @@ function SuksesPage() {
       document.body.style.height = '';
       document.documentElement.style.overflow = '';
     };
-  }, []);
+  }, [showAnimation1, showAnimation2, showReceipt]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -203,10 +203,11 @@ function SuksesPage() {
         <div className={`${styles.animationContainer} ${styles.blackBackground}`}>
           <DotLottieReact
             src="https://lottie.host/e1c883f2-fa12-45f5-8379-57109bb3cb01/IdRCZWAxwi.lottie"
-            loop={false}
+            loop
             autoplay
             style={{ width: '300px', height: '300px' }}
           />
+          <p className={styles.animationText}>Sedang mencetak bukti pembayaran...</p>
         </div>
       </>
     );

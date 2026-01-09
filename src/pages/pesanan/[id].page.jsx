@@ -8,6 +8,7 @@ import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
 import LoadingSpinner from '@src/components/dom/LoadingSpinner';
+import ReviewDialog from '@src/components/dom/ReviewDialog';
 import styles from './pesanan.module.scss';
 
 const STATUS_LABELS = {
@@ -35,6 +36,11 @@ function OrderDetailPage() {
 
   const [order, setOrder] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [reviewDialog, setReviewDialog] = useState({
+    isOpen: false,
+    produkId: null,
+    produkName: '',
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -149,6 +155,33 @@ function OrderDetailPage() {
       });
     }
   }, [order, router, showAlert]);
+
+  const handleOpenReviewDialog = useCallback(() => {
+    if (order?.order_items?.[0]) {
+      const firstItem = order.order_items[0];
+      setReviewDialog({
+        isOpen: true,
+        produkId: firstItem.produkId,
+        produkName: firstItem.produk?.nama || 'Produk',
+      });
+    }
+  }, [order]);
+
+  const handleCloseReviewDialog = useCallback(() => {
+    setReviewDialog({
+      isOpen: false,
+      produkId: null,
+      produkName: '',
+    });
+  }, []);
+
+  const handleReviewSuccess = useCallback(() => {
+    showAlert({
+      type: 'success',
+      title: 'Ulasan Terkirim',
+      message: 'Terima kasih atas ulasan Anda!',
+    });
+  }, [showAlert]);
 
   const formatDate = (dateString) => {
     const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -343,7 +376,11 @@ function OrderDetailPage() {
               </button>
             )}
             {order.status === 'delivered' && (
-              <button type="button" className={styles.btnSecondary}>
+              <button 
+                type="button" 
+                className={styles.btnSecondary}
+                onClick={handleOpenReviewDialog}
+              >
                 Beri Ulasan
               </button>
             )}
@@ -353,6 +390,16 @@ function OrderDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Review Dialog */}
+      <ReviewDialog
+        isOpen={reviewDialog.isOpen}
+        onClose={handleCloseReviewDialog}
+        produkId={reviewDialog.produkId}
+        produkName={reviewDialog.produkName}
+        orderId={order?.id}
+        onSuccess={handleReviewSuccess}
+      />
     </>
   );
 }
