@@ -84,3 +84,11 @@ main,
 header {
   will-change: transform, opacity;
 }
+
+/* Force scroll enable for receipt/payment success pages */
+body.receipt-page,
+html.receipt-page {
+  overflow: auto !important;
+  height: auto !important;
+  position: relative !important;
+}

@@ -135,16 +135,66 @@ function SuksesPage() {
 
   // Enable scrolling on this page and during animations
   useEffect(() => {
-    document.body.style.overflow = 'auto';
-    document.body.style.height = 'auto';
-    document.documentElement.style.overflow = 'auto';
+    // Force enable scroll
+    const enableScroll = () => {
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      document.documentElement.style.overflow = 'auto';
+      document.body.style.position = 'relative';
+      document.documentElement.style.position = 'relative';
+      
+      // Remove any scroll lock from other components
+      const html = document.documentElement;
+      html.classList.remove('scroll-lock', 'no-scroll');
+      document.body.classList.remove('scroll-lock', 'no-scroll');
+    };
+
+    enableScroll();
+
+    // Re-enable scroll after a short delay (for animation transitions)
+    const timer = setTimeout(enableScroll, 100);
 
     return () => {
+      clearTimeout(timer);
       document.body.style.overflow = '';
       document.body.style.height = '';
       document.documentElement.style.overflow = '';
+      document.body.style.position = '';
+      document.documentElement.style.position = '';
     };
   }, [showAnimation1, showAnimation2, showReceipt]);
+
+  // Additional effect to force scroll when receipt shows
+  useEffect(() => {
+    if (showReceipt) {
+      // Add class to body and html
+      document.body.classList.add('receipt-page');
+      document.documentElement.classList.add('receipt-page');
+      
+      // Extra aggressive scroll enable when showing receipt
+      const forceScroll = () => {
+        document.body.style.overflow = 'auto !important';
+        document.body.style.height = 'auto !important';
+        document.documentElement.style.overflow = 'auto !important';
+        window.scrollTo(0, 0);
+      };
+      
+      forceScroll();
+      
+      // Multiple checks to ensure scroll works
+      const timer1 = setTimeout(forceScroll, 100);
+      const timer2 = setTimeout(forceScroll, 300);
+      const timer3 = setTimeout(forceScroll, 500);
+      
+      return () => {
+        clearTimeout(timer1);
+        clearTimeout(timer2);
+        clearTimeout(timer3);
+        document.body.classList.remove('receipt-page');
+        document.documentElement.classList.remove('receipt-page');
+      };
+    }
+  }, [showReceipt]);
 
   // Format date
   const formatDate = (dateString) => {
@@ -185,7 +235,7 @@ function SuksesPage() {
         <CustomHead {...seo} />
         <div className={styles.animationContainer}>
           <DotLottieReact
-            src="https://lottie.host/46195a4e-5424-4d18-85f0-f16e8f88e696/f3QvBSLY4H.lottie"
+            src="https://lottie.host/embed/46195a4e-5424-4d18-85f0-f16e8f88e696/f3QvBSLY4H.lottie"
             loop={false}
             autoplay
             style={{ width: '300px', height: '300px' }}
@@ -202,7 +252,7 @@ function SuksesPage() {
         <CustomHead {...seo} />
         <div className={`${styles.animationContainer} ${styles.blackBackground}`}>
           <DotLottieReact
-            src="https://lottie.host/e1c883f2-fa12-45f5-8379-57109bb3cb01/IdRCZWAxwi.lottie"
+            src="https://lottie.host/embed/e1c883f2-fa12-45f5-8379-57109bb3cb01/IdRCZWAxwi.lottie"
             loop
             autoplay
             style={{ width: '300px', height: '300px' }}

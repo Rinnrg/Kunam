@@ -9,6 +9,9 @@
   justify-content: center;
   background-color: #fff;
   gap: 2rem;
+  position: relative; // Changed from fixed to relative
+  width: 100%;
+  overflow: visible; // Allow overflow
   
   &.blackBackground {
     background-color: #000;
@@ -44,6 +47,8 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative; // Ensure relative positioning
+  overflow: visible; // Allow scroll
 }
 
 // Old container kept for compatibility
