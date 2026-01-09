@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import styles from './ReviewDialog.module.scss';
 
 function ReviewDialog({ isOpen, onClose, produkId, produkName, orderId, onSuccess }) {
@@ -7,6 +7,30 @@ function ReviewDialog({ isOpen, onClose, produkId, produkName, orderId, onSucces
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
+
+  // Lock body scroll when dialog is open
+  useEffect(() => {
+    if (isOpen) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      
+      // Lock scroll
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        // Unlock scroll and restore position
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+    return undefined;
+  }, [isOpen]);
 
   const handleSubmit = useCallback(async (e) => {
     e.preventDefault();

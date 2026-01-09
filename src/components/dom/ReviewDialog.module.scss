@@ -11,6 +11,7 @@
   z-index: 10000;
   padding: 1rem;
   animation: fadeIn 0.2s ease;
+  overflow: hidden;
 }
 
 @keyframes fadeIn {
