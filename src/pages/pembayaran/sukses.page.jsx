@@ -177,6 +177,7 @@ function SuksesPage() {
         document.body.style.height = 'auto !important';
         document.documentElement.style.overflow = 'auto !important';
         window.scrollTo(0, 0);
+        return true;
       };
       
       forceScroll();
