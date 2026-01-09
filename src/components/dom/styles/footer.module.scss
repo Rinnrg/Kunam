@@ -131,14 +131,10 @@
 
   // Links Grid for mobile 2-column layout
   .linksGrid {
-    display: contents;
-
-    @include mobile {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: calc(var(--layout-columns-gap) * 0.8);
-      grid-column: 1 / 7 !important;
-    }
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: calc(var(--layout-columns-gap) * 0.8);
+    grid-column: 1 / 7 !important;
   }
 
   // Links Container

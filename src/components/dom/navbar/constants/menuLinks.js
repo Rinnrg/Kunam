@@ -24,7 +24,7 @@ export const getMenuLinks = (categories = []) => {
         },
         {
           title: 'Instagram',
-          href: 'https://www.instagram.com/',
+          href: 'https://www.instagram.com/kunam.officialshop/',
           external: true,
         },
       ],
@@ -58,7 +58,7 @@ const menuLinks = [
       },
       {
         title: 'Instagram',
-        href: 'https://www.instagram.com/',
+        href: 'https://www.instagram.com/kunam.officialshop/',
         external: true,
       },
     ],
