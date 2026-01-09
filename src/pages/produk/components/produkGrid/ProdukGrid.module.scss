@@ -164,27 +164,44 @@
 }
 
 .cardContent {
-  padding: 1rem 0;
+  padding: 1.25rem 0;
 
   @include mobile {
-    padding: 0.75rem 0;
+    padding: 1rem 0;
   }
 }
 
+.bottomActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.nameContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
 .productName {
-  font-size: 0.875rem;
-  font-weight: 400;
-  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
   color: #000;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
+  margin-right: 0.5rem;
 
   @include mobile {
-    font-size: 0.8rem;
-    margin-bottom: 0.25rem;
+    font-size: 1rem;
   }
 }
 
@@ -193,16 +210,27 @@
   align-items: baseline;
   gap: 0.5rem;
   flex-wrap: wrap;
+  margin-bottom: 0.5rem;
 }
 
 .currentPrice {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #000;
 
   @include mobile {
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
+
+  &.discountedPrice {
+    color: #ff0000;
+  }
+}
+
+.originalPriceContainer {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .originalPrice {
@@ -211,23 +239,35 @@
   text-decoration: line-through;
 }
 
+.discountBadgeSmall {
+  font-size: 0.65rem;
+  color: #ff0000;
+  font-weight: 600;
+  background: #ffeaea;
+  padding: 0.1rem 0.3rem;
+  border-radius: 3px;
+}
+
+.category {
+  font-size: 0.7rem;
+  color: #666;
+  margin-top: 0.5rem;
+  font-weight: 500;
+}
+
 // Wishlist Button
 .wishlistBtn {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.9);
-  border: none;
+  border: 1px solid #e0e0e0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1rem;
   transition: all 0.2s ease;
-  z-index: 2;
 
   &:hover {
     background: #fff;
@@ -239,29 +279,22 @@
   }
 
   @include mobile {
-    width: 32px;
-    height: 32px;
-    font-size: 1rem;
-    top: 0.5rem;
-    right: 0.5rem;
+    width: 28px;
+    height: 28px;
+    font-size: 0.9rem;
   }
 }
 
 // Discount Badge
 .discountBadge {
-  position: absolute;
-  top: 0.75rem;
-  left: 0.75rem;
   background: #ff0000;
   color: #fff;
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  z-index: 2;
+  border-radius: 4px;
 
   @include mobile {
-    top: 0.5rem;
-    left: 0.5rem;
     font-size: 0.7rem;
     padding: 0.2rem 0.4rem;
   }

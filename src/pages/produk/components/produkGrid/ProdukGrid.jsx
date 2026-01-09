@@ -219,20 +219,6 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
                   href={`/produk/${item.id}`}
                   className={styles.card}
                 >
-                  {/* Wishlist Button */}
-                  <button
-                    type="button"
-                    className={clsx(styles.wishlistBtn, { [styles.active]: isLiked })}
-                    onClick={(e) => handleWishlistToggle(e, item.id)}
-                    aria-label={isLiked ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}
-                  >
-                    {isLiked ? '♥' : '♡'}
-                  </button>
-
-                  {/* Discount Badge */}
-                  {item.diskon > 0 && (
-                    <span className={styles.discountBadge}>-{item.diskon}%</span>
-                  )}
 
                   {/* Image */}
                   <div className={styles.imageContainer}>
@@ -246,17 +232,36 @@ function ProdukGrid({ produk = [], kategori = null, error = null }) {
 
                   {/* Content */}
                   <div className={styles.cardContent}>
-                    <h3 className={styles.productName}>{item.nama}</h3>
+                    <div className={styles.nameContainer}>
+                      <h3 className={styles.productName}>{item.nama}</h3>
+                      {/* Wishlist Button */}
+                      <button
+                        type="button"
+                        className={clsx(styles.wishlistBtn, { [styles.active]: isLiked })}
+                        onClick={(e) => handleWishlistToggle(e, item.id)}
+                        aria-label={isLiked ? 'Hapus dari wishlist' : 'Tambah ke wishlist'}
+                      >
+                        {isLiked ? '♥' : '♡'}
+                      </button>
+                    </div>
                     <div className={styles.priceContainer}>
-                      <span className={styles.currentPrice}>
+                      <span className={clsx(styles.currentPrice, { [styles.discountedPrice]: item.diskon > 0 })}>
                         Rp {finalPrice.toLocaleString('id-ID')}
                       </span>
                       {item.diskon > 0 && (
-                        <span className={styles.originalPrice}>
-                          Rp {item.harga.toLocaleString('id-ID')}
-                        </span>
+                        <div className={styles.originalPriceContainer}>
+                          <span className={styles.originalPrice}>
+                            Rp {item.harga.toLocaleString('id-ID')}
+                          </span>
+                          <span className={styles.discountBadgeSmall}>-{item.diskon}%</span>
+                        </div>
                       )}
                     </div>
+                    <div className={styles.category}>{item.kategori}</div>
+                  </div>
+
+                  {/* Bottom Actions */}
+                  <div className={styles.bottomActions}>
                   </div>
                 </Link>
               );

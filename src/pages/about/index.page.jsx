@@ -25,16 +25,9 @@ const seo = {
 };
 function Page() {
   return (
-    <>
-      <CustomHead {...seo} />
-      <div style={{ padding: '0 2rem', maxWidth: '1400px', margin: '0 auto' }}>
-        <Breadcrumb items={[{ label: 'About', href: null }]} />
-      </div>
-      <Hero />
-      <Overview />
-      <Services />
-      <Process />
-    </>
+    <div style={{ margin: '2rem 0', padding: '0 2rem' }}>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+    </div>
   );
 }
 

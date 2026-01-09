@@ -4,10 +4,12 @@ import clsx from 'clsx';
 import { gsap } from 'gsap';
 import styles from '@src/pages/components/home/styles/home.module.scss';
 import { useIsomorphicLayoutEffect } from '@src/hooks/useIsomorphicLayoutEffect';
+import { useRouter } from 'next/router';
 
 function Home() {
   const rootRef = useRef();
   const infiniteTextRef = useRef();
+  const router = useRouter();
 
   useIsomorphicLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -37,14 +39,14 @@ function Home() {
         <h2 className="h2">Elevate Your</h2>
         <h2 className={clsx('h2', 'bold')}>Style Statement</h2>
         <p className={styles.subtitle}>Discover premium clothing that defines your unique identity</p>
-        {/* <div className={styles.ctaContainer}>
-          <button type="button" className={styles.primaryButton}>
+        <div className={styles.ctaContainer}>
+          <button type="button" className={styles.primaryButton} onClick={() => router.push('/produk')}>
             Product Collection
           </button>
-          <button type="button" className={styles.secondaryButton}>
+          {/* <button type="button" className={styles.secondaryButton}>
             View Lookbook
-          </button>
-        </div> */}
+          </button> */}
+        </div>
       </div>
     </section>
   );

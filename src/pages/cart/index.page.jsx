@@ -369,7 +369,7 @@ function CartPage() {
                                   </span>
                                   <span className={styles.priceOriginal}>Rp {item.produk.harga.toLocaleString('id-ID')}</span>
                                   {item.produk.diskon > 0 && (
-                                    <span className={styles.saleLabel}>DISKON</span>
+                                    <span className={styles.saleLabel}>{item.produk.diskon}%</span>
                                   )}
                                 </>
                               ) : (
