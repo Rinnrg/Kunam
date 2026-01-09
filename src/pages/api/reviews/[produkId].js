@@ -66,13 +66,13 @@ export default async function handler(req, res) {
     }
 
     try {
-      // Cek apakah user sudah pernah membeli produk ini
-      const hasPurchased = await prisma.orderItem.findFirst({
+      // Cek apakah user sudah pernah membeli produk ini dan pembayaran sudah selesai
+      const hasPurchased = await prisma.order_items.findFirst({
         where: {
           produkId,
-          order: {
+          orders: {
             userId: session.user.id,
-            status: 'completed', // Hanya order yang sudah selesai
+            paymentStatus: 'settlement', // Hanya order yang sudah dibayar
           },
         },
       });
@@ -116,6 +116,23 @@ export default async function handler(req, res) {
               image: true,
             },
           },
+        },
+      });
+
+      // Update product rating dan totalReviews
+      const allReviews = await prisma.reviews.findMany({
+        where: { produkId },
+        select: { rating: true },
+      });
+
+      const totalRating = allReviews.reduce((sum, r) => sum + r.rating, 0);
+      const averageRating = allReviews.length > 0 ? totalRating / allReviews.length : 0;
+
+      await prisma.produk.update({
+        where: { id: produkId },
+        data: {
+          rating: Number(averageRating.toFixed(1)),
+          totalReviews: allReviews.length,
         },
       });
 

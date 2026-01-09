@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Image from 'next/image';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './login.module.scss';
 
 export default function AdminLogin() {
@@ -88,7 +89,7 @@ export default function AdminLogin() {
   if (status === 'loading') {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Memuat...</div>
+        <LoadingSpinner size="large" />
       </div>
     );
   }

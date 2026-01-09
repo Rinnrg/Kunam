@@ -9,6 +9,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './pembayaran.module.scss';
 
 function PembayaranPage() {
@@ -326,9 +327,7 @@ function PembayaranPage() {
     return (
       <>
         <CustomHead {...seo} />
-        <div className={styles.loading}>
-          <p>Memuat...</p>
-        </div>
+        <LoadingSpinner fullscreen />
       </>
     );
   }

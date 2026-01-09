@@ -41,6 +41,9 @@ function SuksesPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [order, setOrder] = useState(null);
   const [error, setError] = useState(null);
+  const [showAnimation1, setShowAnimation1] = useState(false);
+  const [showAnimation2, setShowAnimation2] = useState(false);
+  const [showReceipt, setShowReceipt] = useState(false);
 
   const fetchOrderStatus = useCallback(async (orderNumber) => {
     try {
@@ -52,13 +55,52 @@ function SuksesPage() {
       }
 
       setOrder(data.order);
+      
+      // Start animation sequence after data is loaded
+      if (data.order.paymentStatus === 'settlement') {
+        // Jika pembayaran berhasil, mulai sequence animasi
+        setTimeout(() => {
+          setIsLoading(false);
+          setShowAnimation1(true);
+        }, 500);
+      } else {
+        // Jika pending, langsung tampilkan receipt
+        setIsLoading(false);
+        setShowReceipt(true);
+      }
     } catch (err) {
       console.error('Error fetching order:', err);
       setError(err.message);
-    } finally {
       setIsLoading(false);
+    } finally {
+      // Remove finally setIsLoading since we handle it in the try block
     }
   }, []);
+
+  // Animation sequence effect
+  useEffect(() => {
+    if (showAnimation1) {
+      // Show animation 1 for 2 seconds
+      const timer1 = setTimeout(() => {
+        setShowAnimation1(false);
+        setShowAnimation2(true);
+      }, 2000);
+
+      return () => clearTimeout(timer1);
+    }
+  }, [showAnimation1]);
+
+  useEffect(() => {
+    if (showAnimation2) {
+      // Show animation 2 for 2 seconds
+      const timer2 = setTimeout(() => {
+        setShowAnimation2(false);
+        setShowReceipt(true);
+      }, 2000);
+
+      return () => clearTimeout(timer2);
+    }
+  }, [showAnimation2]);
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -136,6 +178,41 @@ function SuksesPage() {
     );
   }
 
+  // Show Animation 1
+  if (showAnimation1) {
+    return (
+      <>
+        <CustomHead {...seo} />
+        <div className={styles.animationContainer}>
+          <DotLottieReact
+            src="https://lottie.host/4c5ce210-69b0-41e1-a3d5-6e0d1c0e6b2a/NUQGGzjl0s.json"
+            loop={false}
+            autoplay
+            style={{ width: '300px', height: '300px' }}
+          />
+        </div>
+      </>
+    );
+  }
+
+  // Show Animation 2
+  if (showAnimation2) {
+    return (
+      <>
+        <CustomHead {...seo} />
+        <div className={styles.animationContainer}>
+          <DotLottieReact
+            src="https://lottie.host/b1f9c5f8-8e5a-4f3e-9c5a-8f5e5b5e5b5e/ZpjqX5zJ0P.json"
+            loop={false}
+            autoplay
+            style={{ width: '300px', height: '300px' }}
+          />
+          <p className={styles.animationText}>Memproses pesanan Anda...</p>
+        </div>
+      </>
+    );
+  }
+
   if (error || !order) {
     return (
       <>
@@ -149,6 +226,16 @@ function SuksesPage() {
             </Link>
           </div>
         </div>
+      </>
+    );
+  }
+
+  // Don't show receipt until showReceipt is true
+  if (!showReceipt) {
+    return (
+      <>
+        <CustomHead {...seo} />
+        <LoadingSpinner fullscreen />
       </>
     );
   }

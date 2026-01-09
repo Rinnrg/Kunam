@@ -100,6 +100,8 @@ model produk {
   tanggalDibuat  DateTime      @default(now())
   tanggalDiubah  DateTime      @updatedAt
   jumlahTerjual  Int           @default(0)
+  rating         Float         @default(0)    // Average rating
+  totalReviews   Int           @default(0)    // Total number of reviews
   carts          carts[]
   order_items    order_items[]
   reviews        reviews[]
@@ -110,6 +112,7 @@ model produk {
   @@index([kategori])
   @@index([produkUnggulan])
   @@index([urutanTampilan])
+  @@index([rating])
 }
 
 model reviews {

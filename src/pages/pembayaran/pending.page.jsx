@@ -8,6 +8,7 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './sukses.module.scss';
 
 function PendingPage() {
@@ -184,9 +185,7 @@ function PendingPage() {
     return (
       <>
         <CustomHead {...seo} />
-        <div className={styles.loading}>
-          <p>Memuat...</p>
-        </div>
+        <LoadingSpinner fullscreen />
       </>
     );
   }

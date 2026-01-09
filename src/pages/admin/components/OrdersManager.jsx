@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './OrdersManager.module.scss';
 
 export default function OrdersManager() {
@@ -128,8 +129,7 @@ export default function OrdersManager() {
   if (isLoading) {
     return (
       <div className={styles.loading}>
-        <div className={styles.spinner} />
-        <p>Memuat data pesanan...</p>
+        <LoadingSpinner size="large" />
       </div>
     );
   }

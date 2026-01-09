@@ -7,6 +7,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './pesanan.module.scss';
 
 const ORDER_STATUSES = [
@@ -223,7 +224,7 @@ function PesananPage() {
   if (status === 'loading' || isLoading) {
     return (
       <div className={styles.loading}>
-        <p>Memuat...</p>
+        <LoadingSpinner size="large" />
       </div>
     );
   }

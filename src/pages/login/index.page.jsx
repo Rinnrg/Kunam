@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import Image from 'next/image';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './login.module.scss';
 
 function LoginPage() {
@@ -170,7 +171,7 @@ function LoginPage() {
   if (status === 'loading') {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Memuat...</div>
+        <LoadingSpinner size="large" />
       </div>
     );
   }

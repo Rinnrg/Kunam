@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useStore } from '@src/store';
 import { useShallow } from 'zustand/react/shallow';
+import LoadingSpinner from './LoadingSpinner';
 import styles from './ProductReviews.module.scss';
 
 function ProductReviews({ produkId }) {
@@ -187,7 +188,9 @@ function ProductReviews({ produkId }) {
   if (loading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Memuat review...</div>
+        <div className={styles.loading}>
+          <LoadingSpinner size="medium" />
+        </div>
       </div>
     );
   }

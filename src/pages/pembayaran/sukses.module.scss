@@ -1,5 +1,32 @@
 @import '@src/styles/variables.scss';
 
+// Animation container untuk animasi sukses
+.animationContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff;
+  gap: 2rem;
+}
+
+.animationText {
+  font-size: 1.25rem;
+  color: #333;
+  font-weight: 500;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 // Page wrapper tanpa header/footer
 .pageWrapper {
   min-height: 100vh;
