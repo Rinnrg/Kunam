@@ -8,6 +8,7 @@ import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
 import LoadingSpinner from '@src/components/dom/LoadingSpinner';
+import ReviewDialog from '@src/components/dom/ReviewDialog';
 import styles from './pesanan.module.scss';
 
 const ORDER_STATUSES = [
@@ -47,6 +48,12 @@ function PesananPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [reviewDialog, setReviewDialog] = useState({
+    isOpen: false,
+    produkId: null,
+    produkName: '',
+    orderId: null,
+  });
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -199,6 +206,34 @@ function PesananPage() {
       });
     }
   }, [router, showAlert]);
+
+  const handleOpenReview = useCallback((produkId, produkName, orderId) => {
+    setReviewDialog({
+      isOpen: true,
+      produkId,
+      produkName,
+      orderId,
+    });
+  }, []);
+
+  const handleCloseReview = useCallback(() => {
+    setReviewDialog({
+      isOpen: false,
+      produkId: null,
+      produkName: '',
+      orderId: null,
+    });
+  }, []);
+
+  const handleReviewSuccess = useCallback(() => {
+    showAlert({
+      type: 'success',
+      title: 'Ulasan Berhasil',
+      message: 'Terima kasih atas ulasan Anda!',
+    });
+    // Optionally refresh orders to update review status
+    fetchOrders();
+  }, [showAlert, fetchOrders]);
 
   const formatDate = (dateString) => {
     const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -392,7 +427,20 @@ function PesananPage() {
                             >
                               Beli Lagi
                             </button>
-                            <button type="button" className={styles.btnSecondary}>
+                            <button 
+                              type="button" 
+                              className={styles.btnSecondary}
+                              onClick={() => {
+                                const firstItem = order.order_items?.[0];
+                                if (firstItem) {
+                                  handleOpenReview(
+                                    firstItem.produkId,
+                                    firstItem.produk?.nama || 'Produk',
+                                    order.id
+                                  );
+                                }
+                              }}
+                            >
                               Beri Ulasan
                             </button>
                           </>
@@ -449,6 +497,16 @@ function PesananPage() {
           )}
         </div>
       </main>
+
+      {/* Review Dialog */}
+      <ReviewDialog
+        isOpen={reviewDialog.isOpen}
+        onClose={handleCloseReview}
+        produkId={reviewDialog.produkId}
+        produkName={reviewDialog.produkName}
+        orderId={reviewDialog.orderId}
+        onSuccess={handleReviewSuccess}
+      />
     </>
   );
 }
