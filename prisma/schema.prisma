@@ -65,6 +65,7 @@ model orders {
   transactionId   String?       // Midtrans transaction ID
   transactionTime DateTime?
   paidAt          DateTime?
+  stockUpdated    Boolean       @default(false) // Track if stock has been updated
   
   // Customer info
   customerName    String?

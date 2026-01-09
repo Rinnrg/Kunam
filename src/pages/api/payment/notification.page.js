@@ -92,27 +92,71 @@ export default async function handler(req, res) {
     };
 
     // Set paidAt if payment is successful
-    if (paymentStatus === 'settlement' && !order.paidAt) {
-      updateData.paidAt = new Date();
+    if (paymentStatus === 'settlement') {
+      // Only update paidAt if not already set
+      if (!order.paidAt) {
+        updateData.paidAt = new Date();
+      }
       
-      console.log('💰 Payment settled! Updating product stock and sold count...');
-      
-      // Update product sold count
-      const orderItems = order.order_items;
+      // Only update stock if not already updated
+      if (!order.stockUpdated) {
+        console.log('💰 Payment settled! Updating product stock and sold count...');
+        console.log(`Order ID: ${order.id}, Order Number: ${orderId}`);
+        
+        // Update product sold count and stock
+        const orderItems = order.order_items;
+        console.log(`Processing ${orderItems.length} items...`);
 
-      // Update all products in parallel
-      const updatePromises = orderItems.map((item) =>
-        prisma.produk.update({
-          where: { id: item.produkId },
-          data: {
-            jumlahTerjual: { increment: item.quantity },
-            stok: { decrement: item.quantity },
-          },
-        }).then(() => {
-          console.log(`  ✅ Updated product ${item.produkId}: +${item.quantity} sold, -${item.quantity} stock`);
-        })
-      );
-      await Promise.all(updatePromises);
+        // Update all products in parallel with error handling
+        const updatePromises = orderItems.map(async (item) => {
+          try {
+            // First check if product exists and has enough stock
+            const product = await prisma.produk.findUnique({
+              where: { id: item.produkId },
+              select: { id: true, nama: true, stok: true, jumlahTerjual: true },
+            });
+
+            if (!product) {
+              console.error(`  ❌ Product ${item.produkId} not found`);
+              return { success: false, produkId: item.produkId, error: 'Product not found' };
+            }
+
+            console.log(`  📦 Product ${item.produkId} (${product.nama}): Current stock=${product.stok}, will decrease by ${item.quantity}`);
+
+            // Check if stock is sufficient
+            if (product.stok < item.quantity) {
+              console.warn(`  ⚠️  Warning: Product ${item.produkId} has insufficient stock (${product.stok} < ${item.quantity})`);
+            }
+
+            // Update product
+            const updated = await prisma.produk.update({
+              where: { id: item.produkId },
+              data: {
+                jumlahTerjual: { increment: item.quantity },
+                stok: { decrement: item.quantity },
+              },
+              select: { stok: true, jumlahTerjual: true },
+            });
+
+            console.log(`  ✅ Updated product ${item.produkId}: sold ${product.jumlahTerjual} → ${updated.jumlahTerjual}, stock ${product.stok} → ${updated.stok}`);
+            return { success: true, produkId: item.produkId };
+          } catch (productError) {
+            console.error(`  ❌ Error updating product ${item.produkId}:`, productError);
+            return { success: false, produkId: item.produkId, error: productError.message };
+          }
+        });
+        
+        const results = await Promise.all(updatePromises);
+        const successCount = results.filter(r => r?.success).length;
+        const failCount = results.filter(r => r && !r.success).length;
+        
+        console.log(`✅ Stock update complete: ${successCount} success, ${failCount} failed`);
+        
+        // Store stock update flag in order
+        updateData.stockUpdated = true;
+      } else {
+        console.log('ℹ️  Stock already updated for this order. Skipping...');
+      }
     }
 
     await prisma.orders.update({

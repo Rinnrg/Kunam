@@ -16,6 +16,7 @@ import Lenis from 'lenis';
 import Loader from '@src/components/dom/Loader';
 import Navbar from '@src/components/dom/navbar/Index';
 import AlertDialog from '@src/components/dom/AlertDialog';
+import GlobalLoader from '@src/components/dom/GlobalLoader';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import Scrollbar from '@src/components/dom/Scrollbar';
 import { SessionProvider } from 'next-auth/react';
@@ -67,9 +68,15 @@ function MyApp({ Component, pageProps, router }) {
   const mainContainerRef = useRef();
   const layoutRef = useRef();
   const transitionOverlayRef = useRef();
+  
   // Check if current page is admin page
   const isAdminPage = router.pathname.startsWith('/admin');
   const isLoginPage = router.pathname === '/login';
+  const isReceiptPage = router.pathname === '/pembayaran/sukses';
+  
+  // Check if page has custom layout (getLayout function)
+  const getLayout = Component.getLayout || null;
+  const useCustomLayout = getLayout !== null;
 
   // Prevent flash on initial load
   useEffect(() => {
@@ -85,8 +92,8 @@ function MyApp({ Component, pageProps, router }) {
   });
 
   useIsomorphicLayoutEffect(() => {
-    // Skip Lenis for admin pages
-    if (isAdminPage) return undefined;
+    // Skip Lenis for admin, login, and receipt pages
+    if (isAdminPage || isReceiptPage) return undefined;
 
     // Check if it's a mobile device
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -264,21 +271,21 @@ function MyApp({ Component, pageProps, router }) {
   const domElements = useMemo(
     () => (
       <>
-        {!isAdminPage && <Loader />}
-        {!isAdminPage && (
+        {!isAdminPage && !isReceiptPage && <Loader />}
+        {!isAdminPage && !isReceiptPage && (
           <div className={styles.background}>
             <Background />
           </div>
         )}
-        {!isAdminPage && <Scrollbar />}
+        {!isAdminPage && !isReceiptPage && <Scrollbar />}
         <Analytics />
       </>
     ),
-    [isAdminPage],
+    [isAdminPage, isReceiptPage],
   );
 
   const canvasElements = useMemo(() => {
-    if (isAdminPage) return null;
+    if (isAdminPage || isReceiptPage) return null;
 
     return (
       <Canvas
@@ -305,6 +312,9 @@ function MyApp({ Component, pageProps, router }) {
   if (isAdminPage) {
     return (
       <SessionProvider session={pageProps.session}>
+        {/* Global Page Loader */}
+        <GlobalLoader />
+        
         {/* Page Transition Overlay */}
         <div ref={transitionOverlayRef} className="page-transition-overlay" />
         <Component {...pageProps} />
@@ -316,6 +326,9 @@ function MyApp({ Component, pageProps, router }) {
   if (isLoginPage) {
     return (
       <SessionProvider session={pageProps.session}>
+        {/* Global Page Loader */}
+        <GlobalLoader />
+        
         {/* Page Transition Overlay */}
         <div ref={transitionOverlayRef} className="page-transition-overlay" />
         <Component {...pageProps} />
@@ -323,8 +336,26 @@ function MyApp({ Component, pageProps, router }) {
     );
   }
 
+  // Render pages with custom layout (like receipt page - no header/footer)
+  if (useCustomLayout) {
+    return (
+      <SessionProvider session={pageProps.session}>
+        {/* Global Page Loader */}
+        <GlobalLoader />
+        
+        {/* Page Transition Overlay */}
+        <div ref={transitionOverlayRef} className="page-transition-overlay" />
+        
+        {getLayout(<Component {...pageProps} />)}
+      </SessionProvider>
+    );
+  }
+
   return (
     <SessionProvider session={pageProps.session}>
+      {/* Global Page Loader */}
+      <GlobalLoader />
+      
       {/* Page Transition Overlay */}
       <div ref={transitionOverlayRef} className="page-transition-overlay" />
       

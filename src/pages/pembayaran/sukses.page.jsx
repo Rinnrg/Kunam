@@ -4,10 +4,18 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
+import LoadingSpinner from '@src/components/dom/LoadingSpinner';
 import styles from './sukses.module.scss';
+
+// Import Lottie dynamically to avoid SSR issues
+const DotLottieReact = dynamic(
+  () => import('@lottiefiles/dotlottie-react').then(mod => mod.DotLottieReact),
+  { ssr: false }
+);
 
 const PAYMENT_TYPE_LABELS = {
   gopay: 'GoPay',
@@ -108,6 +116,11 @@ function SuksesPage() {
     });
   };
 
+  // Handle print receipt
+  const handlePrintReceipt = useCallback(() => {
+    window.print();
+  }, []);
+
   // SEO
   const seo = {
     title: 'Pembayaran Berhasil - Kunam',
@@ -118,9 +131,7 @@ function SuksesPage() {
     return (
       <>
         <CustomHead {...seo} />
-        <div className={styles.loading}>
-          <p>Memuat...</p>
-        </div>
+        <LoadingSpinner fullscreen />
       </>
     );
   }
@@ -148,11 +159,26 @@ function SuksesPage() {
   return (
     <>
       <CustomHead {...seo} />
-      <div className={styles.container}>
+      
+      <div className={styles.pageWrapper}>
         <div className={styles.receipt}>
-          {/* Success Icon */}
+          {/* Success Icon with Lottie Animation */}
           <div className={isPaid ? styles.successIcon : styles.pendingIcon}>
-            {isPaid ? '✓' : '⏳'}
+            {isPaid ? (
+              <DotLottieReact
+                src="https://lottie.host/4c5ce210-69b0-41e1-a3d5-6e0d1c0e6b2a/NUQGGzjl0s.json"
+                loop={false}
+                autoplay
+                style={{ width: '120px', height: '120px' }}
+              />
+            ) : (
+              <DotLottieReact
+                src="https://lottie.host/b5dbea15-768b-4e5e-9c4f-8f5e5b5e5b5e/5KT7T7T7T7.json"
+                loop
+                autoplay
+                style={{ width: '120px', height: '120px' }}
+              />
+            )}
           </div>
 
           {/* Title */}
@@ -161,13 +187,13 @@ function SuksesPage() {
           </h1>
           <p className={styles.subtitle}>
             {isPaid
-              ? 'Terima kasih! Pesanan Anda sedang diproses.'
+              ? 'Terima kasih!  Pesanan Anda sedang diproses.'
               : 'Silakan selesaikan pembayaran Anda.'}
           </p>
 
           {/* Order Number */}
           <div className={styles.orderNumber}>
-            <div className={styles.label}>Nomor Pesanan</div>
+            <div className={styles.label}>ID Pesanan</div>
             <div className={styles.value}>{order.orderNumber}</div>
           </div>
 
@@ -271,24 +297,31 @@ function SuksesPage() {
 
           <div className={styles.divider} />
 
-          {/* Actions */}
-          <div className={styles.actions}>
-            <Link href="/pesanan" className={styles.primaryButton}>
-              Lihat Pesanan Saya
-            </Link>
-            <Link href="/produk" className={styles.secondaryButton}>
-              Lanjut Belanja
-            </Link>
-          </div>
-
           {/* Timestamp */}
           <p className={styles.timestamp}>
             Transaksi pada {formatDate(order.createdAt)}
           </p>
+
+          {/* Actions - Hidden during print */}
+          <div className={`${styles.actions} ${styles.noPrint}`}>
+            <button 
+              type="button"
+              onClick={handlePrintReceipt}
+              className={styles.printButton}
+            >
+              Cetak Bukti Pembayaran
+            </button>
+            <Link href="/pesanan" className={styles.outlineButton}>
+              Lihat Pesanan Saya
+            </Link>
+          </div>
         </div>
       </div>
     </>
   );
 }
+
+// Disable layout for this page (no header/footer)
+SuksesPage.getLayout = (page) => page;
 
 export default SuksesPage;
