@@ -19,7 +19,6 @@ export default function OrdersPage() {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
-  const [statusFilter, setStatusFilter] = useState('all')
   const [deleteLoading, setDeleteLoading] = useState(null)
   const [updateLoading, setUpdateLoading] = useState(null)
   const [editingOrder, setEditingOrder] = useState(null)
@@ -128,9 +127,7 @@ export default function OrdersPage() {
       order.users?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.users?.email?.toLowerCase().includes(searchQuery.toLowerCase())
     
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter
-
-    return matchesSearch && matchesStatus
+    return matchesSearch
   })
 
   const orderStats = {
@@ -140,6 +137,439 @@ export default function OrdersPage() {
     shipped: orders.filter(o => o.status === 'shipped').length,
     delivered: orders.filter(o => o.status === 'delivered').length,
     cancelled: orders.filter(o => o.status === 'cancelled').length,
+  }
+
+  const renderOrdersSection = (title, statuses, accentColor) => {
+    const sectionOrders = filteredOrders.filter(order => statuses.includes(order.status))
+    
+    if (sectionOrders.length === 0) return null
+
+    return (
+      <div style={{ marginBottom: '2rem' }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          marginBottom: '1rem',
+          paddingBottom: '0.5rem',
+          borderBottom: `2px solid ${accentColor}`,
+        }}>
+          <h3 style={{
+            fontSize: '1.25rem',
+            fontWeight: '600',
+            color: '#111827',
+            margin: 0,
+          }}>
+            {title}
+          </h3>
+          <span style={{
+            backgroundColor: accentColor,
+            color: '#ffffff',
+            padding: '0.125rem 0.5rem',
+            borderRadius: '9999px',
+            fontSize: '0.75rem',
+            fontWeight: '500',
+          }}>
+            {sectionOrders.length}
+          </span>
+        </div>
+        
+        <div style={{
+          backgroundColor: '#ffffff',
+          border: '1px solid #e5e7eb',
+          borderRadius: '0.5rem',
+          overflow: 'hidden',
+        }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{
+              width: '100%',
+              borderCollapse: 'collapse',
+            }}>
+              <thead style={{
+                backgroundColor: '#f9fafb',
+                borderBottom: '1px solid #e5e7eb',
+              }}>
+                <tr>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Order ID
+                  </th>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Customer
+                  </th>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Date
+                  </th>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Total
+                  </th>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Status
+                  </th>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'left',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Payment
+                  </th>
+                  <th style={{
+                    padding: '0.75rem 1rem',
+                    textAlign: 'right',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    color: '#6b7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                  }}>
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {sectionOrders.map((order) => {
+                  const statusInfo = statusConfig[order.status] || statusConfig.pending
+                  const StatusIcon = statusInfo.icon
+                  
+                  return (
+                    <tr
+                      key={order.id}
+                      style={{
+                        borderBottom: '1px solid #e5e7eb',
+                      }}
+                    >
+                      <td style={{
+                        padding: '1rem',
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        color: '#111827',
+                      }}>
+                        #{order.orderNumber || order.id}
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        <div>
+                          <div style={{
+                            fontSize: '0.875rem',
+                            fontWeight: '500',
+                            color: '#111827',
+                          }}>
+                            {order.customerName || order.users?.name || 'N/A'}
+                          </div>
+                          {(order.customerEmail || order.users?.email) && (
+                            <div style={{
+                              fontSize: '0.75rem',
+                              color: '#6b7280',
+                              marginTop: '0.125rem',
+                            }}>
+                              {order.customerEmail || order.users?.email}
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td style={{
+                        padding: '1rem',
+                        fontSize: '0.875rem',
+                        color: '#374151',
+                      }}>
+                        {order.createdAt 
+                          ? new Date(order.createdAt).toLocaleDateString('id-ID', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })
+                          : '-'}
+                      </td>
+                      <td style={{
+                        padding: '1rem',
+                        fontSize: '0.875rem',
+                        color: '#374151',
+                        fontWeight: '600',
+                      }}>
+                        Rp {(order.totalAmount || 0).toLocaleString('id-ID')}
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        {editingOrder === order.id ? (
+                          <select
+                            defaultValue={order.status}
+                            onChange={(e) => {
+                              order._newStatus = e.target.value
+                            }}
+                            style={{
+                              padding: '0.375rem 0.5rem',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '0.375rem',
+                              fontSize: '0.75rem',
+                              fontWeight: '500',
+                              backgroundColor: '#ffffff',
+                              color: '#374151',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              width: '100%',
+                            }}
+                          >
+                            {Object.entries(statusConfig).map(([key, config]) => (
+                              <option key={key} value={key}>{config.label}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '0.375rem',
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            borderRadius: '9999px',
+                            backgroundColor: statusInfo.bg,
+                            color: statusInfo.color,
+                          }}>
+                            <StatusIcon style={{ width: '0.75rem', height: '0.75rem' }} />
+                            {statusInfo.label}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{ padding: '1rem' }}>
+                        {editingOrder === order.id ? (
+                          <select
+                            defaultValue={order.paymentStatus}
+                            onChange={(e) => {
+                              order._newPaymentStatus = e.target.value
+                            }}
+                            style={{
+                              padding: '0.375rem 0.5rem',
+                              border: '1px solid #e5e7eb',
+                              borderRadius: '0.375rem',
+                              fontSize: '0.75rem',
+                              fontWeight: '500',
+                              backgroundColor: '#ffffff',
+                              color: '#374151',
+                              cursor: 'pointer',
+                              outline: 'none',
+                              width: '100%',
+                            }}
+                          >
+                            <option value="pending">Pending</option>
+                            <option value="settlement">Paid</option>
+                            <option value="paid">Paid</option>
+                            <option value="expire">Expired</option>
+                            <option value="cancel">Cancelled</option>
+                          </select>
+                        ) : (
+                          <span style={{
+                            display: 'inline-block',
+                            padding: '0.25rem 0.75rem',
+                            fontSize: '0.75rem',
+                            fontWeight: '500',
+                            borderRadius: '9999px',
+                            backgroundColor: order.paymentStatus === 'settlement' || order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7',
+                            color: order.paymentStatus === 'settlement' || order.paymentStatus === 'paid' ? '#166534' : '#92400e',
+                          }}>
+                            {order.paymentStatus === 'settlement' || order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'expire' ? 'Expired' : order.paymentStatus === 'cancel' ? 'Cancelled' : 'Pending'}
+                          </span>
+                        )}
+                      </td>
+                      <td style={{
+                        padding: '1rem',
+                        textAlign: 'right',
+                      }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          {editingOrder === order.id ? (
+                            <>
+                              <button
+                                onClick={() => {
+                                  const newStatus = order._newStatus || order.status
+                                  const newPaymentStatus = order._newPaymentStatus || order.paymentStatus
+                                  handleUpdateStatus(order.id, newStatus, newPaymentStatus)
+                                }}
+                                disabled={updateLoading === order.id}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '2rem',
+                                  height: '2rem',
+                                  color: '#16a34a',
+                                  backgroundColor: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '0.25rem',
+                                  cursor: updateLoading === order.id ? 'not-allowed' : 'pointer',
+                                  transition: 'all 0.2s',
+                                  opacity: updateLoading === order.id ? 0.5 : 1,
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (updateLoading !== order.id) {
+                                    e.currentTarget.style.backgroundColor = '#f0fdf4'
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent'
+                                }}
+                              >
+                                <Save style={{ width: '1rem', height: '1rem' }} />
+                              </button>
+                              <button
+                                onClick={() => setEditingOrder(null)}
+                                disabled={updateLoading === order.id}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '2rem',
+                                  height: '2rem',
+                                  color: '#6b7280',
+                                  backgroundColor: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '0.25rem',
+                                  cursor: updateLoading === order.id ? 'not-allowed' : 'pointer',
+                                  transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (updateLoading !== order.id) {
+                                    e.currentTarget.style.backgroundColor = '#f9fafb'
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent'
+                                }}
+                              >
+                                <X style={{ width: '1rem', height: '1rem' }} />
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={() => setEditingOrder(order.id)}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '2rem',
+                                  height: '2rem',
+                                  color: '#f59e0b',
+                                  backgroundColor: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '0.25rem',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#fffbeb'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent'
+                                }}
+                              >
+                                <Edit2 style={{ width: '1rem', height: '1rem' }} />
+                              </button>
+                              <Link
+                                href={`/admin/orders/${order.id}`}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '2rem',
+                                  height: '2rem',
+                                  color: '#2563eb',
+                                  backgroundColor: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '0.25rem',
+                                  textDecoration: 'none',
+                                  cursor: 'pointer',
+                                  transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                  e.currentTarget.style.backgroundColor = '#eff6ff'
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent'
+                                }}
+                              >
+                                <Eye style={{ width: '1rem', height: '1rem' }} />
+                              </Link>
+                              <button
+                                onClick={() => handleDelete(order.id)}
+                                disabled={deleteLoading === order.id}
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  width: '2rem',
+                                  height: '2rem',
+                                  color: '#dc2626',
+                                  backgroundColor: 'transparent',
+                                  border: 'none',
+                                  borderRadius: '0.25rem',
+                                  cursor: deleteLoading === order.id ? 'not-allowed' : 'pointer',
+                                  transition: 'all 0.2s',
+                                  opacity: deleteLoading === order.id ? 0.5 : 1,
+                                }}
+                                onMouseEnter={(e) => {
+                                  if (deleteLoading !== order.id) {
+                                    e.currentTarget.style.backgroundColor = '#fef2f2'
+                                  }
+                                }}
+                                onMouseLeave={(e) => {
+                                  e.currentTarget.style.backgroundColor = 'transparent'
+                                }}
+                              >
+                                <Trash2 style={{ width: '1rem', height: '1rem' }} />
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   if (status === 'loading' || loading) {
@@ -169,11 +599,8 @@ export default function OrdersPage() {
                   border: '1px solid #e5e7eb',
                   borderRadius: '0.5rem',
                   padding: '1rem',
-                  cursor: 'pointer',
                   transition: 'all 0.2s',
-                  borderLeft: statusFilter === key ? `4px solid ${config.color}` : '1px solid #e5e7eb',
                 }}
-                onClick={() => setStatusFilter(key)}
                 onMouseEnter={(e) => {
                   e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
                 }}
@@ -252,34 +679,10 @@ export default function OrdersPage() {
             />
           </div>
 
-          {/* Status Filter Dropdown */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: '0.625rem 2rem 0.625rem 1rem',
-              border: '1px solid #e5e7eb',
-              borderRadius: '0.5rem',
-              fontSize: '0.875rem',
-              backgroundColor: '#ffffff',
-              color: '#374151',
-              cursor: 'pointer',
-              outline: 'none',
-            }}
-          >
-            <option value="all">All Status</option>
-            {Object.entries(statusConfig).map(([key, config]) => (
-              <option key={key} value={key}>{config.label}</option>
-            ))}
-          </select>
-
-          {/* Clear Filters */}
-          {(searchQuery || statusFilter !== 'all') && (
+          {/* Clear Search */}
+          {searchQuery && (
             <button
-              onClick={() => {
-                setSearchQuery('')
-                setStatusFilter('all')
-              }}
+              onClick={() => setSearchQuery('')}
               style={{
                 padding: '0.625rem 1rem',
                 backgroundColor: '#ffffff',
@@ -298,430 +701,18 @@ export default function OrdersPage() {
                 e.currentTarget.style.backgroundColor = '#ffffff'
               }}
             >
-              Clear Filters
+              Clear Search
             </button>
           )}
         </div>
 
-        {/* Orders Table */}
-        <div style={{
-          backgroundColor: '#ffffff',
-          border: '1px solid #e5e7eb',
-          borderRadius: '0.5rem',
-          overflow: 'hidden',
-        }}>
-          {filteredOrders.length === 0 ? (
-            <div style={{
-              padding: '3rem',
-              textAlign: 'center',
-              color: '#6b7280',
-            }}>
-              {searchQuery || statusFilter !== 'all' 
-                ? 'No orders found matching your filters.' 
-                : 'No orders yet.'}
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{
-                width: '100%',
-                borderCollapse: 'collapse',
-              }}>
-                <thead style={{
-                  backgroundColor: '#f9fafb',
-                  borderBottom: '1px solid #e5e7eb',
-                }}>
-                  <tr>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Order ID
-                    </th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Customer
-                    </th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Date
-                    </th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Total
-                    </th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Status
-                    </th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'left',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Payment
-                    </th>
-                    <th style={{
-                      padding: '0.75rem 1rem',
-                      textAlign: 'right',
-                      fontSize: '0.75rem',
-                      fontWeight: '600',
-                      color: '#6b7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                    }}>
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredOrders.map((order) => {
-                    const statusInfo = statusConfig[order.status] || statusConfig.pending
-                    const StatusIcon = statusInfo.icon
-                    
-                    return (
-                      <tr
-                        key={order.id}
-                        style={{
-                          borderBottom: '1px solid #e5e7eb',
-                        }}
-                      >
-                        <td style={{
-                          padding: '1rem',
-                          fontSize: '0.875rem',
-                          fontWeight: '600',
-                          color: '#111827',
-                        }}>
-                          #{order.orderNumber || order.id}
-                        </td>
-                        <td style={{ padding: '1rem' }}>
-                          <div>
-                            <div style={{
-                              fontSize: '0.875rem',
-                              fontWeight: '500',
-                              color: '#111827',
-                            }}>
-                              {order.customerName || order.users?.name || 'N/A'}
-                            </div>
-                            {(order.customerEmail || order.users?.email) && (
-                              <div style={{
-                                fontSize: '0.75rem',
-                                color: '#6b7280',
-                                marginTop: '0.125rem',
-                              }}>
-                                {order.customerEmail || order.users?.email}
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td style={{
-                          padding: '1rem',
-                          fontSize: '0.875rem',
-                          color: '#374151',
-                        }}>
-                          {order.createdAt 
-                            ? new Date(order.createdAt).toLocaleDateString('id-ID', {
-                                day: 'numeric',
-                                month: 'short',
-                                year: 'numeric',
-                              })
-                            : '-'}
-                        </td>
-                        <td style={{
-                          padding: '1rem',
-                          fontSize: '0.875rem',
-                          color: '#374151',
-                          fontWeight: '600',
-                        }}>
-                          Rp {(order.totalAmount || 0).toLocaleString('id-ID')}
-                        </td>
-                        <td style={{ padding: '1rem' }}>
-                          {editingOrder === order.id ? (
-                            <select
-                              defaultValue={order.status}
-                              onChange={(e) => {
-                                order._newStatus = e.target.value
-                              }}
-                              style={{
-                                padding: '0.375rem 0.5rem',
-                                border: '1px solid #e5e7eb',
-                                borderRadius: '0.375rem',
-                                fontSize: '0.75rem',
-                                fontWeight: '500',
-                                backgroundColor: '#ffffff',
-                                color: '#374151',
-                                cursor: 'pointer',
-                                outline: 'none',
-                                width: '100%',
-                              }}
-                            >
-                              {Object.entries(statusConfig).map(([key, config]) => (
-                                <option key={key} value={key}>{config.label}</option>
-                              ))}
-                            </select>
-                          ) : (
-                            <span style={{
-                              display: 'inline-flex',
-                              alignItems: 'center',
-                              gap: '0.375rem',
-                              padding: '0.25rem 0.75rem',
-                              fontSize: '0.75rem',
-                              fontWeight: '500',
-                              borderRadius: '9999px',
-                              backgroundColor: statusInfo.bg,
-                              color: statusInfo.color,
-                            }}>
-                              <StatusIcon style={{ width: '0.75rem', height: '0.75rem' }} />
-                              {statusInfo.label}
-                            </span>
-                          )}
-                        </td>
-                        <td style={{ padding: '1rem' }}>
-                          {editingOrder === order.id ? (
-                            <select
-                              defaultValue={order.paymentStatus}
-                              onChange={(e) => {
-                                order._newPaymentStatus = e.target.value
-                              }}
-                              style={{
-                                padding: '0.375rem 0.5rem',
-                                border: '1px solid #e5e7eb',
-                                borderRadius: '0.375rem',
-                                fontSize: '0.75rem',
-                                fontWeight: '500',
-                                backgroundColor: '#ffffff',
-                                color: '#374151',
-                                cursor: 'pointer',
-                                outline: 'none',
-                                width: '100%',
-                              }}
-                            >
-                              <option value="pending">Pending</option>
-                              <option value="settlement">Paid</option>
-                              <option value="paid">Paid</option>
-                              <option value="expire">Expired</option>
-                              <option value="cancel">Cancelled</option>
-                            </select>
-                          ) : (
-                            <span style={{
-                              display: 'inline-block',
-                              padding: '0.25rem 0.75rem',
-                              fontSize: '0.75rem',
-                              fontWeight: '500',
-                              borderRadius: '9999px',
-                              backgroundColor: order.paymentStatus === 'settlement' || order.paymentStatus === 'paid' ? '#dcfce7' : '#fef3c7',
-                              color: order.paymentStatus === 'settlement' || order.paymentStatus === 'paid' ? '#166534' : '#92400e',
-                            }}>
-                              {order.paymentStatus === 'settlement' || order.paymentStatus === 'paid' ? 'Paid' : order.paymentStatus === 'expire' ? 'Expired' : order.paymentStatus === 'cancel' ? 'Cancelled' : 'Pending'}
-                            </span>
-                          )}
-                        </td>
-                        <td style={{
-                          padding: '1rem',
-                          textAlign: 'right',
-                        }}>
-                          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
-                            {editingOrder === order.id ? (
-                              <>
-                                <button
-                                  onClick={() => {
-                                    const newStatus = order._newStatus || order.status
-                                    const newPaymentStatus = order._newPaymentStatus || order.paymentStatus
-                                    handleUpdateStatus(order.id, newStatus, newPaymentStatus)
-                                  }}
-                                  disabled={updateLoading === order.id}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.375rem',
-                                    padding: '0.5rem 0.75rem',
-                                    color: '#16a34a',
-                                    backgroundColor: '#f0fdf4',
-                                    border: 'none',
-                                    borderRadius: '0.375rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500',
-                                    cursor: updateLoading === order.id ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s',
-                                    opacity: updateLoading === order.id ? 0.5 : 1,
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (updateLoading !== order.id) {
-                                      e.currentTarget.style.backgroundColor = '#dcfce7'
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#f0fdf4'
-                                  }}
-                                >
-                                  <Save style={{ width: '1rem', height: '1rem' }} />
-                                  {updateLoading === order.id ? 'Saving...' : 'Save'}
-                                </button>
-                                <button
-                                  onClick={() => setEditingOrder(null)}
-                                  disabled={updateLoading === order.id}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.375rem',
-                                    padding: '0.5rem 0.75rem',
-                                    color: '#6b7280',
-                                    backgroundColor: '#f9fafb',
-                                    border: '1px solid #e5e7eb',
-                                    borderRadius: '0.375rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500',
-                                    cursor: updateLoading === order.id ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s',
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (updateLoading !== order.id) {
-                                      e.currentTarget.style.backgroundColor = '#f3f4f6'
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#f9fafb'
-                                  }}
-                                >
-                                  <X style={{ width: '1rem', height: '1rem' }} />
-                                  Cancel
-                                </button>
-                              </>
-                            ) : (
-                              <>
-                                <button
-                                  onClick={() => setEditingOrder(order.id)}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.375rem',
-                                    padding: '0.5rem 0.75rem',
-                                    color: '#f59e0b',
-                                    backgroundColor: '#fffbeb',
-                                    border: 'none',
-                                    borderRadius: '0.375rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#fef3c7'
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#fffbeb'
-                                  }}
-                                >
-                                  <Edit2 style={{ width: '1rem', height: '1rem' }} />
-                                  Edit
-                                </button>
-                                <Link
-                                  href={`/admin/orders/${order.id}`}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.375rem',
-                                    padding: '0.5rem 0.75rem',
-                                    color: '#2563eb',
-                                    backgroundColor: '#eff6ff',
-                                    border: 'none',
-                                    borderRadius: '0.375rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500',
-                                    textDecoration: 'none',
-                                    cursor: 'pointer',
-                                    transition: 'all 0.2s',
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#dbeafe'
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#eff6ff'
-                                  }}
-                                >
-                                  <Eye style={{ width: '1rem', height: '1rem' }} />
-                                  View
-                                </Link>
-                                <button
-                                  onClick={() => handleDelete(order.id)}
-                                  disabled={deleteLoading === order.id}
-                                  style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '0.375rem',
-                                    padding: '0.5rem 0.75rem',
-                                    color: '#dc2626',
-                                    backgroundColor: '#fef2f2',
-                                    border: 'none',
-                                    borderRadius: '0.375rem',
-                                    fontSize: '0.875rem',
-                                    fontWeight: '500',
-                                    cursor: deleteLoading === order.id ? 'not-allowed' : 'pointer',
-                                    transition: 'all 0.2s',
-                                    opacity: deleteLoading === order.id ? 0.5 : 1,
-                                  }}
-                                  onMouseEnter={(e) => {
-                                    if (deleteLoading !== order.id) {
-                                      e.currentTarget.style.backgroundColor = '#fee2e2'
-                                    }
-                                  }}
-                                  onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#fef2f2'
-                                  }}
-                                >
-                                  <Trash2 style={{ width: '1rem', height: '1rem' }} />
-                                  {deleteLoading === order.id ? 'Deleting...' : 'Delete'}
-                                </button>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
+        {/* Orders Sections */}
+        {renderOrdersSection('Active Orders', ['pending', 'processing'], '#3b82f6')}
+        {renderOrdersSection('Shipped Orders', ['shipped'], '#8b5cf6')}
+        {renderOrdersSection('Delivered Orders', ['delivered'], '#10b981')}
+        {renderOrdersSection('Cancelled Orders', ['cancelled'], '#ef4444')}
 
-        {/* Stats */}
+        {/* Overall Stats */}
         {filteredOrders.length > 0 && (
           <div style={{
             display: 'flex',
@@ -731,12 +722,16 @@ export default function OrdersPage() {
             color: '#6b7280',
             flexWrap: 'wrap',
             gap: '1rem',
+            padding: '1rem',
+            backgroundColor: '#f9fafb',
+            borderRadius: '0.5rem',
+            border: '1px solid #e5e7eb',
           }}>
             <div>
-              Showing {filteredOrders.length} of {orders.length} orders
+              Total Orders: {orders.length}
             </div>
             <div style={{ fontWeight: '600', color: '#111827' }}>
-              Total Revenue: Rp {filteredOrders.reduce((sum, order) => sum + (order.totalAmount || 0), 0).toLocaleString('id-ID')}
+              Total Revenue: Rp {orders.reduce((sum, order) => sum + (order.totalAmount || 0), 0).toLocaleString('id-ID')}
             </div>
           </div>
         )}
