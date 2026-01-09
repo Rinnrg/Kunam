@@ -16,6 +16,9 @@ const prismaClientOptions = {
     },
   },
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  // Add connection pool settings to limit connections
+  // This helps prevent "max clients reached" errors
+  connectionLimit: 10, // Limit concurrent connections
 };
 
 // Create singleton instance
@@ -30,6 +33,11 @@ const prisma = (() => {
   return globalForPrisma.prisma;
 })();
 
+// Ensure connection is established
+prisma.$connect().catch((error) => {
+  console.error('Failed to connect to database:', error);
+});
+
 // Graceful shutdown
 if (typeof window === 'undefined') {
   const cleanup = async () => {
@@ -43,6 +51,7 @@ if (typeof window === 'undefined') {
   process.on('beforeExit', cleanup);
   process.on('SIGINT', cleanup);
   process.on('SIGTERM', cleanup);
+  process.on('SIGUSR2', cleanup); // nodemon restart
 }
 
 /**
