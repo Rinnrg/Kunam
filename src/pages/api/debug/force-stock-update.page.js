@@ -55,10 +55,8 @@ export default async function handler(req, res) {
       });
     }
 
-    const results = [];
-
-    // Update each product
-    for (const item of order.order_items) {
+    // Update each product using Promise.all to avoid await in loop
+    const updatePromises = order.order_items.map(async (item) => {
       try {
         const productBefore = await prisma.produk.findUnique({
           where: { id: item.produkId },
@@ -66,12 +64,11 @@ export default async function handler(req, res) {
         });
 
         if (!productBefore) {
-          results.push({
+          return {
             produkId: item.produkId,
             status: 'error',
             message: 'Product not found',
-          });
-          continue;
+          };
         }
 
         console.log(`  📦 Updating ${productBefore.nama}`);
@@ -89,7 +86,7 @@ export default async function handler(req, res) {
 
         console.log(`     After: stock=${updated.stok}, sold=${updated.jumlahTerjual}`);
 
-        results.push({
+        return {
           produkId: item.produkId,
           productName: productBefore.nama,
           status: 'success',
@@ -101,16 +98,18 @@ export default async function handler(req, res) {
             stok: updated.stok,
             jumlahTerjual: updated.jumlahTerjual,
           },
-        });
+        };
       } catch (error) {
         console.error(`  ❌ Error updating product ${item.produkId}:`, error);
-        results.push({
+        return {
           produkId: item.produkId,
           status: 'error',
           message: error.message,
-        });
+        };
       }
-    }
+    });
+
+    const results = await Promise.all(updatePromises);
 
     // Mark order as stock updated
     await prisma.orders.update({

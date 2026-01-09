@@ -48,7 +48,7 @@ export default async function handler(req, res) {
       } = req.body
 
       // Build update data
-      let updateData = {}
+      const updateData = {}
       
       if (nama !== undefined) updateData.nama = nama
       if (deskripsi !== undefined) updateData.deskripsi = deskripsi

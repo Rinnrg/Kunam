@@ -34,6 +34,9 @@ module.exports = {
     'radix': 'warn',
     'no-shadow': 'warn',
     'react/no-danger': 'warn',
+    'no-await-in-loop': 'off',
+    'no-continue': 'off',
+    'react-hooks/exhaustive-deps': 'warn',
     // 'import-helpers/order-imports': [
     //   'warn',
     //   {
