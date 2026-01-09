@@ -27,15 +27,6 @@ function CartPage() {
 
   const [selectedItems, setSelectedItems] = useState([]);
   const [isAllSelected, setIsAllSelected] = useState(false);
-  const [isCouponOpen, setIsCouponOpen] = useState(false);
-  const [selectedCoupon, setSelectedCoupon] = useState(null);
-
-  // Dummy data untuk kupon diskon
-  const coupons = [
-    { id: 1, code: 'DISKON10', discount: 10, type: 'percentage', minPurchase: 100000 },
-    { id: 2, code: 'DISKON50K', discount: 50000, type: 'fixed', minPurchase: 200000 },
-    { id: 3, code: 'NEWYEAR2026', discount: 15, type: 'percentage', minPurchase: 150000 },
-  ];
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -97,22 +88,6 @@ function CartPage() {
     });
     return Object.values(grouped);
   }, [cart]);
-
-  const calculateDiscount = useCallback(() => {
-    if (!selectedCoupon) return 0;
-    const subtotal = calculateSelectedTotal();
-    
-    if (selectedCoupon.type === 'percentage') {
-      return (subtotal * selectedCoupon.discount) / 100;
-    }
-    return selectedCoupon.discount;
-  }, [selectedCoupon, calculateSelectedTotal]);
-
-  const calculateFinalTotal = useCallback(() => {
-    const subtotal = calculateSelectedTotal();
-    const discount = calculateDiscount();
-    return Math.max(0, subtotal - discount);
-  }, [calculateSelectedTotal, calculateDiscount]);
 
   const handleSelectAll = useCallback(() => {
     if (isAllSelected) {
@@ -178,34 +153,6 @@ function CartPage() {
       });
     }
   }, [wishlist, setWishlist, showAlert]);
-
-  const handleApplyCoupon = useCallback((coupon) => {
-    const subtotal = calculateSelectedTotal();
-    if (subtotal < coupon.minPurchase) {
-      showAlert({
-        type: 'error',
-        title: 'Kupon Tidak Valid',
-        message: `Minimal pembelian Rp ${coupon.minPurchase.toLocaleString('id-ID')} untuk menggunakan kupon ini.`,
-      });
-      return;
-    }
-    setSelectedCoupon(coupon);
-    setIsCouponOpen(false);
-    showAlert({
-      type: 'success',
-      title: 'Kupon Diterapkan',
-      message: `Kupon ${coupon.code} berhasil diterapkan!`,
-    });
-  }, [calculateSelectedTotal, showAlert]);
-
-  const handleRemoveCoupon = useCallback(() => {
-    setSelectedCoupon(null);
-    showAlert({
-      type: 'success',
-      title: 'Kupon Dihapus',
-      message: 'Kupon berhasil dihapus.',
-    });
-  }, [showAlert]);
 
   const handleCheckout = useCallback(() => {
     if (selectedItems.length === 0) {
@@ -474,12 +421,6 @@ function CartPage() {
                   <span>Ongkos Kirim</span>
                   <span>TBD</span>
                 </div>
-                {selectedCoupon && (
-                  <div className={styles.summaryRow}>
-                    <span>Diskon ({selectedCoupon.code})</span>
-                    <span className={styles.discount}>-Rp {calculateDiscount().toLocaleString('id-ID')}</span>
-                  </div>
-                )}
                 <div className={styles.summaryRow}>
                   <span>Subtotal</span>
                   <span>Rp {calculateSelectedTotal().toLocaleString('id-ID')}</span>
@@ -491,71 +432,7 @@ function CartPage() {
               </div>
               <div className={`${styles.summaryRow} ${styles.total}`}>
                 <span>Total Pesanan</span>
-                <span>Rp {calculateFinalTotal().toLocaleString('id-ID')}</span>
-              </div>
-              
-              <div className={styles.couponSection}>
-                <button 
-                  type="button" 
-                  className={styles.couponButton}
-                  onClick={() => setIsCouponOpen(!isCouponOpen)}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 22V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 12L3.27 6.96" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M12 12L20.73 6.96" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>
-                    {selectedCoupon ? `Kupon: ${selectedCoupon.code}` : `Pilih Kupon (${coupons.length})`}
-                  </span>
-                  <svg 
-                    width="16" 
-                    height="16" 
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    xmlns="http://www.w3.org/2000/svg"
-                    style={{ transform: isCouponOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
-                  >
-                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </button>
-
-                {isCouponOpen && (
-                  <div className={styles.couponDropdown}>
-                    {coupons.map((coupon) => (
-                      <div key={coupon.id} className={styles.couponItem}>
-                        <div className={styles.couponInfo}>
-                          <h4>{coupon.code}</h4>
-                          <p>
-                            Diskon {coupon.type === 'percentage' ? `${coupon.discount}%` : `Rp ${coupon.discount.toLocaleString('id-ID')}`}
-                          </p>
-                          <p className={styles.minPurchase}>
-                            Min. pembelian: Rp {coupon.minPurchase.toLocaleString('id-ID')}
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          className={styles.applyCouponBtn}
-                          onClick={() => handleApplyCoupon(coupon)}
-                          disabled={selectedCoupon?.id === coupon.id}
-                        >
-                          {selectedCoupon?.id === coupon.id ? 'Terpilih' : 'Gunakan'}
-                        </button>
-                      </div>
-                    ))}
-                    
-                    {selectedCoupon && (
-                      <button
-                        type="button"
-                        className={styles.removeCouponBtn}
-                        onClick={handleRemoveCoupon}
-                      >
-                        Hapus Kupon
-                      </button>
-                    )}
-                  </div>
-                )}
+                <span>Rp {calculateSelectedTotal().toLocaleString('id-ID')}</span>
               </div>
 
               <button 

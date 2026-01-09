@@ -1,9 +1,9 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import Link from 'next/link';
 import clsx from 'clsx';
 import footerLinks from '@src/components/dom/navbar/constants/footerLinks';
-import menuLinks from '@src/components/dom/navbar/constants/menuLinks';
+import { getMenuLinks } from '@src/components/dom/navbar/constants/menuLinks';
 import styles from '@src/components/dom/navbar/styles/menuLinks.module.scss';
 import { useRouter } from 'next/router';
 import { useStore } from '@src/store';
@@ -12,6 +12,25 @@ function MenuLinks() {
   const [isMenuOpen, setIsMenuOpen, lenis] = useStore((state) => [state.isMenuOpen, state.setIsMenuOpen, state.lenis]);
   const menuRef = useRef();
   const router = useRouter();
+  const [menuLinks, setMenuLinks] = useState(getMenuLinks([]));
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        
+        if (data.success && data.categories) {
+          setMenuLinks(getMenuLinks(data.categories));
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Simple CSS-based animation via class toggle
   useEffect(() => {

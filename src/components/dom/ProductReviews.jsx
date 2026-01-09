@@ -281,13 +281,13 @@ function ProductReviews({ produkId }) {
             <div key={review.id} className={styles.reviewItem}>
               <div className={styles.reviewHeader}>
                 <div className={styles.userInfo}>
-                  {review.user.image ? (
-                    <img src={review.user.image} alt={review.user.name || 'User'} className={styles.userAvatar} />
+                  {review.users?.image ? (
+                    <img src={review.users.image} alt={review.users.name || 'User'} className={styles.userAvatar} />
                   ) : (
-                    <div className={styles.userAvatarPlaceholder}>{(review.user.name || review.user.email || 'U').charAt(0).toUpperCase()}</div>
+                    <div className={styles.userAvatarPlaceholder}>{(review.users?.name || review.users?.email || 'U').charAt(0).toUpperCase()}</div>
                   )}
                   <div>
-                    <p className={styles.userName}>{review.user.name || review.user.email}</p>
+                    <p className={styles.userName}>{review.users?.name || review.users?.email}</p>
                     <p className={styles.reviewDate}>{formatDate(review.createdAt)}</p>
                   </div>
                 </div>

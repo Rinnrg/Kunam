@@ -1,3 +1,42 @@
+// Function to generate menu links with dynamic categories
+export const getMenuLinks = (categories = []) => {
+  return [
+    {
+      title: 'Home',
+      href: '/',
+    },
+    {
+      title: 'Product',
+      href: '/produk',
+      submenu: categories.map((cat) => ({
+        title: cat.name,
+        href: cat.href,
+      })),
+    },
+    {
+      title: 'Platform',
+      href: undefined,
+      submenu: [
+        {
+          title: 'Shopee',
+          href: 'https://shopee.co.id/',
+          external: true,
+        },
+        {
+          title: 'Instagram',
+          href: 'https://www.instagram.com/',
+          external: true,
+        },
+      ],
+    },
+    {
+      title: 'Contact',
+      href: undefined,
+    },
+  ];
+};
+
+// Default menu links (fallback if categories not loaded yet)
 const menuLinks = [
   {
     title: 'Home',
@@ -6,32 +45,7 @@ const menuLinks = [
   {
     title: 'Product',
     href: '/produk',
-    submenu: [
-      {
-        title: 'T-Shirt',
-        href: '/produk?kategori=T-Shirt',
-      },
-      {
-        title: 'Hoodie',
-        href: '/produk?kategori=Hoodie',
-      },
-      {
-        title: 'Jacket',
-        href: '/produk?kategori=Jacket',
-      },
-      {
-        title: 'Pants',
-        href: '/produk?kategori=Pants',
-      },
-      {
-        title: 'Shorts',
-        href: '/produk?kategori=Shorts',
-      },
-      {
-        title: 'Accessories',
-        href: '/produk?kategori=Accessories',
-      },
-    ],
+    submenu: [],
   },
   {
     title: 'Platform',
@@ -54,4 +68,5 @@ const menuLinks = [
     href: undefined,
   },
 ];
+
 export default menuLinks;

@@ -8,10 +8,10 @@ export default async function handler(req, res) {
   // GET - Mengambil semua review untuk produk tertentu
   if (req.method === 'GET') {
     try {
-      const reviews = await prisma.review.findMany({
+      const reviews = await prisma.reviews.findMany({
         where: { produkId },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               name: true,
@@ -84,7 +84,7 @@ export default async function handler(req, res) {
       }
 
       // Cek apakah user sudah pernah review produk ini
-      const existingReview = await prisma.review.findUnique({
+      const existingReview = await prisma.reviews.findUnique({
         where: {
           userId_produkId: {
             userId: session.user.id,
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
       }
 
       // Buat review baru
-      const review = await prisma.review.create({
+      const review = await prisma.reviews.create({
         data: {
           userId: session.user.id,
           produkId,
@@ -108,7 +108,7 @@ export default async function handler(req, res) {
           comment: comment.trim(),
         },
         include: {
-          user: {
+          users: {
             select: {
               id: true,
               name: true,

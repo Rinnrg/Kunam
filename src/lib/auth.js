@@ -1,5 +1,6 @@
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../pages/api/auth/[...nextauth].page';
+import { logSecurityEvent, getClientIP } from './security';
 
 /**
  * Get authenticated session on server side
@@ -39,6 +40,15 @@ export async function requireAuth(req, res) {
   const session = await getSession(req, res);
 
   if (!session) {
+    const ip = getClientIP(req);
+    await logSecurityEvent({
+      type: 'UNAUTHORIZED_ACCESS',
+      severity: 'warning',
+      ip,
+      userAgent: req.headers['user-agent'],
+      details: { path: req.url },
+    });
+
     res.status(401).json({
       error: 'Unauthorized',
       message: 'You must be signed in to access this resource',
@@ -50,7 +60,7 @@ export async function requireAuth(req, res) {
 }
 
 /**
- * Verify admin access
+ * Verify admin access with enhanced security
  * @param {Object} req - Request object
  * @param {Object} res - Response object
  * @returns {Promise<Object|null>} Session if admin, sends 403 response if not
@@ -62,7 +72,43 @@ export async function requireAdmin(req, res) {
     return null;
   }
 
-  // Add additional admin checks here if needed
-  // For now, any authenticated user is considered admin
+  // Check if user is admin
+  if (session.user?.role !== 'admin') {
+    const ip = getClientIP(req);
+    await logSecurityEvent({
+      type: 'UNAUTHORIZED_ADMIN_ACCESS',
+      severity: 'high',
+      ip,
+      userAgent: req.headers['user-agent'],
+      details: {
+        userId: session.user?.id,
+        email: session.user?.email,
+        attemptedPath: req.url,
+      },
+    });
+
+    res.status(403).json({
+      error: 'Forbidden',
+      message: 'You do not have permission to access this resource',
+    });
+    return null;
+  }
+
+  // Log admin access for audit trail
+  const ip = getClientIP(req);
+  await logSecurityEvent({
+    type: 'ADMIN_ACCESS',
+    severity: 'info',
+    ip,
+    userAgent: req.headers['user-agent'],
+    details: {
+      adminId: session.user.id,
+      email: session.user.email,
+      path: req.url,
+      method: req.method,
+    },
+  });
+
   return session;
 }
+

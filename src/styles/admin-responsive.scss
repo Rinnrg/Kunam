@@ -1,0 +1,118 @@
+/* Admin Pages Responsive Styles */
+
+/* Global responsive overrides for inline-styled admin pages */
+@media (max-width: 768px) {
+  /* Container and padding fixes */
+  div[style*="padding: '2rem'"] {
+    padding: 1rem !important;
+  }
+
+  div[style*="padding: '1.5rem'"] {
+    padding: 1rem !important;
+  }
+
+  /* Grid layouts - force single column */
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))'"],
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))'"],
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))'"],
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))'"],
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))'"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Search bars */
+  div[style*="maxWidth: '400px'"],
+  div[style*="maxWidth: '500px'"],
+  div[style*="maxWidth: '600px'"] {
+    max-width: 100% !important;
+  }
+
+  /* Flex containers */
+  div[style*="justifyContent: 'space-between'"],
+  div[style*="display: 'flex'"][style*="alignItems: 'center'"] {
+    flex-wrap: wrap !important;
+    gap: 1rem !important;
+  }
+
+  /* Font sizes */
+  h1[style*="fontSize: '1.875rem'"] {
+    font-size: 1.375rem !important;
+  }
+
+  div[style*="fontSize: '2rem'"] {
+    font-size: 1.5rem !important;
+  }
+
+  p[style*="fontSize: '0.875rem'"] {
+    font-size: 0.8125rem !important;
+  }
+
+  /* Buttons */
+  a[style*="display: 'inline-flex'"],
+  button[style*="display: 'inline-flex'"] {
+    font-size: 0.8125rem !important;
+    padding: 0.5rem 0.75rem !important;
+  }
+
+  /* Table container */
+  div > div:has(table) {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Stats cards grid */
+  div[style*="display: 'grid'"][style*="gap: '1rem'"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Make tables scrollable horizontally */
+  table {
+    min-width: 600px;
+  }
+}
+
+@media (max-width: 640px) {
+  /* Extra small screens */
+  div[style*="padding: '1rem'"] {
+    padding: 0.75rem !important;
+  }
+
+  h1[style*="fontSize"] {
+    font-size: 1.25rem !important;
+  }
+
+  /* Stack all flex items */
+  div[style*="display: 'flex'"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+
+  /* Full width buttons */
+  a[style*="display: 'inline-flex'"],
+  button[style*="display: 'inline-flex'"] {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Smaller table text */
+  table {
+    font-size: 0.75rem;
+  }
+
+  td[style*="padding"],
+  th[style*="padding"] {
+    padding: 0.5rem 0.25rem !important;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 769px) and (max-width: 1024px) {
+  div[style*="gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))'"] {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  div[style*="maxWidth: '800px'"] {
+    max-width: 100% !important;
+    padding: 0 1rem !important;
+  }
+}

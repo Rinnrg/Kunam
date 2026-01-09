@@ -355,7 +355,6 @@ export default function EditProduk() {
         { label: 'Edit Produk', href: null }
       ]} />
       <div className={styles.header}>
-        <h1 className={styles.title}>Edit Produk</h1>
         <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
           Kembali ke Dashboard
         </button>
@@ -364,10 +363,12 @@ export default function EditProduk() {
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.error}>{error}</div>}
 
+        {/* Basic Information Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📝 Informasi Dasar</h3>
           <label htmlFor="nama" className={styles.label}>
             Nama Produk *
-            <input id="nama" name="nama" type="text" value={formData.nama} onChange={handleChange} className={styles.input} required />
+            <input id="nama" name="nama" type="text" value={formData.nama} onChange={handleChange} className={styles.input} placeholder="Masukkan nama produk" required />
           </label>
         </div>
 
@@ -386,8 +387,10 @@ export default function EditProduk() {
           </label>
         </div>
 
+        {/* Pricing Section */}
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
+            <h3 className={styles.sectionHeader}>💰 Harga & Stok</h3>
             <label htmlFor="harga" className={styles.label}>
               Harga (Rp) *
               <input id="harga" name="harga" type="number" step="1" value={formData.harga} onChange={handleChange} className={styles.input} placeholder="Contoh: 200000" required />
@@ -403,16 +406,18 @@ export default function EditProduk() {
           <div className={styles.formGroup}>
             <label htmlFor="stok" className={styles.label}>
               Stok *
-              <input id="stok" name="stok" type="number" value={formData.stok} onChange={handleChange} className={styles.input} required />
+              <input id="stok" name="stok" type="number" value={formData.stok} onChange={handleChange} className={styles.input} placeholder="Jumlah stok" required />
             </label>
           </div>
         </div>
 
+        {/* Description Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📄 Deskripsi Produk</h3>
           <label className={styles.label}>
             Deskripsi / Product Sections
             <span className={styles.helpText}>
-              (Sections akan ditampilkan sebagai detail produk di bawah gallery foto)
+              Sections akan ditampilkan sebagai detail produk di bawah gallery foto
             </span>
           </label>
           <SectionsEditor
@@ -421,11 +426,13 @@ export default function EditProduk() {
           />
         </div>
 
+        {/* Size Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📏 Ukuran Produk</h3>
           <label htmlFor="ukuran-select-0" className={styles.label}>
             Ukuran & Jumlah per Ukuran *
             <span className={styles.stockInfo}>
-              (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
+              Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()}
             </span>
           </label>
 
@@ -463,16 +470,18 @@ export default function EditProduk() {
 
           {getTotalUkuran() < parseInt(formData.stok, 10) && (
             <button type="button" onClick={addUkuranInput} className={styles.addUkuranButton}>
-              + Tambah Ukuran
+              Tambah Ukuran
             </button>
           )}
 
           {getTotalUkuran() > parseInt(formData.stok, 10) && <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>}
         </div>
 
+        {/* Color Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>🎨 Warna Produk</h3>
           <label className={styles.label}>
-            Warna
+            Pilih Warna yang Tersedia
           </label>
           <ColorSelector
             selectedColors={formData.warna}
@@ -480,11 +489,13 @@ export default function EditProduk() {
           />
         </div>
 
+        {/* Images Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📸 Foto Produk</h3>
           <label className={styles.label}>
-            Foto Produk
+            Upload Foto Produk
             <span className={styles.helpText}>
-              (Foto pertama akan menjadi thumbnail, semua foto akan ditampilkan di gallery produk)
+              Foto pertama akan menjadi thumbnail, semua foto akan ditampilkan di gallery produk
             </span>
           </label>
           <MultipleImageUpload
@@ -494,9 +505,9 @@ export default function EditProduk() {
           />
         </div>
 
+        {/* Video Section */}
         <div className={styles.formGroup}>
-          {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-          <label className={styles.label}>Video Produk</label>
+          <h3 className={styles.sectionHeader}>🎥 Video Produk</h3>
 
           {/* Existing Videos */}
           {existingVideos.length > 0 && (
@@ -545,13 +556,13 @@ export default function EditProduk() {
 
         <div className={styles.formActions}>
           <button type="button" onClick={() => router.push('/admin')} className={styles.cancelButton} disabled={isSubmitting}>
-            Batal
+            ❌ Batal
           </button>
           <button type="submit" className={styles.submitButton} disabled={isSubmitting || isUploading}>
             {(() => {
-              if (isUploading) return 'Mengupload Gambar...';
-              if (isSubmitting) return 'Mengupdate...';
-              return 'Update Produk';
+              if (isUploading) return '⏳ Mengupload...';
+              if (isSubmitting) return '⏳ Menyimpan...';
+              return '✅ Simpan Perubahan';
             })()}
           </button>
         </div>

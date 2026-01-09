@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import useIsMobile from '@src/hooks/useIsMobile';
-import menuLinks from '@src/components/dom/navbar/constants/menuLinks';
+import { getMenuLinks } from '@src/components/dom/navbar/constants/menuLinks';
 import styles from '@src/components/dom/navbar/styles/userNavbar.module.scss';
 
 function UserNavbar() {
@@ -13,10 +13,29 @@ function UserNavbar() {
   const isMobile = useIsMobile();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [menuLinks, setMenuLinks] = useState(getMenuLinks([]));
 
   const [setIsAuthModalOpen, wishlist, cart, setWishlist, setCart, showAlert, lenis] = useStore(
     useShallow((state) => [state.setIsAuthModalOpen, state.wishlist, state.cart, state.setWishlist, state.setCart, state.showAlert, state.lenis]),
   );
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        
+        if (data.success && data.categories) {
+          setMenuLinks(getMenuLinks(data.categories));
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   // Update profile image from session
   useEffect(() => {

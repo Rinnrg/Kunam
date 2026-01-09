@@ -11,6 +11,7 @@ export default function EditHomeSection() {
   const { id } = router.query;
   const [formData, setFormData] = useState({
     judul: '',
+    page: 'home',
     urutan: 0,
   });
   const [images, setImages] = useState([]);
@@ -26,6 +27,7 @@ export default function EditHomeSection() {
         const data = await response.json();
         setFormData({
           judul: data.judul,
+          page: data.page || 'home',
           urutan: data.urutan,
         });
         setExistingImages(data.gambar || []);
@@ -91,6 +93,7 @@ export default function EditHomeSection() {
         },
         body: JSON.stringify({
           judul: formData.judul,
+          page: formData.page,
           gambar: finalImages,
           urutan: parseInt(formData.urutan, 10) || 0,
         }),
@@ -148,6 +151,27 @@ export default function EditHomeSection() {
               placeholder="Masukkan judul section"
               required
             />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="page" className={styles.label}>
+              Halaman Tujuan *
+            </label>
+            <select
+              id="page"
+              name="page"
+              value={formData.page}
+              onChange={handleChange}
+              className={styles.input}
+              required
+            >
+              <option value="home">Beranda (Home)</option>
+              <option value="produk">Produk</option>
+              <option value="about">Tentang Kami</option>
+              <option value="contact">Kontak</option>
+              <option value="promo">Promo</option>
+            </select>
+            <small className={styles.hint}>Pilih halaman dimana section ini akan ditampilkan</small>
           </div>
 
           <div className={styles.formGroup}>

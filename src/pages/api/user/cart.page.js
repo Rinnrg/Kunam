@@ -15,8 +15,17 @@ export default async function handler(req, res) {
 
     // Validate userId - check if it's a valid number and not NaN
     if (!userId || Number.isNaN(userId) || userId <= 0) {
-      console.error('[Cart API] Invalid userId:', session.user.id);
-      return res.status(400).json({ message: 'Invalid user ID', userId: session.user.id });
+      console.error('[Cart API] Invalid userId:', session.user.id, 'Type:', typeof session.user.id);
+      console.error('[Cart API] Session user:', JSON.stringify(session.user, null, 2));
+      return res.status(400).json({ 
+        message: 'Invalid user ID. Please log out and log in again.', 
+        userId: session.user.id,
+        debug: process.env.NODE_ENV === 'development' ? {
+          rawUserId: session.user.id,
+          parsedUserId: userId,
+          userIdType: typeof session.user.id
+        } : undefined
+      });
     }
 
   // GET - Get user's cart

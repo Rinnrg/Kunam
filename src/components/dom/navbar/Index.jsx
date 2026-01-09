@@ -10,7 +10,7 @@ import useIsMobile from '@src/hooks/useIsMobile';
 import { useRouter } from 'next/router';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
-import menuLinks from '@src/components/dom/navbar/constants/menuLinks';
+import { getMenuLinks } from '@src/components/dom/navbar/constants/menuLinks';
 
 function Navbar() {
   const { data: session } = useSession();
@@ -20,6 +20,25 @@ function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGuestMenuOpen, setIsGuestMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [menuLinks, setMenuLinks] = useState(getMenuLinks([]));
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        const data = await response.json();
+        
+        if (data.success && data.categories) {
+          setMenuLinks(getMenuLinks(data.categories));
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const scrollToPosition = useCallback(
     (position, duration = 1.5) => {
@@ -74,9 +93,9 @@ function Navbar() {
     };
   }, [lenis]);
 
-  const getLogoWidth = () => (isMobile ? 60 : 100);
+  const getLogoWidth = () => (isMobile ? 50 : 80);
 
-  const getLogoHeight = () => (isMobile ? 20 : 33);
+  const getLogoHeight = () => (isMobile ? 16 : 26);
 
   const handleLoginClick = useCallback(() => {
     router.push('/login');

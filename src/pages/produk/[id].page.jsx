@@ -11,6 +11,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import CustomHead from '@src/components/dom/CustomHead';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
+import ProductReviews from '@src/components/dom/ProductReviews';
 import styles from '@src/pages/produk/produkDetail.module.scss';
 import prisma from '@src/lib/db';
 
@@ -26,8 +27,6 @@ function ProdukDetailPage({ produk, error }) {
   const [selectedColor, setSelectedColor] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [expandedSections, setExpandedSections] = useState({});
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
-  const [modalImageIndex, setModalImageIndex] = useState(0);
 
   const currentProduk = produk;
   const isLiked = useMemo(() => wishlist.some((item) => item.produkId === currentProduk?.id), [wishlist, currentProduk]);
@@ -89,6 +88,13 @@ function ProdukDetailPage({ produk, error }) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentProduk]);
+
+  // Cleanup scroll on modal close or unmount
+  useEffect(() => {
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, []);
 
   // Image gallery - combine all images
   const allImages = useMemo(() => {
@@ -304,26 +310,6 @@ function ProdukDetailPage({ produk, error }) {
     [currentProduk, allImages]
   );
 
-  // Image modal handlers
-  const openImageModal = useCallback((index) => {
-    setModalImageIndex(index);
-    setIsImageModalOpen(true);
-    document.body.style.overflow = 'hidden';
-  }, []);
-
-  const closeImageModal = useCallback(() => {
-    setIsImageModalOpen(false);
-    document.body.style.overflow = 'auto';
-  }, []);
-
-  const nextImage = useCallback(() => {
-    setModalImageIndex((prev) => (prev + 1) % allImages.length);
-  }, [allImages.length]);
-
-  const prevImage = useCallback(() => {
-    setModalImageIndex((prev) => (prev - 1 + allImages.length) % allImages.length);
-  }, [allImages.length]);
-
   if (error || !currentProduk) {
     return (
       <>
@@ -359,162 +345,39 @@ function ProdukDetailPage({ produk, error }) {
 
           {/* Main Product Layout */}
           <div className={styles.productLayout}>
-            {/* Left Column: Image Gallery + Product Details */}
-            <div className={styles.leftColumn}>
-              {/* Image Gallery */}
-              <div className={styles.imageGallery}>
-                {allImages.length === 1 ? (
-                  // Single image layout
-                  <div 
-                    className={styles.singleImage}
-                    onClick={() => openImageModal(0)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') openImageModal(0);
-                    }}
-                  >
-                    <Image
-                      src={allImages[0]}
-                      alt={currentProduk.nama}
-                      fill
-                      priority
-                      quality={90}
-                      sizes="(max-width: 768px) 100vw, 60vw"
-                    />
-                  </div>
-                ) : (
-                  // Multiple images grid layout (2x2)
-                  <div className={styles.imageGrid}>
-                    {allImages.map((img, index) => (
-                      <div
-                        key={index}
-                        className={styles.gridImage}
-                        onClick={() => openImageModal(index)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') openImageModal(index);
-                        }}
-                      >
-                        <Image
-                          src={img}
-                          alt={`${currentProduk.nama} ${index + 1}`}
-                          fill
-                          quality={85}
-                          sizes="(max-width: 768px) 50vw, 30vw"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Product Details */}
-              <div className={styles.productDetails}>
-                {/* Dynamic Sections from Database */}
-                {currentProduk.sections && Array.isArray(currentProduk.sections) && currentProduk.sections.length > 0 ? (
-                  currentProduk.sections.map((section, index) => (
-                    <div key={index} className={styles.detailSection}>
-                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                      <div className={styles.detailHeader} onClick={() => toggleSection(`section-${index}`)}>
-                        <h3>{section.judul}</h3>
-                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
-                          ▼
-                        </span>
-                      </div>
-                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
-                        {section.gambar && (
-                          <div className={styles.sectionImage}>
-                            <Image 
-                              src={section.gambar} 
-                              alt={section.judul} 
-                              width={600} 
-                              height={400} 
-                              style={{ width: '100%', height: 'auto' }}
-                            />
-                          </div>
-                        )}
-                        <div className={styles.sectionDescription}>
-                          {section.deskripsi.split('\n').map((paragraph, i) => (
-                            <p key={i}>{paragraph}</p>
-                          ))}
-                        </div>
-                      </div>
+            {/* Image Gallery - Separate for mobile ordering */}
+            <div className={styles.imageGallery}>
+              {allImages.length === 1 ? (
+                // Single image layout
+                <div className={styles.singleImage}>
+                  <Image
+                    src={allImages[0]}
+                    alt={currentProduk.nama}
+                    fill
+                    priority
+                    quality={90}
+                    sizes="(max-width: 768px) 100vw, 60vw"
+                  />
+                </div>
+              ) : (
+                // Multiple images grid layout (2x2)
+                <div className={styles.imageGrid}>
+                  {allImages.map((img, index) => (
+                    <div
+                      key={index}
+                      className={styles.gridImage}
+                    >
+                      <Image
+                        src={img}
+                        alt={`${currentProduk.nama} ${index + 1}`}
+                        fill
+                        quality={85}
+                        sizes="(max-width: 768px) 50vw, 30vw"
+                      />
                     </div>
-                  ))
-                ) : (
-                  <>
-                    {/* Default sections if no custom sections */}
-                    {/* Description */}
-                    <div className={styles.detailSection}>
-                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                      <div className={styles.detailHeader} onClick={() => toggleSection('description')}>
-                        <h3>Deskripsi Produk</h3>
-                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.description })}>
-                          ▼
-                        </span>
-                      </div>
-                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.description })}>
-                        <p>{currentProduk.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
-                      </div>
-                    </div>
-
-                    {/* Features */}
-                    <div className={styles.detailSection}>
-                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                      <div className={styles.detailHeader} onClick={() => toggleSection('features')}>
-                        <h3>Fitur & Material</h3>
-                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.features })}>
-                          ▼
-                        </span>
-                      </div>
-                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.features })}>
-                        <ul>
-                          <li>Bahan berkualitas tinggi</li>
-                          <li>Nyaman dipakai</li>
-                          <li>Desain modern dan stylish</li>
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Care Instructions */}
-                    <div className={styles.detailSection}>
-                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                      <div className={styles.detailHeader} onClick={() => toggleSection('care')}>
-                        <h3>Cara Perawatan</h3>
-                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.care })}>
-                          ▼
-                        </span>
-                      </div>
-                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.care })}>
-                        <ul>
-                          <li>Cuci dengan mesin air dingin</li>
-                          <li>Jangan gunakan pemutih</li>
-                          <li>Keringkan dengan suhu rendah</li>
-                          <li>Setrika dengan suhu sedang</li>
-                        </ul>
-                      </div>
-                    </div>
-
-                    {/* Shipping & Returns */}
-                    <div className={styles.detailSection}>
-                      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-                      <div className={styles.detailHeader} onClick={() => toggleSection('shipping')}>
-                        <h3>Pengiriman & Pengembalian</h3>
-                        <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.shipping })}>
-                          ▼
-                        </span>
-                      </div>
-                      <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.shipping })}>
-                        <p>Gratis ongkir untuk pembelian di atas Rp 500.000</p>
-                        <p>Pengembalian gratis dalam 30 hari</p>
-                        <p>Garansi uang kembali jika produk tidak sesuai</p>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Right Column: Product Info (Sticky) */}
@@ -664,91 +527,121 @@ function ProdukDetailPage({ produk, error }) {
                 </button>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Image Modal Popup */}
-        {isImageModalOpen && (
-          // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
-          <div className={styles.imageModal} onClick={closeImageModal}>
-            <button 
-              type="button"
-              className={styles.modalClose} 
-              onClick={closeImageModal}
-              aria-label="Close modal"
-            >
-              ×
-            </button>
-            
-            {allImages.length > 1 && (
-              <>
-                <button 
-                  type="button"
-                  className={styles.modalPrev} 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    prevImage();
-                  }}
-                  aria-label="Previous image"
-                >
-                  ‹
-                </button>
-                <button 
-                  type="button"
-                  className={styles.modalNext} 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    nextImage();
-                  }}
-                  aria-label="Next image"
-                >
-                  ›
-                </button>
-              </>
-            )}
-
-            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
-            <div 
-              className={styles.modalContent}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={styles.modalImageWrapper}>
-                <Image
-                  src={allImages[modalImageIndex]}
-                  alt={`${currentProduk.nama} ${modalImageIndex + 1}`}
-                  fill
-                  quality={100}
-                  sizes="90vw"
-                  style={{ objectFit: 'contain' }}
-                />
-              </div>
-              
-              {allImages.length > 1 && (
-                <div className={styles.modalThumbnails}>
-                  {allImages.map((img, index) => (
-                    <div
-                      key={index}
-                      className={clsx(styles.modalThumbnail, { [styles.active]: index === modalImageIndex })}
-                      onClick={() => setModalImageIndex(index)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') setModalImageIndex(index);
-                      }}
-                    >
-                      <Image 
-                        src={img} 
-                        alt={`Thumbnail ${index + 1}`} 
-                        fill 
-                        sizes="80px"
-                      />
+            {/* Product Details Sections - Moved below for mobile ordering */}
+            <div className={styles.productDetails}>
+              {/* Dynamic Sections from Database */}
+              {currentProduk.sections && Array.isArray(currentProduk.sections) && currentProduk.sections.length > 0 ? (
+                currentProduk.sections.map((section, index) => (
+                  <div key={index} className={styles.detailSection}>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                    <div className={styles.detailHeader} onClick={() => toggleSection(`section-${index}`)}>
+                      <h3>{section.judul}</h3>
+                      <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
+                        ▼
+                      </span>
                     </div>
-                  ))}
-                </div>
+                    <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
+                      {section.gambar && (
+                        <div className={styles.sectionImage}>
+                          <Image 
+                            src={section.gambar} 
+                            alt={section.judul} 
+                            width={600} 
+                            height={400} 
+                            style={{ width: '100%', height: 'auto' }}
+                          />
+                        </div>
+                      )}
+                      <div className={styles.sectionDescription}>
+                        {section.deskripsi.split('\n').map((paragraph, i) => (
+                          <p key={i}>{paragraph}</p>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  {/* Default sections if no custom sections */}
+                  {/* Description */}
+                  <div className={styles.detailSection}>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                    <div className={styles.detailHeader} onClick={() => toggleSection('description')}>
+                      <h3>Deskripsi Produk</h3>
+                      <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.description })}>
+                        ▼
+                      </span>
+                    </div>
+                    <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.description })}>
+                      <p>{currentProduk.deskripsi || 'Tidak ada deskripsi tersedia.'}</p>
+                    </div>
+                  </div>
+
+                  {/* Features */}
+                  <div className={styles.detailSection}>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                    <div className={styles.detailHeader} onClick={() => toggleSection('features')}>
+                      <h3>Fitur & Material</h3>
+                      <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.features })}>
+                        ▼
+                      </span>
+                    </div>
+                    <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.features })}>
+                      <ul>
+                        <li>Bahan berkualitas tinggi</li>
+                        <li>Nyaman dipakai</li>
+                        <li>Desain modern dan stylish</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Care Instructions */}
+                  <div className={styles.detailSection}>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                    <div className={styles.detailHeader} onClick={() => toggleSection('care')}>
+                      <h3>Cara Perawatan</h3>
+                      <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.care })}>
+                        ▼
+                      </span>
+                    </div>
+                    <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.care })}>
+                      <ul>
+                        <li>Cuci dengan mesin air dingin</li>
+                        <li>Jangan gunakan pemutih</li>
+                        <li>Keringkan dengan suhu rendah</li>
+                        <li>Setrika dengan suhu sedang</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Shipping & Returns */}
+                  <div className={styles.detailSection}>
+                    {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events */}
+                    <div className={styles.detailHeader} onClick={() => toggleSection('shipping')}>
+                      <h3>Pengiriman & Pengembalian</h3>
+                      <span className={clsx(styles.toggleIcon, { [styles.expanded]: expandedSections.shipping })}>
+                        ▼
+                      </span>
+                    </div>
+                    <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections.shipping })}>
+                      <p>Gratis ongkir untuk pembelian di atas Rp 500.000</p>
+                      <p>Pengembalian gratis dalam 30 hari</p>
+                      <p>Garansi uang kembali jika produk tidak sesuai</p>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>
-        )}
+
+          {/* Product Reviews Section */}
+          {currentProduk && (
+            <div className={styles.reviewsSection}>
+              <ProductReviews produkId={currentProduk.id} />
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

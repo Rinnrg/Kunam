@@ -31,6 +31,12 @@ function PembayaranPage() {
     phone: '',
   });
   const [errors, setErrors] = useState({});
+  const [voucherCode, setVoucherCode] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [voucherLoading, setVoucherLoading] = useState(false);
+  const [voucherError, setVoucherError] = useState('');
+  const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+  const [availableVouchers, setAvailableVouchers] = useState([]);
 
   // Get checkout items from query params or localStorage
   useEffect(() => {
@@ -75,6 +81,25 @@ function PembayaranPage() {
     }
   }, [status, session, router, setIsAuthModalOpen]);
 
+  // Fetch available vouchers
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      try {
+        const response = await fetch('/api/vouchers?active=true');
+        const data = await response.json();
+        if (data.vouchers) {
+          setAvailableVouchers(data.vouchers);
+        }
+      } catch (error) {
+        console.error('Error fetching vouchers:', error);
+      }
+    };
+
+    if (status === 'authenticated') {
+      fetchVouchers();
+    }
+  }, [status]);
+
   // Calculate totals
   const subtotal = useMemo(() => {
     return checkoutItems.reduce((sum, item) => {
@@ -85,7 +110,7 @@ function PembayaranPage() {
     }, 0);
   }, [checkoutItems]);
 
-  const discount = 0; // Can be extended for coupons
+  const discount = appliedVoucher ? appliedVoucher.discountAmount : 0;
   const total = subtotal - discount;
 
   // Form validation
@@ -122,6 +147,70 @@ function PembayaranPage() {
       setErrors((prev) => ({ ...prev, [name]: '' }));
     }
   }, [errors]);
+
+  // Handle voucher apply
+  const handleApplyVoucher = useCallback(async (codeOrVoucher) => {
+    const code = typeof codeOrVoucher === 'string' ? codeOrVoucher : codeOrVoucher.code;
+    
+    if (!code || !code.trim()) {
+      setVoucherError('Masukkan kode voucher');
+      return;
+    }
+
+    setVoucherLoading(true);
+    setVoucherError('');
+
+    try {
+      const response = await fetch('/api/vouchers/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          totalAmount: subtotal,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setVoucherError(data.error || 'Voucher tidak valid');
+        setAppliedVoucher(null);
+      } else {
+        setAppliedVoucher(data);
+        setVoucherCode(data.voucher.code);
+        setVoucherError('');
+        setIsVoucherModalOpen(false);
+        showAlert({
+          type: 'success',
+          title: 'Voucher Diterapkan',
+          message: `Voucher ${data.voucher.code} berhasil diterapkan!`,
+        });
+      }
+    } catch (error) {
+      console.error('Error validating voucher:', error);
+      setVoucherError('Terjadi kesalahan saat memvalidasi voucher');
+      setAppliedVoucher(null);
+    } finally {
+      setVoucherLoading(false);
+    }
+  }, [subtotal, showAlert]);
+
+  // Handle remove voucher
+  const handleRemoveVoucher = useCallback(() => {
+    setAppliedVoucher(null);
+    setVoucherCode('');
+    setVoucherError('');
+    showAlert({
+      type: 'success',
+      title: 'Voucher Dihapus',
+      message: 'Voucher berhasil dihapus.',
+    });
+  }, [showAlert]);
+
+  // Handle apply voucher from input
+  const handleApplyVoucherFromInput = useCallback(() => {
+    handleApplyVoucher(voucherCode);
+  }, [voucherCode, handleApplyVoucher]);
 
   // Handle payment
   const handlePayment = useCallback(async () => {
@@ -386,6 +475,125 @@ function PembayaranPage() {
             <div className={styles.summaryCard}>
               <h2 className={styles.summaryTitle}>Ringkasan Pembayaran</h2>
 
+              {/* Voucher Section */}
+              <div className={styles.voucherSection}>
+                <button
+                  type="button"
+                  className={styles.voucherButton}
+                  onClick={() => setIsVoucherModalOpen(!isVoucherModalOpen)}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 22V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 12L3.27 6.96" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M12 12L20.73 6.96" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  <span>
+                    {appliedVoucher ? `Voucher: ${appliedVoucher.voucher.code}` : `Pilih Voucher (${availableVouchers.length})`}
+                  </span>
+                  <svg 
+                    width="16" 
+                    height="16" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    xmlns="http://www.w3.org/2000/svg"
+                    style={{ transform: isVoucherModalOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.3s' }}
+                  >
+                    <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+
+                {isVoucherModalOpen && (
+                  <div className={styles.voucherDropdown}>
+                    {/* Manual Input Section */}
+                    <div className={styles.manualVoucherInput}>
+                      <h4>Masukkan Kode Voucher</h4>
+                      <div className={styles.voucherInputGroup}>
+                        <input
+                          type="text"
+                          value={voucherCode}
+                          onChange={(e) => {
+                            setVoucherCode(e.target.value.toUpperCase());
+                            setVoucherError('');
+                          }}
+                          placeholder="KODE VOUCHER"
+                          className={voucherError ? styles.error : ''}
+                        />
+                        <button
+                          type="button"
+                          onClick={handleApplyVoucherFromInput}
+                          disabled={voucherLoading || !voucherCode.trim()}
+                          className={styles.applyBtn}
+                        >
+                          {voucherLoading ? 'Validasi...' : 'Gunakan'}
+                        </button>
+                      </div>
+                      {voucherError && (
+                        <span className={styles.errorText}>{voucherError}</span>
+                      )}
+                    </div>
+
+                    {/* Available Vouchers List */}
+                    {availableVouchers.length > 0 && (
+                      <>
+                        <div className={styles.dividerText}>
+                          <span>atau pilih voucher tersedia</span>
+                        </div>
+                        <div className={styles.voucherList}>
+                          {availableVouchers.map((voucher) => (
+                            <div key={voucher.id} className={styles.voucherItem}>
+                              <div className={styles.voucherItemHeader}>
+                                <div className={styles.voucherBadge}>
+                                  {voucher.discountType === 'percentage' 
+                                    ? `${voucher.discountValue}%` 
+                                    : `Rp ${voucher.discountValue.toLocaleString('id-ID')}`
+                                  }
+                                </div>
+                                <span className={styles.voucherCode}>{voucher.code}</span>
+                              </div>
+                              <h4 className={styles.voucherName}>{voucher.name}</h4>
+                              {voucher.description && (
+                                <p className={styles.voucherDesc}>{voucher.description}</p>
+                              )}
+                              <div className={styles.voucherDetails}>
+                                <span className={styles.minPurchase}>
+                                  Min. pembelian: Rp {voucher.minPurchase.toLocaleString('id-ID')}
+                                </span>
+                                {voucher.maxDiscount && (
+                                  <span className={styles.maxDiscount}>
+                                    Maks. diskon: Rp {voucher.maxDiscount.toLocaleString('id-ID')}
+                                  </span>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                className={styles.useVoucherBtn}
+                                onClick={() => handleApplyVoucher(voucher)}
+                                disabled={appliedVoucher?.voucher.id === voucher.id || voucherLoading}
+                              >
+                                {appliedVoucher?.voucher.id === voucher.id ? '✓ Terpilih' : 'Gunakan'}
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    {appliedVoucher && (
+                      <button
+                        type="button"
+                        className={styles.removeVoucherBtn}
+                        onClick={handleRemoveVoucher}
+                      >
+                        Hapus Voucher
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div className={styles.divider} />
+
               <div className={styles.summaryRows}>
                 <div className={styles.summaryRow}>
                   <span className={styles.label}>Subtotal ({checkoutItems.reduce((sum, item) => sum + item.quantity, 0)} item)</span>
@@ -393,7 +601,7 @@ function PembayaranPage() {
                 </div>
                 {discount > 0 && (
                   <div className={`${styles.summaryRow} ${styles.discount}`}>
-                    <span className={styles.label}>Diskon</span>
+                    <span className={styles.label}>Diskon Voucher</span>
                     <span className={styles.value}>-Rp {discount.toLocaleString('id-ID')}</span>
                   </div>
                 )}

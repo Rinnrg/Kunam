@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     });
 
     // Cek apakah user sudah pernah review produk ini
-    const hasReviewed = await prisma.review.findUnique({
+    const hasReviewed = await prisma.reviews.findUnique({
       where: {
         userId_produkId: {
           userId: session.user.id,

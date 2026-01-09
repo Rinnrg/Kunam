@@ -164,6 +164,7 @@ model wishlists {
 model HomeSection {
   id          String   @id @default(cuid())
   title       String
+  page        String   @default("home") // home, produk, about, contact, etc.
   images      String[] // Array of image URLs
   layoutType  String   @default("slider") // slider, grid, masonry, carousel
   columns     Int      @default(3) // For grid layout
@@ -175,4 +176,26 @@ model HomeSection {
   updatedAt   DateTime @updatedAt
 
   @@index([order])
+  @@index([page])
+}
+
+model Voucher {
+  id            String   @id @default(cuid())
+  code          String   @unique
+  name          String
+  description   String?
+  discountType  String   // "percentage" or "fixed"
+  discountValue Float    // Percentage (0-100) or fixed amount
+  minPurchase   Float    @default(0) // Minimum purchase amount
+  maxDiscount   Float?   // Maximum discount for percentage type
+  usageLimit    Int?     // Null = unlimited
+  usageCount    Int      @default(0)
+  startDate     DateTime
+  endDate       DateTime
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
 }

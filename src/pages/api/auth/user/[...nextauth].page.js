@@ -120,8 +120,13 @@ export const userAuthOptions = {
             where: { email: user.email.toLowerCase() },
             select: { id: true, image: true },
           });
-          token.id = dbUser?.id.toString();
-          token.image = dbUser?.image || user.image;
+          if (dbUser) {
+            token.id = dbUser.id.toString();
+            token.image = dbUser.image || user.image;
+          } else {
+            console.error('[JWT] Google user not found in database:', user.email);
+            return null;
+          }
         } else {
           token.id = user.id;
           token.image = user.image;
@@ -133,14 +138,21 @@ export const userAuthOptions = {
       
       // Update token on session update
       if (trigger === 'update') {
-        const dbUser = await prisma.users.findUnique({
-          where: { id: parseInt(token.id, 10) },
-          select: { name: true, image: true, email: true },
-        });
-        if (dbUser) {
-          token.name = dbUser.name;
-          token.image = dbUser.image;
-          token.email = dbUser.email;
+        try {
+          const userId = parseInt(token.id, 10);
+          if (userId && !Number.isNaN(userId)) {
+            const dbUser = await prisma.users.findUnique({
+              where: { id: userId },
+              select: { name: true, image: true, email: true },
+            });
+            if (dbUser) {
+              token.name = dbUser.name;
+              token.image = dbUser.image;
+              token.email = dbUser.email;
+            }
+          }
+        } catch (error) {
+          console.error('[JWT] Update trigger error:', error);
         }
       }
       
@@ -150,8 +162,21 @@ export const userAuthOptions = {
       if (token && session.user) {
         // Always fetch fresh image from database
         try {
+          const userId = parseInt(token.id, 10);
+          
+          // Validate that we have a valid numeric user ID
+          if (!userId || Number.isNaN(userId)) {
+            console.error('[Session] Invalid token.id:', token.id);
+            session.user.id = token.id;
+            session.user.email = token.email;
+            session.user.name = token.name;
+            session.user.image = token.image;
+            session.user.role = token.role;
+            return session;
+          }
+          
           const dbUser = await prisma.users.findUnique({
-            where: { id: parseInt(token.id, 10) },
+            where: { id: userId },
             select: { image: true },
           });
           
@@ -161,6 +186,7 @@ export const userAuthOptions = {
           session.user.image = dbUser?.image || token.image;
           session.user.role = token.role;
         } catch (error) {
+          console.error('[Session] Database query error:', error);
           // Fallback to token image if database query fails
           session.user.id = token.id;
           session.user.email = token.email;

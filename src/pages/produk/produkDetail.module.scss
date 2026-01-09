@@ -62,20 +62,10 @@
   }
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
     margin-top: 1rem;
-  }
-}
-
-// ===== LEFT COLUMN: IMAGE GALLERY + DETAILS =====
-.leftColumn {
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-
-  @media (max-width: 768px) {
-    gap: 2rem;
   }
 }
 
@@ -87,6 +77,7 @@
 
   @media (max-width: 768px) {
     gap: 0.75rem;
+    order: 1;
   }
 }
 
@@ -97,16 +88,10 @@
   aspect-ratio: 3 / 4;
   background-color: #f5f5f5;
   overflow: hidden;
-  cursor: pointer;
   border-radius: 8px;
 
   img {
     object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-
-  &:hover img {
-    transform: scale(1.02);
   }
 
   @media (max-width: 768px) {
@@ -131,16 +116,10 @@
   aspect-ratio: 3 / 4;
   background-color: #f5f5f5;
   overflow: hidden;
-  cursor: pointer;
   border-radius: 8px;
-  transition: transform 0.2s ease;
 
   img {
     object-fit: cover;
-  }
-
-  &:hover {
-    transform: scale(0.98);
   }
 
   @media (max-width: 768px) {
@@ -219,6 +198,11 @@
   display: flex;
   flex-direction: column;
   border-top: 1px solid #e0e0e0;
+  
+  @media (max-width: 768px) {
+    order: 3;
+    margin-top: 1.5rem;
+  }
 }
 
 .detailSection {
@@ -319,21 +303,51 @@
 // ===== RIGHT COLUMN: PRODUCT INFO (STICKY) =====
 .productInfo {
   position: sticky;
-  top: calc(70px + 2rem); // Header height (approx 70px) + spacing
+  top: 5rem; // Balanced spacing from top to avoid header overlap
   height: fit-content;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem; // Reduced from 1.5rem to 1rem for tighter spacing
   background-color: #fff;
-  padding: 1.5rem;
+  padding: 1.25rem; // Reduced from 1.5rem
+  padding-bottom: 1.25rem; // Reduced from 2rem
   border: 1px solid #f0f0f0;
   border-radius: 12px;
+  align-self: flex-start;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  overflow-x: hidden; // Prevent horizontal overflow
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+
+    &:hover {
+      background: #555;
+    }
+  }
 
   @media (max-width: 768px) {
     position: static;
     border: none;
-    padding: 0;
+    padding: 1rem;
+    padding-bottom: 1rem;
     gap: 1rem;
+    order: 2;
+    max-height: none;
+    overflow-y: visible;
+    margin: 0 -1rem;
+    width: calc(100% + 2rem);
+    border-radius: 0;
   }
 }
 
@@ -355,7 +369,7 @@
 .colorSection {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem; // Reduced from 0.75rem
 
   @media (max-width: 768px) {
     gap: 0.5rem;
@@ -417,7 +431,7 @@
 .sizeSection {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.5rem; // Reduced from 0.75rem
 
   @media (max-width: 768px) {
     gap: 0.5rem;
@@ -469,7 +483,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding-bottom: 1rem;
+  padding-bottom: 0.75rem; // Reduced from 1rem
   border-bottom: 1px solid #e0e0e0;
 
   @media (max-width: 768px) {
@@ -558,7 +572,7 @@
 // ===== QUANTITY & BUY NOW ROW =====
 .quantityBuyRow {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem; // Reduced from 0.75rem
   align-items: stretch;
 
   @media (max-width: 768px) {
@@ -658,7 +672,7 @@
 // ===== WISHLIST + ADD TO CART ROW =====
 .cartWishlistRow {
   display: flex;
-  gap: 0.75rem;
+  gap: 0.5rem; // Reduced from 0.75rem
 
   @media (max-width: 768px) {
     gap: 0.5rem;
@@ -744,6 +758,11 @@
   justify-content: center;
   z-index: 9999;
   padding: 2rem;
+  overflow: hidden;
+  overscroll-behavior: contain;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -834,10 +853,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
   max-width: 90vw;
   max-height: 90vh;
   width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: auto;
 
   @media (max-width: 768px) {
     gap: 1rem;
@@ -849,72 +872,63 @@
   width: 100%;
   max-width: 1200px;
   height: calc(90vh - 120px);
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: transparent;
   border-radius: 8px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: zoom-in;
 
   img {
     object-fit: contain !important;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.3);
   }
 
   @media (max-width: 768px) {
     height: calc(90vh - 100px);
     border-radius: 4px;
-  }
-}
-
-.modalThumbnails {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding: 0.5rem;
-  max-width: 100%;
-
-  &::-webkit-scrollbar {
-    height: 6px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.5);
+    cursor: default;
+    
+    &:hover img {
+      transform: scale(1);
     }
   }
 }
 
-.modalThumbnail {
-  position: relative;
-  width: 80px;
-  height: 100px;
-  flex-shrink: 0;
-  cursor: pointer;
-  border: 2px solid transparent;
-  border-radius: 4px;
-  overflow: hidden;
-  transition: all 0.2s ease;
-  background-color: rgba(255, 255, 255, 0.1);
-
-  img {
-    object-fit: cover;
-  }
-
-  &:hover {
-    border-color: rgba(255, 255, 255, 0.5);
-  }
-
-  &.active {
-    border-color: white;
-  }
+.modalCounter {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  z-index: 10001;
 
   @media (max-width: 768px) {
-    width: 60px;
-    height: 75px;
+    bottom: 1.5rem;
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem;
+  }
+}
+
+// ===== REVIEWS SECTION =====
+.reviewsSection {
+  margin-top: 4rem;
+  width: 100%;
+
+  @media (max-width: 768px) {
+    margin-top: 2rem;
   }
 }

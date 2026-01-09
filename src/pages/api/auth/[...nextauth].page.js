@@ -3,6 +3,13 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import bcrypt from 'bcryptjs';
 import prisma from '../../../lib/prisma';
+import {
+  getClientIP,
+  isIPBlocked,
+  recordLoginAttempt,
+  logSecurityEvent,
+  sanitizeInput,
+} from '../../../lib/security';
 
 export const authOptions = {
   providers: [
@@ -26,15 +33,34 @@ export const authOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize(credentials, req) {
         try {
           if (!credentials?.email || !credentials?.password) {
             return null;
           }
 
+          // Get client IP for security checks
+          const ip = getClientIP(req);
+          const userAgent = req.headers?.['user-agent'] || 'unknown';
+
+          // Check if IP is blocked
+          if (isIPBlocked(ip)) {
+            await logSecurityEvent({
+              type: 'BLOCKED_ADMIN_LOGIN',
+              severity: 'warning',
+              ip,
+              userAgent,
+              details: { email: credentials.email },
+            });
+            throw new Error('Terlalu banyak percobaan login. Silakan coba lagi nanti.');
+          }
+
+          // Sanitize email input
+          const sanitizedEmail = sanitizeInput(credentials.email.toLowerCase());
+
           const admin = await prisma.Admin.findUnique({
             where: {
-              email: credentials.email,
+              email: sanitizedEmail,
             },
             select: {
               id: true,
@@ -45,14 +71,44 @@ export const authOptions = {
           });
 
           if (!admin) {
+            recordLoginAttempt(ip, false);
+            await logSecurityEvent({
+              type: 'FAILED_ADMIN_LOGIN',
+              severity: 'warning',
+              ip,
+              userAgent,
+              details: { email: sanitizedEmail, reason: 'Admin not found' },
+            });
             return null;
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, admin.password);
 
           if (!isPasswordValid) {
+            recordLoginAttempt(ip, false);
+            await logSecurityEvent({
+              type: 'FAILED_ADMIN_LOGIN',
+              severity: 'warning',
+              ip,
+              userAgent,
+              details: { email: sanitizedEmail, reason: 'Invalid password' },
+            });
             return null;
           }
+
+          // Successful login
+          recordLoginAttempt(ip, true);
+          await logSecurityEvent({
+            type: 'SUCCESSFUL_ADMIN_LOGIN',
+            severity: 'info',
+            ip,
+            userAgent,
+            details: {
+              adminId: admin.id,
+              email: admin.email,
+              name: admin.name,
+            },
+          });
 
           return {
             id: admin.id.toString(),
@@ -63,7 +119,7 @@ export const authOptions = {
         } catch (error) {
           // eslint-disable-next-line no-console
           console.error('[Admin Auth] Authorization error:', error);
-          return null;
+          throw error;
         }
       },
     }),

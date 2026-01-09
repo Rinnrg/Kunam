@@ -11,8 +11,7 @@
   padding: calc(var(--layout-columns-gap) * 3) var(--layout-margin) calc(var(--layout-columns-gap) * 2) var(--layout-margin);
 
   @include mobile {
-    padding-top: calc(var(--layout-columns-gap) * 2);
-    padding-bottom: var(--layout-columns-gap);
+    padding: calc(var(--layout-columns-gap) * 1.5) var(--layout-margin) calc(var(--layout-columns-gap) * 1) var(--layout-margin);
   }
 
   // Company Info Section
@@ -20,7 +19,7 @@
     padding-bottom: calc(var(--layout-columns-gap) * 2);
 
     @include mobile {
-      padding-bottom: var(--layout-columns-gap);
+      padding-bottom: calc(var(--layout-columns-gap) * 1.2);
     }
 
     .brandName {
@@ -30,7 +29,8 @@
       color: var(--white);
 
       @include mobile {
-        font-size: 8vw;
+        font-size: 10vw;
+        margin-bottom: calc(var(--layout-columns-gap) * 0.6);
       }
 
       .kunamText {
@@ -48,13 +48,19 @@
       max-width: 90%;
 
       @include mobile {
-        font-size: 3.2vw;
+        font-size: 3.5vw;
         max-width: 100%;
+        line-height: 1.5;
+        margin-bottom: calc(var(--layout-columns-gap) * 0.8);
       }
 
       p {
         margin-bottom: calc(var(--layout-columns-gap) * 0.5);
         font-weight: 400;
+
+        @include mobile {
+          margin-bottom: calc(var(--layout-columns-gap) * 0.4);
+        }
       }
 
       .tagline {
@@ -69,7 +75,8 @@
       line-height: 1.6;
 
       @include mobile {
-        font-size: 3.2vw;
+        font-size: 3.5vw;
+        line-height: 1.5;
       }
 
       .title {
@@ -79,13 +86,18 @@
         color: var(--white);
 
         @include mobile {
-          font-size: 3.8vw;
+          font-size: 4vw;
+          margin-bottom: calc(var(--layout-columns-gap) * 0.3);
         }
       }
 
       p {
         margin: calc(var(--layout-columns-gap) * 0.25) 0;
         font-weight: 400;
+
+        @include mobile {
+          margin: calc(var(--layout-columns-gap) * 0.2) 0;
+        }
 
         a {
           color: var(--white);
@@ -117,12 +129,24 @@
     }
   }
 
+  // Links Grid for mobile 2-column layout
+  .linksGrid {
+    display: contents;
+
+    @include mobile {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: calc(var(--layout-columns-gap) * 0.8);
+      grid-column: 1 / 7 !important;
+    }
+  }
+
   // Links Container
   .linksContainer {
     padding-top: calc(var(--layout-columns-gap) * 0.5);
 
     @include mobile {
-      padding-top: var(--layout-columns-gap);
+      padding-top: 0;
     }
 
     width: 100%;
@@ -139,8 +163,8 @@
       letter-spacing: 0.05em;
 
       @include mobile {
-        font-size: 3.8vw;
-        padding-bottom: calc(var(--layout-columns-gap) * 0.5);
+        font-size: 4vw;
+        padding-bottom: calc(var(--layout-columns-gap) * 0.4);
       }
     }
 
@@ -148,7 +172,7 @@
       padding-top: calc(var(--layout-columns-gap) * 0.35);
 
       @include mobile {
-        padding-top: calc(var(--layout-columns-gap) * 0.25);
+        padding-top: calc(var(--layout-columns-gap) * 0.2);
       }
 
       .linkText {
@@ -161,7 +185,7 @@
         transition: all 0.3s ease;
 
         @include mobile {
-          font-size: 3.2vw;
+          font-size: 3.5vw;
         }
 
         > svg {
@@ -211,6 +235,11 @@
       gap: calc(var(--layout-columns-gap) * 0.5);
       margin-top: calc(var(--layout-columns-gap) * 0.5);
 
+      @include mobile {
+        gap: calc(var(--layout-columns-gap) * 0.4);
+        margin-top: calc(var(--layout-columns-gap) * 0.3);
+      }
+
       .socialIconContainer {
         .socialLink {
           display: flex;
@@ -223,8 +252,8 @@
           transition: all 0.3s ease;
 
           @include mobile {
-            width: 10vw;
-            height: 10vw;
+            width: 11vw;
+            height: 11vw;
           }
 
           .iconPlaceholder {
@@ -257,8 +286,8 @@
     border-top: 1px solid rgba(255, 255, 255, 0.2);
 
     @include mobile {
-      margin-top: var(--layout-columns-gap);
-      padding-top: var(--layout-columns-gap);
+      margin-top: calc(var(--layout-columns-gap) * 1.2);
+      padding-top: calc(var(--layout-columns-gap) * 0.8);
     }
 
     .bottomInfo {
@@ -274,6 +303,7 @@
         font-size: 3.2vw;
         flex-direction: column;
         align-items: flex-start;
+        gap: calc(var(--layout-columns-gap) * 0.2);
       }
 
       .bottomText {

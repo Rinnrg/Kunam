@@ -10,6 +10,7 @@ export default function CreateHomeSection() {
   const router = useRouter();
   const [formData, setFormData] = useState({
     judul: '',
+    page: 'home',
     urutan: 0,
   });
   const [images, setImages] = useState([]);
@@ -59,6 +60,7 @@ export default function CreateHomeSection() {
         },
         body: JSON.stringify({
           judul: formData.judul,
+          page: formData.page,
           gambar: images,
           urutan: parseInt(formData.urutan, 10) || 0,
         }),
@@ -95,7 +97,6 @@ export default function CreateHomeSection() {
             { label: 'Tambah Section', href: null },
           ]}
         />
-        <h1 className={styles.title}>Tambah Home Section</h1>
       </header>
 
       <main className={styles.main}>
@@ -116,6 +117,27 @@ export default function CreateHomeSection() {
               placeholder="Masukkan judul section"
               required
             />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label htmlFor="page" className={styles.label}>
+              Halaman Tujuan *
+            </label>
+            <select
+              id="page"
+              name="page"
+              value={formData.page}
+              onChange={handleChange}
+              className={styles.input}
+              required
+            >
+              <option value="home">Beranda (Home)</option>
+              <option value="produk">Produk</option>
+              <option value="about">Tentang Kami</option>
+              <option value="contact">Kontak</option>
+              <option value="promo">Promo</option>
+            </select>
+            <small className={styles.hint}>Pilih halaman dimana section ini akan ditampilkan</small>
           </div>
 
           <div className={styles.formGroup}>

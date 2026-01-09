@@ -65,54 +65,57 @@ function Footer() {
         </AppearTitle>
       </div>
 
-      {/* Layanan Section */}
-      <div className={styles.linksContainer} style={{ gridColumn: isMobile ? '1 / 4' : '7 / 10' }}>
-        <AppearTitle isFooter>
-          <h6 className={clsx(styles.title, 'h6')}>LAYANAN</h6>
-          {footerLinks.layanan.map((link) => (
-            <div key={link.title} className={styles.linkTextContainer}>
-              <LinkText className={styles.linkText} title={link.title} href={link.href}>
-                <span className="footer">{link.title}</span>
-              </LinkText>
-            </div>
-          ))}
-        </AppearTitle>
-      </div>
-
-      {/* Tentang Kami Section */}
-      <div className={styles.linksContainer} style={{ gridColumn: isMobile ? '4 / 7' : '10 / 13' }}>
-        <AppearTitle isFooter>
-          <h6 className={clsx(styles.title, 'h6')}>TENTANG KAMI</h6>
-          {footerLinks.tentangKami.map((link) => (
-            <div key={link.title} className={styles.linkTextContainer}>
-              <LinkText className={styles.linkText} title={link.title} href={link.href}>
-                <span className="footer">{link.title}</span>
-              </LinkText>
-            </div>
-          ))}
-        </AppearTitle>
-      </div>
-
-      {/* Social Media Section */}
-      <div className={styles.linksContainer} style={{ gridColumn: isMobile ? '1 / 7' : '13 / 17' }}>
-        <AppearTitle isFooter>
-          <h6 className={clsx(styles.title, 'h6')}>TEMUKAN KAMI</h6>
-          <div className={styles.socialIcons}>
-            {footerLinks.social.map((link) => (
-              <div key={link.title} className={styles.socialIconContainer}>
-                <LinkText target className={styles.socialLink} title={link.title} href={link.href}>
-                  <Image 
-                    src={`/logo/${link.icon}-white.svg`} 
-                    alt={link.title}
-                    width={32}
-                    height={32}
-                    className={styles.socialIcon}
-                  />
+      {/* Links Grid Container - Mobile 2 columns */}
+      <div className={styles.linksGrid} style={{ gridColumn: isMobile ? '1 / 7' : '7 / 17' }}>
+        {/* Layanan Section */}
+        <div className={styles.linksContainer}>
+          <AppearTitle isFooter>
+            <h6 className={clsx(styles.title, 'h6')}>LAYANAN</h6>
+            {footerLinks.layanan.map((link) => (
+              <div key={link.title} className={styles.linkTextContainer}>
+                <LinkText className={styles.linkText} title={link.title} href={link.href}>
+                  <span className="footer">{link.title}</span>
                 </LinkText>
               </div>
             ))}
-          </div>
-        </AppearTitle>
+          </AppearTitle>
+        </div>
+
+        {/* Tentang Kami Section */}
+        <div className={styles.linksContainer}>
+          <AppearTitle isFooter>
+            <h6 className={clsx(styles.title, 'h6')}>TENTANG KAMI</h6>
+            {footerLinks.tentangKami.map((link) => (
+              <div key={link.title} className={styles.linkTextContainer}>
+                <LinkText className={styles.linkText} title={link.title} href={link.href}>
+                  <span className="footer">{link.title}</span>
+                </LinkText>
+              </div>
+            ))}
+          </AppearTitle>
+        </div>
+
+        {/* Social Media Section */}
+        <div className={styles.linksContainer}>
+          <AppearTitle isFooter>
+            <h6 className={clsx(styles.title, 'h6')}>TEMUKAN KAMI</h6>
+            <div className={styles.socialIcons}>
+              {footerLinks.social.map((link) => (
+                <div key={link.title} className={styles.socialIconContainer}>
+                  <LinkText target className={styles.socialLink} title={link.title} href={link.href}>
+                    <Image 
+                      src={`/logo/${link.icon}-white.svg`} 
+                      alt={link.title}
+                      width={32}
+                      height={32}
+                      className={styles.socialIcon}
+                    />
+                  </LinkText>
+                </div>
+              ))}
+            </div>
+          </AppearTitle>
+        </div>
       </div>
 
       {/* Bottom Info */}

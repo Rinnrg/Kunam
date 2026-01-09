@@ -44,11 +44,41 @@ export default function CreateProduk() {
   }, [status, router]);
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: value,
     }));
+  };
+
+  const handleImagesChange = (images) => {
+    // Find thumbnail - first image or the one marked as thumbnail
+    const thumbnailImage = images.find(img => img.isThumbnail) || images[0];
+    const thumbnailUrl = thumbnailImage ? (thumbnailImage.url || null) : null;
+
+    setProductImages({
+      thumbnail: thumbnailUrl,
+      gallery: images.map(img => img.url || img),
+      allImages: images
+    });
+  };
+
+  const handleVideoChange = (e) => {
+    const files = Array.from(e.target.files);
+    setVideoFiles(files);
+
+    const previews = files.map((file) => URL.createObjectURL(file));
+    setVideoPreviews(previews);
+  };
+
+  const removeNewVideo = (index) => {
+    const newFiles = videoFiles.filter((_, i) => i !== index);
+    const newPreviews = videoPreviews.filter((_, i) => i !== index);
+
+    URL.revokeObjectURL(videoPreviews[index]);
+
+    setVideoFiles(newFiles);
+    setVideoPreviews(newPreviews);
   };
 
   const handleUkuranChange = (index, field, value) => {
@@ -56,8 +86,10 @@ export default function CreateProduk() {
     newUkuran[index][field] = value;
     setUkuranInputs(newUkuran);
 
-    // Update formData with size format: "S:3, M:4, L:5"
-    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+    // Update formData.ukuran with format "SIZE:QTY"
+    const ukuranArray = newUkuran
+      .filter((item) => item.size && item.qty)
+      .map((item) => `${item.size}:${item.qty}`);
 
     setFormData((prev) => ({
       ...prev,
@@ -66,15 +98,16 @@ export default function CreateProduk() {
   };
 
   const addUkuranInput = () => {
-    setUkuranInputs([...ukuranInputs, { id: Date.now() + Math.random(), size: '', qty: '' }]);
+    setUkuranInputs([...ukuranInputs, { id: Date.now(), size: '', qty: '' }]);
   };
 
   const removeUkuranInput = (index) => {
     const newUkuran = ukuranInputs.filter((_, i) => i !== index);
     setUkuranInputs(newUkuran);
 
-    // Update formData
-    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+    const ukuranArray = newUkuran
+      .filter((item) => item.size && item.qty)
+      .map((item) => `${item.size}:${item.qty}`);
 
     setFormData((prev) => ({
       ...prev,
@@ -82,43 +115,24 @@ export default function CreateProduk() {
     }));
   };
 
-  const getTotalUkuran = () => ukuranInputs.reduce((total, item) => total + (parseInt(item.qty, 10) || 0), 0);
+  const getTotalUkuran = () => {
+    return ukuranInputs.reduce((sum, item) => {
+      const qty = parseInt(item.qty, 10) || 0;
+      return sum + qty;
+    }, 0);
+  };
 
   const getRemainingStock = () => {
-    const stok = parseInt(formData.stok, 10) || 0;
-    const totalUkuran = getTotalUkuran();
-    return stok - totalUkuran;
-  };
-
-  const handleImagesChange = (imageData) => {
-    setProductImages(imageData);
-  };
-
-  const handleVideoChange = (e) => {
-    const files = Array.from(e.target.files);
-    setVideoFiles(files);
-
-    // Create preview URLs
-    const previews = files.map((file) => URL.createObjectURL(file));
-    setVideoPreviews(previews);
-  };
-
-  const removeVideo = (index) => {
-    const newFiles = videoFiles.filter((_, i) => i !== index);
-    const newPreviews = videoPreviews.filter((_, i) => i !== index);
-    setVideoFiles(newFiles);
-    setVideoPreviews(newPreviews);
-
-    // Revoke the URL to free memory
-    URL.revokeObjectURL(videoPreviews[index]);
+    const total = getTotalUkuran();
+    const stock = parseInt(formData.stok, 10) || 0;
+    return Math.max(0, stock - total);
   };
 
   const uploadImages = async () => {
-    // Filter only File objects from allImages
     const newImages = productImages.allImages
-      .filter(img => img.isNew && img.file instanceof File)
+      .filter(img => img.isNew && img.file)
       .map(img => img.file);
-    
+
     if (newImages.length === 0) return [];
 
     setIsUploading(true);
@@ -185,51 +199,68 @@ export default function CreateProduk() {
     e.preventDefault();
     setError('');
 
-    // Validate total ukuran
-    if (getTotalUkuran() > parseInt(formData.stok, 10)) {
-      setError('Total ukuran melebihi stok yang tersedia!');
+    // Validate required fields
+    if (!formData.nama || !formData.kategori || !formData.harga || !formData.stok) {
+      setError('Mohon lengkapi semua field yang wajib diisi!');
       return;
     }
 
-    if (getTotalUkuran() < parseInt(formData.stok, 10)) {
-      setError('Total ukuran harus sama dengan stok!');
-      return;
+    // Validate total ukuran
+    if (ukuranInputs.some(item => item.size && item.qty)) {
+      if (getTotalUkuran() > parseInt(formData.stok, 10)) {
+        setError('Total ukuran melebihi stok yang tersedia!');
+        return;
+      }
+
+      if (getTotalUkuran() < parseInt(formData.stok, 10)) {
+        setError('Total ukuran harus sama dengan stok!');
+        return;
+      }
     }
 
     setIsSubmitting(true);
 
     try {
-      // Upload images and videos first
+      // Upload images and videos
       const uploadedImageUrls = await uploadImages();
       const uploadedVideoUrls = await uploadVideos();
-      
-      // Determine thumbnail URL - use the first image that was marked as thumbnail
+
+      // Determine thumbnail URL
       let thumbnailUrl = '';
       if (productImages.allImages && productImages.allImages.length > 0) {
-        // Find the thumbnail image
         const thumbnailImage = productImages.allImages.find(img => img.isThumbnail);
         if (thumbnailImage) {
-          // Find its index in the allImages array
-          const thumbnailIndex = productImages.allImages.indexOf(thumbnailImage);
-          if (thumbnailIndex !== -1 && uploadedImageUrls[thumbnailIndex]) {
-            thumbnailUrl = uploadedImageUrls[thumbnailIndex];
+          if (thumbnailImage.isNew) {
+            const newImages = productImages.allImages.filter(img => img.isNew);
+            const thumbnailIndexInNew = newImages.findIndex(img => img === thumbnailImage);
+            if (thumbnailIndexInNew !== -1 && uploadedImageUrls[thumbnailIndexInNew]) {
+              thumbnailUrl = uploadedImageUrls[thumbnailIndexInNew];
+            }
+          } else {
+            thumbnailUrl = thumbnailImage.url;
           }
-        }
-        // Fallback to first image if no thumbnail marked
-        if (!thumbnailUrl && uploadedImageUrls.length > 0) {
+        } else if (uploadedImageUrls.length > 0) {
           thumbnailUrl = uploadedImageUrls[0];
         }
       }
 
-      // Prepare form data with uploaded URLs
       const dataToSubmit = {
-        ...formData,
+        nama: formData.nama,
+        deskripsi: formData.deskripsi || '',
+        sections: formData.sections,
+        kategori: formData.kategori,
+        harga: parseFloat(formData.harga),
+        diskon: parseFloat(formData.diskon) || 0,
+        stok: parseInt(formData.stok, 10),
+        ukuran: formData.ukuran,
+        warna: formData.warna,
+        gambar: uploadedImageUrls,
         thumbnail: thumbnailUrl,
-        images: uploadedImageUrls,
-        videos: uploadedVideoUrls,
+        video: uploadedVideoUrls,
+        produkUnggulan: false,
       };
 
-      const response = await fetch('/api/produk', {
+      const response = await fetch('/api/admin/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -238,20 +269,20 @@ export default function CreateProduk() {
       });
 
       if (response.ok) {
-        router.push('/admin');
+        router.push('/admin/produk');
       } else {
         const data = await response.json();
-        setError(data.error || data.message || 'Error creating produk');
+        setError(data.error || 'Error membuat produk');
       }
     } catch (err) {
-      setError(err.message || 'Error creating produk');
+      setError(err.message || 'Error membuat produk');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   if (status === 'loading') {
-    return <div className={styles.loader}>Loading...</div>;
+    return <div className={styles.container}>Loading...</div>;
   }
 
   if (!session) {
@@ -265,7 +296,6 @@ export default function CreateProduk() {
         { label: 'Tambah Produk', href: null }
       ]} />
       <div className={styles.header}>
-        <h1 className={styles.title}>Tambah Produk Baru</h1>
         <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
           Kembali ke Dashboard
         </button>
@@ -274,10 +304,12 @@ export default function CreateProduk() {
       <form onSubmit={handleSubmit} className={styles.form}>
         {error && <div className={styles.error}>{error}</div>}
 
+        {/* Basic Information Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📝 Informasi Dasar</h3>
           <label htmlFor="nama" className={styles.label}>
             Nama Produk *
-            <input id="nama" name="nama" type="text" value={formData.nama} onChange={handleChange} className={styles.input} required />
+            <input id="nama" name="nama" type="text" value={formData.nama} onChange={handleChange} className={styles.input} placeholder="Masukkan nama produk" required />
           </label>
         </div>
 
@@ -296,8 +328,10 @@ export default function CreateProduk() {
           </label>
         </div>
 
+        {/* Pricing Section */}
         <div className={styles.formRow}>
           <div className={styles.formGroup}>
+            <h3 className={styles.sectionHeader}>💰 Harga & Stok</h3>
             <label htmlFor="harga" className={styles.label}>
               Harga (Rp) *
               <input id="harga" name="harga" type="number" step="1" value={formData.harga} onChange={handleChange} className={styles.input} placeholder="Contoh: 200000" required />
@@ -313,16 +347,18 @@ export default function CreateProduk() {
           <div className={styles.formGroup}>
             <label htmlFor="stok" className={styles.label}>
               Stok *
-              <input id="stok" name="stok" type="number" value={formData.stok} onChange={handleChange} className={styles.input} required />
+              <input id="stok" name="stok" type="number" value={formData.stok} onChange={handleChange} className={styles.input} placeholder="Jumlah stok" required />
             </label>
           </div>
         </div>
 
+        {/* Description Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📄 Deskripsi Produk</h3>
           <label className={styles.label}>
             Deskripsi / Product Sections
             <span className={styles.helpText}>
-              (Sections akan ditampilkan sebagai detail produk di bawah gallery foto)
+              Sections akan ditampilkan sebagai detail produk di bawah gallery foto
             </span>
           </label>
           <SectionsEditor
@@ -331,18 +367,22 @@ export default function CreateProduk() {
           />
         </div>
 
+        {/* Size Section */}
         <div className={styles.formGroup}>
-          <label htmlFor="ukuran" className={styles.label}>
+          <h3 className={styles.sectionHeader}>📏 Ukuran Produk</h3>
+          <label htmlFor="ukuran-select-0" className={styles.label}>
             Ukuran & Jumlah per Ukuran *
             <span className={styles.stockInfo}>
-              (Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()})
+              Total: {getTotalUkuran()} / {formData.stok || 0} | Sisa: {getRemainingStock()}
             </span>
           </label>
 
           {ukuranInputs.map((ukuran, index) => (
             <div key={ukuran.id} className={styles.ukuranRow}>
-              <select id="ukuran" value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
+              <select id={`ukuran-select-${index}`} value={ukuran.size} onChange={(e) => handleUkuranChange(index, 'size', e.target.value)} className={styles.ukuranSelect}>
                 <option value="">Pilih Ukuran</option>
+                <option value="XXS">XXS</option>
+                <option value="XS">XS</option>
                 <option value="S">S</option>
                 <option value="M">M</option>
                 <option value="L">L</option>
@@ -371,16 +411,18 @@ export default function CreateProduk() {
 
           {getTotalUkuran() < parseInt(formData.stok, 10) && (
             <button type="button" onClick={addUkuranInput} className={styles.addUkuranButton}>
-              + Tambah Ukuran
+              Tambah Ukuran
             </button>
           )}
 
           {getTotalUkuran() > parseInt(formData.stok, 10) && <p className={styles.errorText}>Total ukuran melebihi stok yang tersedia!</p>}
         </div>
 
+        {/* Color Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>🎨 Warna Produk</h3>
           <label className={styles.label}>
-            Warna
+            Pilih Warna yang Tersedia
           </label>
           <ColorSelector
             selectedColors={formData.warna}
@@ -388,11 +430,13 @@ export default function CreateProduk() {
           />
         </div>
 
+        {/* Images Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>📸 Foto Produk</h3>
           <label className={styles.label}>
-            Foto Produk
+            Upload Foto Produk
             <span className={styles.helpText}>
-              (Foto pertama akan menjadi thumbnail, semua foto akan ditampilkan di gallery produk)
+              Foto pertama akan menjadi thumbnail, semua foto akan ditampilkan di gallery produk
             </span>
           </label>
           <MultipleImageUpload
@@ -402,34 +446,46 @@ export default function CreateProduk() {
           />
         </div>
 
+        {/* Video Section */}
         <div className={styles.formGroup}>
+          <h3 className={styles.sectionHeader}>🎥 Video Produk</h3>
           <label htmlFor="videos" className={styles.label}>
-            Video
-            <input id="videos" type="file" name="videos" accept="video/*" multiple onChange={handleVideoChange} className={styles.input} />
+            Upload Video (opsional)
+            <input id="videos" name="videos" type="file" accept="video/*" multiple onChange={handleVideoChange} className={styles.fileInput} />
           </label>
+
+          {/* Video Previews */}
           {videoPreviews.length > 0 && (
-            <div className={styles.videoPreviewContainer}>
-              {videoPreviews.map((preview) => (
-                <div key={preview} className={styles.videoPreview}>
-                  <video controls src={preview}>
-                    <track kind="captions" />
-                  </video>
-                  <button type="button" onClick={() => removeVideo(videoPreviews.indexOf(preview))} className={styles.removeVideoButton}>
-                    ×
-                  </button>
-                </div>
-              ))}
-            </div>
+            <>
+              <p className={styles.sectionLabel}>Preview Video:</p>
+              <div className={styles.videoPreviewContainer}>
+                {videoPreviews.map((preview, index) => (
+                  <div key={preview} className={styles.videoPreview}>
+                    <video src={preview} controls className={styles.videoElement}>
+                      <track kind="captions" />
+                    </video>
+                    <button type="button" onClick={() => removeNewVideo(index)} className={styles.removeVideoButton}>
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
         </div>
 
-        <button type="submit" disabled={isSubmitting} className={styles.submitButton}>
-          {(() => {
-            if (isUploading) return 'Mengupload Gambar...';
-            if (isSubmitting) return 'Menyimpan...';
-            return 'Simpan Produk';
-          })()}
-        </button>
+        <div className={styles.formActions}>
+          <button type="button" onClick={() => router.push('/admin/produk')} className={styles.cancelButton} disabled={isSubmitting}>
+            ❌ Batal
+          </button>
+          <button type="submit" className={styles.submitButton} disabled={isSubmitting || isUploading}>
+            {(() => {
+              if (isUploading) return '⏳ Mengupload Gambar...';
+              if (isSubmitting) return '⏳ Membuat Produk...';
+              return '✅ Buat Produk';
+            })()}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -1,82 +1,208 @@
+@import '@src/styles/functions';
+
 .container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 0px 20px 20px;
-  padding-top: 0px;
+  background: #fafafa;
+  padding: 20px;
+  overflow-y: auto;
+  
+  @media (max-width: 768px) {
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 15px;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
 }
 
-.loginBox {
-  background: white;
-  padding: 40px;
+.loading {
+  font-size: 1rem;
+  color: #666;
+}
+
+.card {
+  background: #fff;
   border-radius: 12px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  max-width: 400px;
   width: 100%;
+  max-width: 380px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.1);
+  overflow: visible;
+  margin: 0 auto;
+  
+  @media (max-width: 768px) {
+    max-width: 100%;
+    border-radius: 8px;
+  }
+}
+
+.logoContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 24px 20px 16px;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+
+  img {
+    width: auto;
+    height: auto;
+    max-width: 100px;
+    object-fit: contain;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 20px 16px 14px;
+    
+    img {
+      max-width: 80px;
+    }
+  }
+}
+
+.header {
+  padding: 0 20px 16px;
+  text-align: center;
+  border-bottom: 1px solid #f0f0f0;
+  
+  @media (max-width: 768px) {
+    padding: 0 16px 14px;
+  }
 }
 
 .title {
-  font-size: 28px;
+  font-size: 1.5rem;
   font-weight: 600;
-  text-align: center;
-  margin-bottom: 30px;
-  color: #333;
+  color: #000;
+  margin: 0 0 6px;
+  
+  @media (max-width: 768px) {
+    font-size: 1.3rem;
+  }
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: #666;
+  margin: 0;
+}
+
+.content {
+  padding: 20px;
+
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 }
 
-.formGroup {
+.inputGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 .label {
-  font-size: 14px;
+  font-size: 0.85rem;
   font-weight: 500;
-  color: #555;
+  color: #333;
+  margin-bottom: 2px;
 }
 
 .input {
-  padding: 12px 16px;
-  border: 2px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  transition: all 0.3s ease;
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  background: #fff;
 
   &:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #000;
   }
 
   &:disabled {
     background-color: #f5f5f5;
     cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  &::placeholder {
+    color: #999;
+  }
+  
+  @media (max-width: 768px) {
+    height: 40px;
+    font-size: 0.85rem;
+    padding: 0 12px;
+  }
+}
+
+.passwordWrapper {
+  position: relative;
+  width: 100%;
+}
+
+.eyeButton {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: color 0.2s ease;
+
+  &:hover:not(:disabled) {
+    color: #000;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
   }
 }
 
 .submitButton {
-  padding: 14px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  width: 100%;
+  height: 44px;
+  background: #000;
+  color: #fff;
   border: none;
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  margin-top: 10px;
+  transition: all 0.2s ease;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 
   &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    background: #333;
+    transform: translateY(-1px);
   }
 
   &:active:not(:disabled) {
@@ -86,6 +212,32 @@
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    transform: none;
+  }
+  
+  @media (max-width: 768px) {
+    height: 42px;
+    font-size: 0.85rem;
+  }
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.spinnerCircle {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 25;
+  stroke-linecap: round;
+  opacity: 0.8;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -93,11 +245,89 @@
   padding: 12px;
   background-color: #fee;
   color: #c33;
-  border-radius: 8px;
-  font-size: 14px;
-  text-align: center;
+  border-radius: 6px;
+  font-size: 0.85rem;
   border: 1px solid #fcc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
 }
+
+.info {
+  padding: 12px;
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border: 1px solid #bee5eb;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+}
+
+.warning {
+  padding: 12px;
+  background-color: #fff3cd;
+  color: #856404;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  border: 1px solid #ffeaa7;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  svg {
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+}
+
+.securityInfo {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: #666;
+  
+  svg {
+    flex-shrink: 0;
+    color: #28a745;
+  }
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+    font-size: 0.75rem;
+    margin-top: 14px;
+  }
+}
+
 
 .loader {
   display: flex;
