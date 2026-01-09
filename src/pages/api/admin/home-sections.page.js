@@ -1,11 +1,9 @@
 import { IncomingForm } from 'formidable';
 import fs from 'fs';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@src/lib/prisma';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../auth/[...nextauth].page';
-
-const prisma = new PrismaClient();
 
 export const config = {
   api: {

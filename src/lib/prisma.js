@@ -11,6 +11,12 @@ const globalForPrisma = global;
 // Configure Prisma Client with optimized settings
 const prismaClientOptions = {
   log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  // Connection pool configuration
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
 };
 
 // Create singleton instance
@@ -25,10 +31,8 @@ const prisma = (() => {
   return globalForPrisma.prisma;
 })();
 
-// Ensure connection is established
-prisma.$connect().catch((error) => {
-  console.error('Failed to connect to database:', error);
-});
+// Don't explicitly connect - let Prisma manage connections lazily
+// This prevents creating unnecessary connections at startup
 
 // Graceful shutdown
 if (typeof window === 'undefined') {
