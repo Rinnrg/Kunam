@@ -133,6 +133,26 @@ function SuksesPage() {
     }
   }, [status, router, setIsAuthModalOpen, fetchOrderStatus]);
 
+  // Handle router events to ensure scroll is enabled when navigating away
+  useEffect(() => {
+    const handleRouteChangeStart = () => {
+      // Ensure scroll is enabled before navigation
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      document.documentElement.style.overflow = 'auto';
+      document.body.style.position = 'relative';
+      document.documentElement.style.position = 'relative';
+      document.body.classList.remove('scroll-lock', 'no-scroll', 'receipt-page');
+      document.documentElement.classList.remove('scroll-lock', 'no-scroll', 'receipt-page');
+    };
+
+    router.events.on('routeChangeStart', handleRouteChangeStart);
+
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChangeStart);
+    };
+  }, [router]);
+
   // Enable scrolling on this page and during animations
   useEffect(() => {
     // Force enable scroll
@@ -153,14 +173,19 @@ function SuksesPage() {
 
     // Re-enable scroll after a short delay (for animation transitions)
     const timer = setTimeout(enableScroll, 100);
+    const timer2 = setTimeout(enableScroll, 500);
 
     return () => {
       clearTimeout(timer);
-      document.body.style.overflow = '';
-      document.body.style.height = '';
-      document.documentElement.style.overflow = '';
-      document.body.style.position = '';
-      document.documentElement.style.position = '';
+      clearTimeout(timer2);
+      // Ensure scroll is enabled when leaving page
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      document.documentElement.style.overflow = 'auto';
+      document.body.style.position = 'relative';
+      document.documentElement.style.position = 'relative';
+      document.body.classList.remove('scroll-lock', 'no-scroll', 'receipt-page');
+      document.documentElement.classList.remove('scroll-lock', 'no-scroll', 'receipt-page');
     };
   }, [showAnimation1, showAnimation2, showReceipt]);
 
@@ -174,9 +199,10 @@ function SuksesPage() {
     
     // Extra aggressive scroll enable when showing receipt
     const forceScroll = () => {
-      document.body.style.overflow = 'auto !important';
-      document.body.style.height = 'auto !important';
-      document.documentElement.style.overflow = 'auto !important';
+      document.body.style.overflow = 'auto';
+      document.body.style.height = 'auto';
+      document.documentElement.style.overflow = 'auto';
+      document.body.style.position = 'relative';
       window.scrollTo(0, 0);
     };
     
@@ -186,13 +212,14 @@ function SuksesPage() {
     const timer1 = setTimeout(forceScroll, 100);
     const timer2 = setTimeout(forceScroll, 300);
     const timer3 = setTimeout(forceScroll, 500);
+    const timer4 = setTimeout(forceScroll, 1000);
     
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
-      document.body.classList.remove('receipt-page');
-      document.documentElement.classList.remove('receipt-page');
+      clearTimeout(timer4);
+      // Don't remove classes or reset styles here - let the cleanup in the main effect handle it
     };
   }, [showReceipt]);
 
@@ -235,7 +262,7 @@ function SuksesPage() {
         <CustomHead {...seo} />
         <div className={styles.animationContainer}>
           <DotLottieReact
-            src="https://lottie.host/embed/46195a4e-5424-4d18-85f0-f16e8f88e696/f3QvBSLY4H.lottie"
+            src="https://lottie.host/46195a4e-5424-4d18-85f0-f16e8f88e696/f3QvBSLY4H.lottie"
             loop={false}
             autoplay
             style={{ width: '300px', height: '300px' }}
@@ -252,7 +279,7 @@ function SuksesPage() {
         <CustomHead {...seo} />
         <div className={`${styles.animationContainer} ${styles.blackBackground}`}>
           <DotLottieReact
-            src="https://lottie.host/embed/e1c883f2-fa12-45f5-8379-57109bb3cb01/IdRCZWAxwi.lottie"
+            src="https://lottie.host/e1c883f2-fa12-45f5-8379-57109bb3cb01/IdRCZWAxwi.lottie"
             loop
             autoplay
             style={{ width: '300px', height: '300px' }}
