@@ -7,6 +7,7 @@ import '@src/styles/admin.css';
 import * as THREE from 'three';
 
 import { useMemo, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 import { Analytics } from '@vercel/analytics/react';
 import Background from '@src/components/canvas/background/Index';
@@ -30,6 +31,7 @@ import { useIsomorphicLayoutEffect } from '@src/hooks/useIsomorphicLayoutEffect'
 import useScroll from '@src/hooks/useScroll';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
+import { LogOut, Trash2, CheckCircle } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
   gsap.defaults({ ease: 'none' });
@@ -63,6 +65,10 @@ if (typeof window !== 'undefined') {
 
 function MyApp({ Component, pageProps, router }) {
   const [lenis, setLenis, isAbout, alertDialog, hideAlert] = useStore(useShallow((state) => [state.lenis, state.setLenis, state.isAbout, state.alertDialog, state.hideAlert]));
+
+  // Debug: log alertDialog state changes
+  // eslint-disable-next-line no-console
+  useEffect(() => { console.log('[app] alertDialog', alertDialog); }, [alertDialog]);
 
   const mainRef = useRef();
   const mainContainerRef = useRef();
@@ -373,6 +379,51 @@ function MyApp({ Component, pageProps, router }) {
           </main>
         </div>
         
+        {/* Debug banner (temporary) to ensure messages are visible while troubleshooting */}
+        {typeof document !== 'undefined' && alertDialog.isOpen && createPortal(
+          <div style={{ position: 'fixed', bottom: 20, right: 20, zIndex: 2000000, background: '#111827', color: '#fff', padding: '0.75rem 1rem', borderRadius: 8, boxShadow: '0 8px 24px rgba(0,0,0,0.25)' }}>
+            <div style={{ fontWeight: 700 }}>{alertDialog.title}</div>
+            <div style={{ marginTop: 4 }}>{alertDialog.message}</div>
+          </div>,
+          document.body
+        )}
+
+        {/* Fallback inline modal (styled like logout dialog) */}
+        {typeof document !== 'undefined' && alertDialog.isOpen && createPortal(
+          <>
+            <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 50, animation: 'fadeIn 0.2s ease-out' }} onClick={() => hideAlert()} />
+
+            <div style={{ position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', backgroundColor: '#ffffff', borderRadius: '0.5rem', padding: '1.5rem', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04)', zIndex: 51, width: '90%', maxWidth: '400px', animation: 'slideIn 0.2s ease-out' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <div style={{ padding: '0.75rem', backgroundColor: alertDialog.type === 'confirm' ? '#fee2e2' : '#dcfce7', borderRadius: '50%' }}>
+                  {alertDialog.type === 'confirm' ? (
+                    <Trash2 style={{ width: '1.5rem', height: '1.5rem', color: '#dc2626' }} />
+                  ) : (
+                    <CheckCircle style={{ width: '1.5rem', height: '1.5rem', color: '#16a34a' }} />
+                  )}
+                </div>
+                <div>
+                  <h3 style={{ fontSize: '1.125rem', fontWeight: '600', color: '#111827', margin: 0 }}>{alertDialog.title || ''}</h3>
+                </div>
+              </div>
+
+              <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '1.5rem' }}>{alertDialog.message || ''}</p>
+
+              <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
+                {alertDialog.showCancel && (
+                  <button onClick={() => hideAlert()} style={{ padding: '0.625rem 1rem', fontSize: '0.875rem', fontWeight: '500', color: '#374151', backgroundColor: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '0.375rem', cursor: 'pointer' }}>
+                    {alertDialog.cancelText || 'Batal'}
+                  </button>
+                )}
+                <button onClick={() => { if (alertDialog.onConfirm) alertDialog.onConfirm(); hideAlert(); }} style={{ padding: '0.625rem 1rem', fontSize: '0.875rem', fontWeight: '500', color: '#ffffff', backgroundColor: alertDialog.type === 'confirm' ? '#dc2626' : '#111827', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}>
+                  {alertDialog.confirmText || 'OK'}
+                </button>
+              </div>
+            </div>
+          </>,
+          document.body
+        )}
+
         {/* Global Alert Dialog */}
         <AlertDialog
           isOpen={alertDialog.isOpen}

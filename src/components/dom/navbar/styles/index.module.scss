@@ -175,7 +175,8 @@
   &:hover .dropdown {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    /* keep translateX so we don't jump to a different compositing position */
+    transform: translateX(-50%) translateY(0) translateZ(0);
     pointer-events: all;
   }
 }
@@ -200,7 +201,8 @@
   position: absolute;
   top: 100%;
   left: 50%;
-  transform: translateX(-50%) translateY(10px);
+  /* add translateZ to create its own compositing layer and avoid font blurring */
+  transform: translateX(-50%) translateY(10px) translateZ(0);
   background: white;
   border: 2px solid #000;
   border-radius: 8px;
@@ -209,10 +211,18 @@
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  transition: all 0.3s ease;
+  /* don't use `all` (can blur during animation) — animate only what we need */
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  will-change: opacity, transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1001;
   margin-top: 0.5rem;
+  /* ensure hover backgrounds are clipped to card radius */
+  overflow: hidden;
+  background-clip: padding-box;
 }
 
 .dropdownItem {
@@ -222,12 +232,25 @@
   text-decoration: none;
   font-size: 0.8rem;
   font-weight: 400;
-  transition: all 0.2s ease;
+  transition: color 0.2s ease, transform 0.18s ease;
+  will-change: transform, color;
+  border-radius: 0; /* we'll round first/last items below */
+  
+  &:first-child {
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+  }
+
+  &:last-child {
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
+  }
   
   &:hover {
     background-color: #f5f5f5;
     color: #000;
-    padding-left: 1.5rem;
+    /* avoid changing padding (reflow) — slide using transform instead */
+    transform: translateX(6px);
   }
 }
 

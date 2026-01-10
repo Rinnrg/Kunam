@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Sidebar } from './sidebar'
-import { TopNav } from './top-nav'
+// TopNav removed: header intentionally omitted
 
 export function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -21,8 +21,7 @@ export function AdminLayout({ children }) {
         flexDirection: 'column',
         overflow: 'hidden',
       }}>
-        {/* Top Navigation */}
-        <TopNav onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
+        {/* Top Navigation removed */}
 
         {/* Page Content */}
         <main style={{

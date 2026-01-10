@@ -16,6 +16,8 @@ import {
   User,
   TrendingUp,
 } from 'lucide-react';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function CustomersPage() {
   const { data: session, status } = useSession();
@@ -30,6 +32,8 @@ export default function CustomersPage() {
   const [total, setTotal] = useState(0);
   const [imageErrors, setImageErrors] = useState({});
   const limit = 10;
+
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'loading') return;
@@ -66,30 +70,35 @@ export default function CustomersPage() {
       setTotal(data.pagination?.total || 0);
     } catch (error) {
       console.error('Error fetching customers:', error);
-      alert(`Failed to load customers: ${error.message}`);
+      showAlert({ type: 'error', title: 'Gagal memuat pelanggan', message: error.message || 'Terjadi kesalahan saat memuat daftar pelanggan.' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (userId) => {
-    if (!confirm('Are you sure you want to delete this customer? This will also delete all their orders, reviews, and wishlists.')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/admin/customers?id=${userId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete customer');
-
-      alert('Customer deleted successfully');
-      fetchCustomers();
-    } catch (error) {
-      console.error('Error deleting customer:', error);
-      alert('Failed to delete customer');
-    }
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Customer',
+      message: 'Apakah Anda yakin ingin menghapus customer ini? Ini juga akan menghapus semua pesanan, review, dan wishlist yang terkait.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/customers?id=${userId}`, {
+            method: 'DELETE',
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || data.message || 'Gagal menghapus customer');
+          showAlert({ type: 'success', title: 'Berhasil', message: 'Customer berhasil dihapus.' });
+          fetchCustomers();
+        } catch (error) {
+          console.error('Error deleting customer:', error);
+          showAlert({ type: 'error', title: 'Gagal', message: error.message || 'Gagal menghapus customer.' });
+        }
+      },
+    });
   };
 
   const formatCurrency = (amount) => {
@@ -451,7 +460,7 @@ export default function CustomersPage() {
                           }}>
                             <ShoppingBag style={{ width: '0.875rem', height: '0.875rem', color: '#6b7280' }} />
                             <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>
-                              {customer.stats.totalOrders}
+                              {customer.stats.totalOrders ?? 0}
                             </span>
                           </div>
                         </td>
@@ -466,7 +475,7 @@ export default function CustomersPage() {
                           }}>
                             <Star style={{ width: '0.875rem', height: '0.875rem', color: '#f59e0b' }} />
                             <span style={{ fontSize: '0.875rem', fontWeight: '500' }}>
-                              {customer.stats.totalReviews}
+                              {customer.stats.totalReviews ?? 0}
                             </span>
                           </div>
                         </td>
@@ -477,7 +486,7 @@ export default function CustomersPage() {
                           color: '#059669',
                           fontSize: '0.875rem',
                         }}>
-                          {formatCurrency(customer.stats.totalSpent)}
+                          {formatCurrency(customer.stats.totalSpent || 0)}
                         </td>
                         <td style={{
                           padding: '1rem',

@@ -45,15 +45,18 @@ function PesananPage() {
   const [orders, setOrders] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState('newest');
   const [expandedOrder, setExpandedOrder] = useState(null);
+  const [openTimeline, setOpenTimeline] = useState(null);
+  const toggleTimeline = useCallback((orderId) => {
+    setOpenTimeline((prev) => (prev === orderId ? null : orderId));
+  }, []);
   const [reviewDialog, setReviewDialog] = useState({
     isOpen: false,
     produkId: null,
     produkName: '',
     orderId: null,
   });
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -98,7 +101,7 @@ function PesananPage() {
 
     // Filter by search
     if (searchQuery) {
-      const query = searchQuery.toLowerCase();
+      const query = searchQuery.toLowerCase().trim();
       result = result.filter((order) =>
         order.orderNumber.toLowerCase().includes(query) ||
         order.order_items?.some((item) =>
@@ -107,19 +110,11 @@ function PesananPage() {
       );
     }
 
-    // Sort
-    if (sortBy === 'newest') {
-      result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-    } else if (sortBy === 'oldest') {
-      result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-    } else if (sortBy === 'highest') {
-      result.sort((a, b) => b.totalAmount - a.totalAmount);
-    } else if (sortBy === 'lowest') {
-      result.sort((a, b) => a.totalAmount - b.totalAmount);
-    }
+    // Default sort: newest first
+    result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     return result;
-  }, [orders, activeTab, searchQuery, sortBy]);
+  }, [orders, activeTab, searchQuery]);
 
   const statusCounts = useMemo(() => {
     const counts = { all: orders.length };
@@ -275,26 +270,8 @@ function PesananPage() {
         <Breadcrumb items={[{ label: 'Pesanan', href: null }]} />
 
         <div className={styles.content}>
-          {/* Status Tabs */}
-          <div className={styles.tabs}>
-            {ORDER_STATUSES.map((statusItem) => (
-              <button
-                key={statusItem.key}
-                type="button"
-                className={`${styles.tab} ${activeTab === statusItem.key ? styles.active : ''}`}
-                onClick={() => setActiveTab(statusItem.key)}
-              >
-                {statusItem.icon && <span>{statusItem.icon}</span>}
-                {statusItem.label}
-                {statusCounts[statusItem.key] > 0 && (
-                  <span className={styles.tabBadge}>{statusCounts[statusItem.key]}</span>
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Filter Section */}
-          <div className={styles.filterSection}>
+          {/* Search box (placed left of tabs) */}
+          <div className={styles.toolbar}>
             <div className={styles.searchBox}>
               <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="11" cy="11" r="8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -308,16 +285,24 @@ function PesananPage() {
                 className={styles.searchInput}
               />
             </div>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className={styles.sortSelect}
-            >
-              <option value="newest">Terbaru</option>
-              <option value="oldest">Terlama</option>
-              <option value="highest">Harga Tertinggi</option>
-              <option value="lowest">Harga Terendah</option>
-            </select>
+
+            {/* Status Tabs */}
+            <div className={styles.tabs}>
+              {ORDER_STATUSES.map((statusItem) => (
+                <button
+                  key={statusItem.key}
+                  type="button"
+                  className={`${styles.tab} ${activeTab === statusItem.key ? styles.active : ''}`}
+                  onClick={() => setActiveTab(statusItem.key)}
+                >
+                  {statusItem.icon && <span>{statusItem.icon}</span>}
+                  {statusItem.label}
+                  {statusCounts[statusItem.key] > 0 && (
+                    <span className={styles.tabBadge}>{statusCounts[statusItem.key]}</span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
 
           {filteredOrders.length === 0 ? (
@@ -339,13 +324,76 @@ function PesananPage() {
                 <div key={order.id} className={styles.orderCard}>
                   <div className={styles.orderHeader}>
                     <div className={styles.orderInfo}>
-                      <span className={styles.orderNumber}>{order.orderNumber}</span>
-                      <span className={styles.orderDate}>{formatDate(order.createdAt)}</span>
+                      <div className={styles.orderMeta}>
+                        <span className={styles.orderNumber}>{order.orderNumber}</span>
+                        <span className={styles.orderDate}>{formatDate(order.createdAt)}</span>
+
+                        {order.status !== 'cancelled' && (
+                          <button
+                            type="button"
+                            className={`${styles.btnSecondary} ${styles.statusSmall} ${openTimeline === order.id ? styles.statusOpen : ''}`}
+                            onClick={() => toggleTimeline(order.id)}
+                            aria-expanded={openTimeline === order.id}
+                            aria-controls={`timeline-${order.id}`}
+                            title={openTimeline === order.id ? 'Sembunyikan status pesanan' : 'Lihat status pesanan'}
+                          >
+                            Status Pesanan
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <span className={`${styles.orderStatus} ${styles[order.status]}`}>
                       {STATUS_LABELS[order.status]}
                     </span>
                   </div>
+
+                  {order.status !== 'cancelled' && (
+                    <div
+                      id={`timeline-${order.id}`}
+                      className={`${styles.timeline} ${openTimeline === order.id ? styles.open : ''}`}
+                      aria-hidden={openTimeline === order.id ? 'false' : 'true'}
+                    >
+                      <div className={styles.timelineInner}>
+                        <h4 className={styles.timelineTitle}>Status Pesanan</h4>
+
+                        {/* Horizontal point-based timeline */}
+                        <div className={styles.timelineContainer}>
+                          <div className={styles.timelineBar} />
+                          <div className={styles.timelineSteps}>
+                            {TIMELINE_STEPS.map((step) => {
+                              const stepStatus = getTimelineStatus(order.status, step.key);
+                              const isActive = stepStatus === 'active';
+                              const isCompleted = stepStatus === 'completed';
+                              // If the order is delivered, mark the delivered step as completed as well
+                              const isDeliveredCompleted = order.status === 'delivered' && step.key === 'delivered';
+                              const showCheck = isCompleted || isDeliveredCompleted;
+                              const showDate = isActive || isDeliveredCompleted;
+
+                              return (
+                                <div key={step.key} className={styles.timelinePoint}>
+                                  <div className={`${styles.pointIcon} ${showCheck ? styles.completed : ''} ${isActive ? styles.active : ''}`}>
+                                    {showCheck ? (
+                                      <svg width="14" height="14" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none">
+                                        <polyline points="20,6 9,17 4,12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                                      </svg>
+                                    ) : (
+                                      <span className={styles.pointDot} />
+                                    )}
+                                  </div>
+
+                                  <div className={styles.pointLabel}>{step.label}</div>
+
+                                  {showDate && (
+                                    <div className={styles.pointDate}>{formatShortDate(order.updatedAt)}</div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className={styles.orderBody}>
                     <div className={styles.orderItems}>
@@ -441,7 +489,7 @@ function PesananPage() {
                                 }
                               }}
                             >
-                              Beri Ulasan
+                              {order.order_items?.[0]?.userReview ? 'Edit Ulasan' : 'Beri Ulasan'}
                             </button>
                           </>
                         )}
@@ -460,37 +508,6 @@ function PesananPage() {
                       </div>
                     </div>
                   </div>
-
-                  {/* Timeline - Only show for non-cancelled orders */}
-                  {order.status !== 'cancelled' && (
-                    <div className={styles.timeline}>
-                      <h4 className={styles.timelineTitle}>Status Pesanan</h4>
-                      <div className={styles.timelineSteps}>
-                        {TIMELINE_STEPS.map((step) => {
-                          const stepStatus = getTimelineStatus(order.status, step.key);
-                          return (
-                            <div key={step.key} className={styles.timelineStep}>
-                              <div className={`${styles.stepIcon} ${stepStatus ? styles[stepStatus] : ''}`}>
-                                {stepStatus === 'completed' ? (
-                                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <polyline points="20,6 9,17 4,12" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                ) : (
-                                  <span style={{ fontSize: '12px' }}>{step.icon}</span>
-                                )}
-                              </div>
-                              <div className={styles.stepInfo}>
-                                <span className={styles.stepLabel}>{step.label}</span>
-                                {stepStatus === 'active' && (
-                                  <span className={styles.stepDate}>{formatShortDate(order.updatedAt)}</span>
-                                )}
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>

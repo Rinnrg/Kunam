@@ -47,9 +47,49 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: 'Pesanan tidak ditemukan' });
       }
 
+      // Fetch user's reviews for products in this order (if any)
+      const productIds = Array.from(new Set(order.order_items.map((item) => item.produkId)));
+      let userReviews = [];
+      if (productIds.length > 0) {
+        userReviews = await prisma.reviews.findMany({
+          where: {
+            userId,
+            produkId: { in: productIds },
+          },
+          select: {
+            id: true,
+            produkId: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+      }
+
+      const reviewMap = {};
+      userReviews.forEach((r) => {
+        reviewMap[r.produkId] = r;
+      });
+
       return res.status(200).json({ 
         order: {
           ...order,
+          order_items: order.order_items.map((item) => {
+            const r = reviewMap[item.produkId] || null;
+            return {
+              ...item,
+              userReview: r
+                ? {
+                    id: r.id,
+                    rating: r.rating,
+                    comment: r.comment,
+                    createdAt: r.createdAt.toISOString(),
+                    updatedAt: r.updatedAt.toISOString(),
+                  }
+                : null,
+            };
+          }),
           createdAt: order.createdAt.toISOString(),
           updatedAt: order.updatedAt.toISOString(),
         }
@@ -110,9 +150,49 @@ export default async function handler(req, res) {
         },
       });
 
+      // Attach user's reviews for the products in the updated order (if any)
+      const updatedProductIds = Array.from(new Set(updatedOrder.order_items.map((item) => item.produkId)));
+      let updatedUserReviews = [];
+      if (updatedProductIds.length > 0) {
+        updatedUserReviews = await prisma.reviews.findMany({
+          where: {
+            userId,
+            produkId: { in: updatedProductIds },
+          },
+          select: {
+            id: true,
+            produkId: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+      }
+
+      const updatedReviewMap = {};
+      updatedUserReviews.forEach((r) => {
+        updatedReviewMap[r.produkId] = r;
+      });
+
       return res.status(200).json({ 
         order: {
           ...updatedOrder,
+          order_items: updatedOrder.order_items.map((item) => {
+            const r = updatedReviewMap[item.produkId] || null;
+            return {
+              ...item,
+              userReview: r
+                ? {
+                    id: r.id,
+                    rating: r.rating,
+                    comment: r.comment,
+                    createdAt: r.createdAt.toISOString(),
+                    updatedAt: r.updatedAt.toISOString(),
+                  }
+                : null,
+            };
+          }),
           createdAt: updatedOrder.createdAt.toISOString(),
           updatedAt: updatedOrder.updatedAt.toISOString(),
         },

@@ -142,15 +142,43 @@ function WishlistPage() {
                   )}
                 </Link>
                 <div className={styles.info}>
-                  <Link href={`/produk/${item.produkId}`} className={styles.name}>
-                    {item.produk?.nama}
-                  </Link>
+                  <div className={styles.nameRow}>
+                    <Link href={`/produk/${item.produkId}`} className={styles.name}>
+                      {item.produk?.nama}
+                    </Link>
+
+                    <div className={styles.verticalActions}>
+                      <button
+                        type="button"
+                        className={styles.addToCart}
+                        onClick={() => handleAddToCart(item.produkId)}
+                        aria-label="Tambah ke Keranjang"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+
+                      <button
+                        type="button"
+                        className={styles.removeButton}
+                        onClick={() => handleRemove(item.produkId)}
+                        aria-label="Hapus dari wishlist"
+                      >
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M3 6H21M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
                   <p className={styles.kategori}>{item.produk?.kategori}</p>
-                  <div className={styles.price}>
+                  <div className={`${styles.price} ${item.produk?.diskon > 0 ? styles.discounted : ''}`}>
                     {item.produk?.diskon > 0 ? (
                       <>
                         <span className={styles.priceOriginal}>Rp {item.produk.harga.toLocaleString('id-ID')}</span>
-                        <span className={styles.priceFinal}>
+                        <span className={`${styles.priceFinal} ${styles.discountedPrice}`}>
                           Rp {(item.produk.harga * (1 - item.produk.diskon / 100)).toLocaleString('id-ID')}
                         </span>
                       </>
@@ -158,20 +186,6 @@ function WishlistPage() {
                       <span className={styles.priceFinal}>Rp {item.produk?.harga?.toLocaleString('id-ID')}</span>
                     )}
                   </div>
-                </div>
-                <div className={styles.actions}>
-                  <button type="button" className={styles.addToCart} onClick={() => handleAddToCart(item.produkId)}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M6 2L3 6V20C3 20.5304 3.21071 21.0391 3.58579 21.4142C3.96086 21.7893 4.46957 22 5 22H19C19.5304 22 20.0391 21.7893 20.4142 21.4142C20.7893 21.0391 21 20.5304 21 20V6L18 2H6Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                      <path d="M3 6H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Tambah ke Keranjang
-                  </button>
-                  <button type="button" className={styles.removeButton} onClick={() => handleRemove(item.produkId)} aria-label="Hapus dari wishlist">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M3 6H21M19 6V20C19 21.1 18.1 22 17 22H7C5.9 22 5 21.1 5 20V6M8 6V4C8 2.9 8.9 2 10 2H14C15.1 2 16 2.9 16 4V6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </button>
                 </div>
               </div>
             ))}

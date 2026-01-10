@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 import styles from '../admin.module.scss';
 
 export default function HomeSectionManager() {
@@ -17,6 +19,7 @@ export default function HomeSectionManager() {
   const [previewUrls, setPreviewUrls] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   const fetchSections = async () => {
     try {
@@ -25,8 +28,7 @@ export default function HomeSectionManager() {
       setSections(data.sections || []);
     } catch (error) {
       console.error('Error fetching sections:', error);
-      // eslint-disable-next-line no-alert
-      alert('Gagal mengambil data sections');
+      showAlert({ type: 'error', title: 'Gagal', message: 'Gagal mengambil data sections' });
     }
   };
 
@@ -111,18 +113,15 @@ export default function HomeSectionManager() {
       const result = await response.json();
 
       if (response.ok) {
-        // eslint-disable-next-line no-alert
-        alert(editingId ? 'Section berhasil diupdate!' : 'Section berhasil ditambahkan!');
+        showAlert({ type: 'success', title: 'Berhasil', message: editingId ? 'Section berhasil diupdate!' : 'Section berhasil ditambahkan!' });
         resetForm();
         fetchSections();
       } else {
-        // eslint-disable-next-line no-alert
-        alert(result.error || 'Gagal menyimpan section');
+        showAlert({ type: 'error', title: 'Gagal', message: result.error || 'Gagal menyimpan section' });
       }
     } catch (error) {
       console.error('Error saving section:', error);
-      // eslint-disable-next-line no-alert
-      alert('Terjadi kesalahan saat menyimpan section');
+      showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Terjadi kesalahan saat menyimpan section' });
     } finally {
       setLoading(false);
     }
@@ -144,28 +143,29 @@ export default function HomeSectionManager() {
   };
 
   const handleDelete = async (id) => {
-    // eslint-disable-next-line no-alert, no-restricted-globals
-    if (!confirm('Yakin ingin menghapus section ini?')) return;
-
-    try {
-      const response = await fetch(`/api/admin/home-sections?id=${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        // eslint-disable-next-line no-alert
-        alert('Section berhasil dihapus!');
-        fetchSections();
-      } else {
-        // eslint-disable-next-line no-alert
-        alert('Gagal menghapus section');
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Section',
+      message: 'Yakin ingin menghapus section ini?',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/home-sections?id=${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            showAlert({ type: 'success', title: 'Berhasil', message: 'Section berhasil dihapus!' });
+            fetchSections();
+          } else {
+            showAlert({ type: 'error', title: 'Gagal', message: 'Gagal menghapus section' });
+          }
+        } catch (error) {
+          console.error('Error deleting section:', error);
+          showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Terjadi kesalahan saat menghapus section' });
+        }
       }
-    } catch (error) {
-      console.error('Error deleting section:', error);
-      // eslint-disable-next-line no-alert
-      alert('Terjadi kesalahan saat menghapus section');
-    }
-  };
+    })
+   };
 
   return (
     <div className={styles.section}>

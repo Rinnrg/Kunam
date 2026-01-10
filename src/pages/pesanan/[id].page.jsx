@@ -181,7 +181,9 @@ function OrderDetailPage() {
       title: 'Ulasan Terkirim',
       message: 'Terima kasih atas ulasan Anda!',
     });
-  }, [showAlert]);
+    // Refresh order to update review flags
+    fetchOrderDetail();
+  }, [showAlert, fetchOrderDetail]);
 
   const formatDate = (dateString) => {
     const options = { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' };
@@ -381,7 +383,7 @@ function OrderDetailPage() {
                 className={styles.btnSecondary}
                 onClick={handleOpenReviewDialog}
               >
-                Beri Ulasan
+                {order.order_items?.[0]?.userReview ? 'Edit Ulasan' : 'Beri Ulasan'}
               </button>
             )}
             <Link href="/pesanan" className={styles.btnSecondary}>

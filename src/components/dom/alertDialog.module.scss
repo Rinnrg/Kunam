@@ -203,3 +203,11 @@
     width: 100%;
   }
 }
+
+/* Temporary debug helper to force dialog visible during troubleshooting */
+.alertDebugForce {
+  display: flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  z-index: 2147483647 !important;
+}

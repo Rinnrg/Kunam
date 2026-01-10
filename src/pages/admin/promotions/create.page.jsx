@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { AdminLayout } from '@src/components/admin/layout/admin-layout'
 import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function CreateVoucherPage() {
   const router = useRouter()
@@ -23,6 +25,7 @@ export default function CreateVoucherPage() {
     isActive: true,
   })
   const [errors, setErrors] = useState({})
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -108,11 +111,11 @@ export default function CreateVoucherPage() {
         throw new Error(data.error || 'Gagal membuat voucher')
       }
 
-      alert('Voucher berhasil dibuat!')
+      showAlert({ type: 'success', title: 'Berhasil', message: 'Voucher berhasil dibuat!' })
       router.push('/admin/promotions')
     } catch (error) {
       console.error('Error creating voucher:', error)
-      alert(error.message || 'Gagal membuat voucher')
+      showAlert({ type: 'error', title: 'Gagal', message: error.message || 'Gagal membuat voucher' })
     } finally {
       setLoading(false)
     }

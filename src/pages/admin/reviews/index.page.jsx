@@ -3,6 +3,8 @@ import { useSession } from 'next-auth/react';
 import { AdminLayout } from '@src/components/admin/layout/admin-layout';
 import { Star, Trash2, Eye, Search, Filter } from 'lucide-react';
 import Link from 'next/link';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function ReviewsPage() {
   const { data: session, status } = useSession();
@@ -15,6 +17,8 @@ export default function ReviewsPage() {
     averageRating: 0,
     ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
   });
+
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'authenticated') {
@@ -35,37 +39,40 @@ export default function ReviewsPage() {
           ratingDistribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
         });
       } else {
-        alert('Failed to fetch reviews');
+        showAlert({ type: 'error', title: 'Gagal Memuat', message: 'Gagal memuat review' });
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
-      alert('Error fetching reviews');
+      showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Gagal memuat review' });
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this review?')) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`/api/admin/reviews/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        setReviews(reviews.filter((r) => r.id !== id));
-        alert('Review deleted successfully');
-        fetchReviews(); // Refresh stats
-      } else {
-        alert('Failed to delete review');
-      }
-    } catch (error) {
-      console.error('Error deleting review:', error);
-      alert('Error deleting review');
-    }
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Review',
+      message: 'Apakah Anda yakin ingin menghapus review ini?',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/reviews/${id}`, { method: 'DELETE' });
+          if (response.ok) {
+            setReviews(reviews.filter((r) => r.id !== id));
+            showAlert({ type: 'success', title: 'Berhasil', message: 'Review berhasil dihapus' });
+            fetchReviews();
+          } else {
+            showAlert({ type: 'error', title: 'Gagal', message: 'Gagal menghapus review' });
+          }
+        } catch (error) {
+          console.error('Error deleting review:', error);
+          showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Gagal menghapus review' });
+        }
+      },
+    });
   };
 
   const formatDate = (dateString) => {

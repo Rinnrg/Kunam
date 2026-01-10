@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { AdminLayout } from '@src/components/admin/layout/admin-layout'
 import { ArrowLeft, Save } from 'lucide-react'
 import Link from 'next/link'
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function EditVoucherPage() {
   const router = useRouter()
@@ -25,6 +27,8 @@ export default function EditVoucherPage() {
     isActive: true,
   })
   const [errors, setErrors] = useState({})
+
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -57,7 +61,7 @@ export default function EditVoucherPage() {
       }
     } catch (error) {
       console.error('Error fetching voucher:', error)
-      alert('Gagal memuat data voucher')
+      showAlert({ type: 'error', title: 'Gagal', message: 'Gagal memuat data voucher' })
     } finally {
       setLoading(false)
     }
@@ -140,11 +144,11 @@ export default function EditVoucherPage() {
         throw new Error(data.error || 'Gagal memperbarui voucher')
       }
 
-      alert('Voucher berhasil diperbarui!')
+      showAlert({ type: 'success', title: 'Berhasil', message: 'Voucher berhasil diperbarui!' })
       router.push('/admin/promotions')
     } catch (error) {
       console.error('Error updating voucher:', error)
-      alert(error.message || 'Gagal memperbarui voucher')
+      showAlert({ type: 'error', title: 'Gagal', message: error.message || 'Gagal memperbarui voucher' })
     } finally {
       setSaving(false)
     }

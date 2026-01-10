@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { AdminLayout } from '@src/components/admin/layout/admin-layout'
 import { Edit, Trash2, Eye, Plus, Search } from 'lucide-react'
 import Link from 'next/link'
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function ProductsPage() {
   const router = useRouter()
@@ -11,6 +13,7 @@ export default function ProductsPage() {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -33,23 +36,28 @@ export default function ProductsPage() {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Are you sure you want to delete this product?')) return
-
-    try {
-      const response = await fetch(`/api/admin/products/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setProducts(products.filter((p) => p.id !== id))
-        alert('Product deleted successfully')
-      } else {
-        alert('Failed to delete product')
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Produk',
+      message: 'Apakah Anda yakin ingin menghapus produk ini?',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
+          if (response.ok) {
+            setProducts(products.filter((p) => p.id !== id))
+            showAlert({ type: 'success', title: 'Berhasil', message: 'Produk berhasil dihapus' })
+          } else {
+            showAlert({ type: 'error', title: 'Gagal', message: 'Gagal menghapus produk' })
+          }
+        } catch (error) {
+          console.error('Error deleting product:', error)
+          showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Gagal menghapus produk' })
+        }
       }
-    } catch (error) {
-      console.error('Error deleting product:', error)
-      alert('Error deleting product')
-    }
+    })
   }
 
   const filteredProducts = products.filter((product) =>

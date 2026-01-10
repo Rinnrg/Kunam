@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { AdminLayout } from '@src/components/admin/layout/admin-layout'
 import { Edit, Trash2, Plus, Search, Tag, Calendar, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function VouchersPage() {
   const router = useRouter()
@@ -12,6 +14,7 @@ export default function VouchersPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all') // all, active, expired
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -34,23 +37,28 @@ export default function VouchersPage() {
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus voucher ini?')) return
-
-    try {
-      const response = await fetch(`/api/vouchers/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setVouchers(vouchers.filter((v) => v.id !== id))
-        alert('Voucher berhasil dihapus')
-      } else {
-        alert('Gagal menghapus voucher')
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Voucher',
+      message: 'Apakah Anda yakin ingin menghapus voucher ini?',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/vouchers/${id}`, { method: 'DELETE' })
+          if (response.ok) {
+            setVouchers(vouchers.filter((v) => v.id !== id))
+            showAlert({ type: 'success', title: 'Berhasil', message: 'Voucher berhasil dihapus' })
+          } else {
+            showAlert({ type: 'error', title: 'Gagal', message: 'Gagal menghapus voucher' })
+          }
+        } catch (error) {
+          console.error('Error deleting voucher:', error)
+          showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Gagal menghapus voucher' })
+        }
       }
-    } catch (error) {
-      console.error('Error deleting voucher:', error)
-      alert('Error menghapus voucher')
-    }
+    })
   }
 
   const getVoucherStatus = (voucher) => {

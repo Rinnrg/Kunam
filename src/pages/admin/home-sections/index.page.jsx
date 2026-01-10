@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { AdminLayout } from '@src/components/admin/layout/admin-layout'
 import { Edit, Trash2, Plus, Search, Image as ImageIcon, MoveUp, MoveDown } from 'lucide-react'
 import Link from 'next/link'
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 
 export default function HomeSectionsPage() {
   const router = useRouter()
@@ -12,6 +14,7 @@ export default function HomeSectionsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterPage, setFilterPage] = useState('all') // all, home, produk, etc.
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -28,29 +31,35 @@ export default function HomeSectionsPage() {
       setSections(data.sections || [])
     } catch (error) {
       console.error('Error fetching sections:', error)
+      showAlert({ type: 'error', title: 'Gagal', message: 'Gagal memuat sections' });
     } finally {
       setLoading(false)
     }
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Apakah Anda yakin ingin menghapus section ini?')) return
-
-    try {
-      const response = await fetch(`/api/home-sections/${id}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        setSections(sections.filter((s) => s.id !== id))
-        alert('Section berhasil dihapus')
-      } else {
-        alert('Gagal menghapus section')
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Section',
+      message: 'Apakah Anda yakin ingin menghapus section ini?',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/home-sections/${id}`, { method: 'DELETE' })
+          if (response.ok) {
+            setSections(sections.filter((s) => s.id !== id))
+            showAlert({ type: 'success', title: 'Berhasil', message: 'Section berhasil dihapus' })
+          } else {
+            showAlert({ type: 'error', title: 'Gagal', message: 'Gagal menghapus section' })
+          }
+        } catch (error) {
+          console.error('Error deleting section:', error)
+          showAlert({ type: 'error', title: 'Terjadi Kesalahan', message: 'Gagal menghapus section' })
+        }
       }
-    } catch (error) {
-      console.error('Error deleting section:', error)
-      alert('Error menghapus section')
-    }
+    })
   }
 
   const filteredSections = sections.filter((section) =>

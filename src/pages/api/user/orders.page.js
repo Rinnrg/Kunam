@@ -35,9 +35,52 @@ export default async function handler(req, res) {
         orderBy: { createdAt: 'desc' },
       });
 
-      // Serialize dates
+      // Collect all product IDs from orders to check for user's reviews
+      const productIds = Array.from(
+        new Set(orders.flatMap((order) => order.order_items.map((item) => item.produkId)))
+      );
+
+      let userReviews = [];
+      if (productIds.length > 0) {
+        userReviews = await prisma.reviews.findMany({
+          where: {
+            userId,
+            produkId: { in: productIds },
+          },
+          select: {
+            id: true,
+            produkId: true,
+            rating: true,
+            comment: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+      }
+
+      const reviewMap = {};
+      userReviews.forEach((r) => {
+        reviewMap[r.produkId] = r;
+      });
+
+      // Serialize dates and attach user's review (if any) to each order item
       const serializedOrders = orders.map((order) => ({
         ...order,
+        order_items: order.order_items.map((item) => {
+          const r = reviewMap[item.produkId] || null;
+          return {
+            ...item,
+            userReview: r
+              ? {
+                  id: r.id,
+                  rating: r.rating,
+                  comment: r.comment,
+                  createdAt: r.createdAt.toISOString(),
+                  updatedAt: r.updatedAt.toISOString(),
+                }
+              : null,
+          };
+        }),
         createdAt: order.createdAt.toISOString(),
         updatedAt: order.updatedAt.toISOString(),
       }));

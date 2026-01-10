@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import styles from './alertDialog.module.scss';
 
 /**
@@ -46,7 +47,41 @@ function AlertDialog({ isOpen, onClose, onConfirm, title, message, type = 'info'
     }
   };
 
+  const overlayRef = useRef(null);
+
+  useEffect(() => {
+    if (overlayRef.current) {
+      // eslint-disable-next-line no-console
+      console.log('[AlertDialog] mounted overlay element:', overlayRef.current);
+      // eslint-disable-next-line no-console
+      const cs = getComputedStyle(overlayRef.current);
+      // eslint-disable-next-line no-console
+      console.log('[AlertDialog] overlay styles', { display: cs.display, visibility: cs.visibility, opacity: cs.opacity, zIndex: cs.zIndex, position: cs.position, top: cs.top });
+      // Force inline styles to ensure visibility when global resets interfere
+      try {
+        const el = overlayRef.current;
+        el.style.display = 'flex';
+        el.style.opacity = '1';
+        el.style.visibility = 'visible';
+        el.style.zIndex = '2147483647';
+        el.style.position = 'fixed';
+        el.style.top = '0';
+        el.style.left = '0';
+        el.style.right = '0';
+        el.style.bottom = '0';
+      } catch (e) {
+        // ignore
+      }
+    } else {
+      // eslint-disable-next-line no-console
+      console.log('[AlertDialog] overlayRef is null');
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
+
+  // If document isn't available (SSR), do not attempt to portal
+  if (typeof document === 'undefined') return null;
 
   const getIcon = () => {
     switch (type) {
@@ -91,8 +126,8 @@ function AlertDialog({ isOpen, onClose, onConfirm, title, message, type = 'info'
     }
   };
 
-  return (
-    <div className={styles.overlay} onClick={handleBackdropClick} role="presentation">
+  return createPortal(
+    <div ref={overlayRef} className={`${styles.overlay} ${styles.alertDebugForce}`} onClick={handleBackdropClick} role="presentation">
       <div className={`${styles.dialog} ${styles[type]}`}>
         <div className={styles.iconWrapper}>{getIcon()}</div>
 
@@ -111,7 +146,8 @@ function AlertDialog({ isOpen, onClose, onConfirm, title, message, type = 'info'
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 

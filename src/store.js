@@ -36,8 +36,11 @@ export const useStore = create((set) => ({
     showCancel: false,
   },
   setAlertDialog: (alertDialog) => set({ alertDialog }),
-  showAlert: ({ title, message, type = 'info', onConfirm, confirmText, cancelText, showCancel }) =>
-    set({
+  showAlert: ({ title, message, type = 'info', onConfirm, confirmText, cancelText, showCancel }) => {
+    // Debug log to verify alert calls
+    // eslint-disable-next-line no-console
+    console.log('[store.showAlert] title:', title, 'message:', message, 'type:', type);
+    return set({
       alertDialog: {
         isOpen: true,
         title,
@@ -48,7 +51,8 @@ export const useStore = create((set) => ({
         cancelText: cancelText || 'Batal',
         showCancel: showCancel !== undefined ? showCancel : type === 'confirm',
       },
-    }),
+    });
+  },
   hideAlert: () =>
     set({
       alertDialog: {

@@ -52,14 +52,14 @@ export default async function handler(req, res) {
           },
           orders: {
             where: {
-              OR: [
-                { status: 'settlement' },
-                { status: 'success' },
-              ],
+              // Only include orders that were actually paid/settled
+              paymentStatus: {
+                in: ['settlement', 'paid'],
+              },
             },
             select: {
               totalAmount: true,
-              status: true,
+              paymentStatus: true,
             },
           },
         },
@@ -67,7 +67,9 @@ export default async function handler(req, res) {
 
       // Calculate statistics for each user
       const usersWithStats = users.map(user => {
-        const totalSpent = user.orders.reduce((sum, o) => sum + o.totalAmount, 0);
+        // Sum only the included (paid) orders safely
+        const totalSpent = user.orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+        const totalOrders = user.orders.length; // Only count paid/settled orders
         const count = user._count; // Extract _count to avoid linting issues
 
         return {
@@ -81,7 +83,7 @@ export default async function handler(req, res) {
           createdAt: user.createdAt.toISOString(),
           updatedAt: user.updatedAt.toISOString(),
           stats: {
-            totalOrders: count.orders,
+            totalOrders: totalOrders,
             totalReviews: count.reviews,
             totalWishlists: count.wishlists,
             totalCartItems: count.carts,
