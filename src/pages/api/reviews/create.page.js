@@ -16,6 +16,8 @@ export default async function handler(req, res) {
 
     const { produkId, orderId, rating, comment } = req.body;
 
+    console.log('[Create Review] Request body:', { produkId, orderId, rating, comment });
+
     // Validation
     if (!produkId || !orderId || !rating || !comment) {
       return res.status(400).json({ message: 'Missing required fields' });
@@ -29,6 +31,10 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Comment must be at least 10 characters' });
     }
 
+    // Ensure produkId is a string
+    const produkIdStr = String(produkId);
+    const orderIdNum = parseInt(orderId, 10);
+
     // Find user
     const user = await prisma.users.findUnique({
       where: { email: session.user.email },
@@ -41,13 +47,13 @@ export default async function handler(req, res) {
     // Verify that user owns the order
     const order = await prisma.orders.findFirst({
       where: {
-        id: parseInt(orderId, 10),
+        id: orderIdNum,
         userId: user.id,
       },
       include: {
         order_items: {
           where: {
-            produkId: parseInt(produkId, 10),
+            produkId: produkIdStr,
           },
         },
       },
@@ -68,12 +74,11 @@ export default async function handler(req, res) {
       });
     }
 
-    // Check if user already reviewed this product from this order
+    // Check if user already reviewed this product
     const existingReview = await prisma.reviews.findFirst({
       where: {
         userId: user.id,
-        produkId: parseInt(produkId, 10),
-        orderId: parseInt(orderId, 10),
+        produkId: produkIdStr,
       },
     });
 
@@ -85,8 +90,7 @@ export default async function handler(req, res) {
     const review = await prisma.reviews.create({
       data: {
         userId: user.id,
-        produkId: parseInt(produkId, 10),
-        orderId: parseInt(orderId, 10),
+        produkId: produkIdStr,
         rating: parseInt(rating, 10),
         comment: comment.trim(),
       },
@@ -100,6 +104,23 @@ export default async function handler(req, res) {
       },
     });
 
+    // Update product rating and total reviews
+    const allReviews = await prisma.reviews.findMany({
+      where: { produkId: produkIdStr },
+      select: { rating: true },
+    });
+
+    const totalReviews = allReviews.length;
+    const averageRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / totalReviews;
+
+    await prisma.produk.update({
+      where: { id: produkIdStr },
+      data: {
+        rating: averageRating,
+        totalReviews: totalReviews,
+      },
+    });
+
     return res.status(201).json({
       message: 'Review created successfully',
       review: {
@@ -109,6 +130,12 @@ export default async function handler(req, res) {
     });
   } catch (error) {
     console.error('[Create Review] Error:', error);
-    return res.status(500).json({ message: 'Internal server error' });
+    console.error('[Create Review] Error Message:', error.message);
+    console.error('[Create Review] Error Stack:', error.stack);
+    return res.status(500).json({ 
+      message: 'Internal server error',
+      error: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 }

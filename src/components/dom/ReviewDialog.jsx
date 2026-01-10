@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useStore } from '@src/store';
+import { useShallow } from 'zustand/react/shallow';
 import styles from './ReviewDialog.module.scss';
 
 function ReviewDialog({ isOpen, onClose, produkId, produkName, orderId, onSuccess }) {
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
   const [rating, setRating] = useState(0);
   const [hoveredRating, setHoveredRating] = useState(0);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
 
   // Lock body scroll when dialog is open
   useEffect(() => {
@@ -36,17 +38,24 @@ function ReviewDialog({ isOpen, onClose, produkId, produkName, orderId, onSucces
     e.preventDefault();
     
     if (rating === 0) {
-      setError('Silakan pilih rating bintang');
+      showAlert({
+        type: 'warning',
+        title: 'Rating Diperlukan',
+        message: 'Silakan pilih rating bintang terlebih dahulu.',
+      });
       return;
     }
 
     if (comment.trim().length < 10) {
-      setError('Komentar minimal 10 karakter');
+      showAlert({
+        type: 'warning',
+        title: 'Komentar Terlalu Pendek',
+        message: 'Komentar harus minimal 10 karakter.',
+      });
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
 
     try {
       const res = await fetch('/api/reviews/create', {
@@ -63,24 +72,36 @@ function ReviewDialog({ isOpen, onClose, produkId, produkName, orderId, onSucces
       const data = await res.json();
 
       if (res.ok) {
+        showAlert({
+          type: 'success',
+          title: 'Review Berhasil',
+          message: 'Terima kasih atas review Anda!',
+        });
         if (onSuccess) onSuccess();
         onClose();
       } else {
-        setError(data.message || 'Gagal mengirim ulasan');
+        showAlert({
+          type: 'error',
+          title: 'Gagal Mengirim Review',
+          message: data.message || 'Gagal mengirim ulasan. Silakan coba lagi.',
+        });
       }
     } catch (err) {
       console.error('Error submitting review:', err);
-      setError('Terjadi kesalahan. Silakan coba lagi.');
+      showAlert({
+        type: 'error',
+        title: 'Terjadi Kesalahan',
+        message: 'Terjadi kesalahan. Silakan coba lagi.',
+      });
     } finally {
       setIsSubmitting(false);
     }
-  }, [rating, comment, produkId, orderId, onClose, onSuccess]);
+  }, [rating, comment, produkId, orderId, onClose, onSuccess, showAlert]);
 
   const handleClose = useCallback(() => {
     if (!isSubmitting) {
       setRating(0);
       setComment('');
-      setError('');
       onClose();
     }
   }, [isSubmitting, onClose]);
@@ -155,12 +176,6 @@ function ReviewDialog({ isOpen, onClose, produkId, produkName, orderId, onSucces
                 {comment.length}/500 karakter
               </div>
             </div>
-
-            {error && (
-              <div className={styles.error}>
-                {error}
-              </div>
-            )}
 
             {/* Actions */}
             <div className={styles.actions}>

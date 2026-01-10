@@ -21,13 +21,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Cek apakah user sudah pernah membeli produk ini
-    const hasPurchased = await prisma.orderItem.findFirst({
+    // Cek apakah user sudah pernah membeli produk ini dan pembayaran sudah selesai
+    const hasPurchased = await prisma.order_items.findFirst({
       where: {
         produkId,
-        order: {
+        orders: {
           userId: session.user.id,
-          status: 'completed',
+          paymentStatus: 'settlement', // Hanya order yang sudah dibayar
         },
       },
     });
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     });
 
     return res.status(200).json({
-      canReview: hasPurchased && !hasReviewed,
+      canReview: !!hasPurchased && !hasReviewed,
       hasPurchased: !!hasPurchased,
       hasReviewed: !!hasReviewed,
     });

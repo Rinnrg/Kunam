@@ -32,9 +32,12 @@ function ProductReviews({ produkId }) {
     try {
       const res = await fetch(`/api/reviews/${produkId}`);
       const data = await res.json();
+      
       if (res.ok) {
         setReviews(data.reviews || []);
         setStats(data.stats || { totalReviews: 0, averageRating: 0 });
+      } else {
+        console.error('Failed to fetch reviews:', data);
       }
     } catch (error) {
       console.error('Error fetching reviews:', error);
