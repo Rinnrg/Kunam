@@ -275,7 +275,13 @@ function PembayaranPage() {
         window.snap.pay(data.snapToken, {
           onSuccess: (result) => {
             console.log('Payment success:', result);
-            router.push(`/pembayaran/sukses?order=${data.order.orderNumber}`);
+            // mark that we just paid so the sukses page can animate once
+            try {
+              localStorage.setItem('justPaid', '1');
+            } catch (e) {
+              // ignore if storage not available
+            }
+            router.push(`/pembayaran/sukses?order=${data.order.orderNumber}&justPaid=1`);
           },
           onPending: (result) => {
             console.log('Payment pending:', result);

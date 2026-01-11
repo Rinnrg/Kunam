@@ -166,7 +166,7 @@ function MyApp({ Component, pageProps, router }) {
       lenis.destroy();
       setLenis(null);
     };
-  }, [isAdminPage]);
+  }, [isAdminPage, isReceiptPage]);
 
   useIsomorphicLayoutEffect(() => {
     if (lenis) {

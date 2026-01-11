@@ -1,5 +1,20 @@
 @import '@src/styles/variables.scss';
 
+/* Ensure the app layout uses native scrolling for the receipt page */
+:global(body.receipt-page) {
+  .layout .main {
+    position: relative !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-height: none !important;
+    height: auto !important;
+  }
+
+  .page-transition-overlay {
+    pointer-events: none !important;
+  }
+}
+
 // Animation container untuk animasi sukses
 .animationContainer {
   min-height: 100vh;
@@ -16,6 +31,30 @@
   &.blackBackground {
     background-color: #000;
   }
+}
+
+/* Animation layers for crossfade */
+.animationWrap {
+  position: relative;
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.animationLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 600ms ease;
+  will-change: opacity;
+}
+
+.animationLayer.show {
+  opacity: 1;
 }
 
 .animationText {
@@ -46,9 +85,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start; /* align to top so the page can scroll */
   position: relative; // Ensure relative positioning
-  overflow: visible; // Allow scroll
+  overflow: auto; /* allow scrolling when content is tall */
+  padding-top: 3rem;
 }
 
 // Old container kept for compatibility
@@ -83,6 +123,7 @@
   margin: 0 auto 1.5rem;
   font-size: 2.5rem;
   animation: scaleIn 0.5s ease;
+  position: relative; // ensure we can absolutely position fallback check
 
   @keyframes scaleIn {
     0% {
@@ -107,6 +148,26 @@
   justify-content: center;
   margin: 0 auto 1.5rem;
   font-size: 2.5rem;
+  position: relative; // ensure we can absolutely position fallback check
+}
+
+.fallbackCheck {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff; /* white check for contrast */
+  z-index: 2;
+  pointer-events: none;
+}
+
+.finalCheck {
+  width: 40px;
+  height: 40px;
+  color: #fff; /* white check for contrast */
+  z-index: 3;
 }
 
 .title {
@@ -236,22 +297,25 @@
 }
 
 .totalSection {
-  background: #000;
-  color: #fff;
-  padding: 1.25rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+  background: transparent; /* removed black background */
+  color: #000;
+  padding: 0.5rem 0; /* reduced padding */
+  border-radius: 0; /* remove rounded box feel */
+  margin-bottom: 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
 
   .totalLabel {
     font-size: 1rem;
+    color: #666;
+    font-weight: 600;
   }
 
   .totalValue {
     font-size: 1.5rem;
     font-weight: 700;
+    color: #000;
   }
 }
 
@@ -314,19 +378,16 @@
 }
 
 .outlineButton {
-  width: 100%;
-  padding: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.25rem;
   background: transparent;
   color: #000;
-  border: 2px solid #000;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
   text-decoration: none;
-  display: inline-block;
-  text-align: center;
+  font-weight: 600;
+  border: 2px solid #000;
 
   &:hover {
     background: #f5f5f5;
@@ -334,23 +395,15 @@
 }
 
 .primaryButton {
-  width: 100%;
-  padding: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.25rem;
   background: #000;
   color: #fff;
-  border: none;
   border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
   text-decoration: none;
-  display: inline-block;
-  text-align: center;
-
-  &:hover {
-    background: #333;
-  }
+  font-weight: 600;
 }
 
 .secondaryButton {

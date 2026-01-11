@@ -559,6 +559,19 @@
         background: #dcfce7;
         border-color: #86efac;
         color: #166534;
+
+        svg {
+          display: block;
+          width: 14px;
+          height: 14px;
+        }
+
+        polyline {
+          stroke: currentColor;
+          stroke-width: 2.5;
+          stroke-linecap: round;
+          stroke-linejoin: round;
+        }
       }
 
       .pointIcon.active {
@@ -613,6 +626,10 @@
 .detailHeader {
   padding: 1.5rem;
   border-bottom: 1px solid #e5e5e5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .detailTitle {
