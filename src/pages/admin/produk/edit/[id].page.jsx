@@ -1,6 +1,8 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 // eslint-disable-next-line import/extensions
 import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
 import ColorSelector from '@src/components/admin/ColorSelector';
@@ -12,6 +14,7 @@ export default function EditProduk() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const { id } = router.query;
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
   const [formData, setFormData] = useState({
     nama: '',
     deskripsi: '',
@@ -139,16 +142,26 @@ export default function EditProduk() {
   };
 
   const removeUkuranInput = (index) => {
-    const newUkuran = ukuranInputs.filter((_, i) => i !== index);
-    setUkuranInputs(newUkuran);
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Ukuran',
+      message: 'Apakah Anda yakin ingin menghapus ukuran ini? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        const newUkuran = ukuranInputs.filter((_, i) => i !== index);
+        setUkuranInputs(newUkuran);
 
-    // Update formData
-    const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
+        // Update formData
+        const ukuranArray = newUkuran.filter((item) => item.size && item.qty).map((item) => `${item.size}:${item.qty}`);
 
-    setFormData((prev) => ({
-      ...prev,
-      ukuran: ukuranArray,
-    }));
+        setFormData((prev) => ({
+          ...prev,
+          ukuran: ukuranArray,
+        }));
+      }
+    });
   };
 
   const getTotalUkuran = () => ukuranInputs.reduce((total, item) => total + (parseInt(item.qty, 10) || 0), 0);
@@ -173,18 +186,40 @@ export default function EditProduk() {
   };
 
   const removeNewVideo = (index) => {
-    const newFiles = videoFiles.filter((_, i) => i !== index);
-    const newPreviews = videoPreviews.filter((_, i) => i !== index);
-    setVideoFiles(newFiles);
-    setVideoPreviews(newPreviews);
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Video',
+      message: 'Apakah Anda yakin ingin menghapus video ini dari preview? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        const newFiles = videoFiles.filter((_, i) => i !== index);
+        const newPreviews = videoPreviews.filter((_, i) => i !== index);
+        setVideoFiles(newFiles);
+        setVideoPreviews(newPreviews);
 
-    // Revoke the URL to free memory
-    URL.revokeObjectURL(videoPreviews[index]);
+        // Revoke the URL to free memory
+        if (videoPreviews[index]?.startsWith('blob:')) {
+          URL.revokeObjectURL(videoPreviews[index]);
+        }
+      }
+    });
   };
 
   const removeExistingVideo = (index) => {
-    const newExisting = existingVideos.filter((_, i) => i !== index);
-    setExistingVideos(newExisting);
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Video',
+      message: 'Apakah Anda yakin ingin menghapus video ini? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        const newExisting = existingVideos.filter((_, i) => i !== index);
+        setExistingVideos(newExisting);
+      }
+    });
   };
 
   const uploadImages = async () => {
@@ -355,7 +390,7 @@ export default function EditProduk() {
         { label: 'Edit Produk', href: null }
       ]} />
       <div className={styles.header}>
-        <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
+        <button type="button" onClick={() => showAlert({ type: 'confirm', title: 'Kembali', message: 'Apakah Anda yakin ingin kembali dan membatalkan perubahan? Semua perubahan belum disimpan akan hilang.', confirmText: 'Ya, Kembali', cancelText: 'Tetap di sini', showCancel: true, onConfirm: () => router.push('/admin') })} className={styles.backButton}>
           Kembali ke Dashboard
         </button>
       </div>
@@ -555,7 +590,7 @@ export default function EditProduk() {
         </div>
 
         <div className={styles.formActions}>
-          <button type="button" onClick={() => router.push('/admin')} className={styles.cancelButton} disabled={isSubmitting}>
+          <button type="button" onClick={() => showAlert({ type: 'confirm', title: 'Batal', message: 'Apakah Anda yakin ingin membatalkan? Semua perubahan belum disimpan akan hilang.', confirmText: 'Ya, Batal', cancelText: 'Kembali', showCancel: true, onConfirm: () => router.push('/admin') })} className={styles.cancelButton} disabled={isSubmitting}>
             ❌ Batal
           </button>
           <button type="submit" className={styles.submitButton} disabled={isSubmitting || isUploading}>

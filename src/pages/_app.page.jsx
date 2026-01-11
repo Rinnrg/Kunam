@@ -31,7 +31,7 @@ import { useIsomorphicLayoutEffect } from '@src/hooks/useIsomorphicLayoutEffect'
 import useScroll from '@src/hooks/useScroll';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
-import { LogOut, Trash2, CheckCircle } from 'lucide-react';
+import { Trash2, CheckCircle } from 'lucide-react';
 
 if (typeof window !== 'undefined') {
   gsap.defaults({ ease: 'none' });
@@ -312,7 +312,7 @@ function MyApp({ Component, pageProps, router }) {
         <View.Port />
       </Canvas>
     );
-  }, [isAbout, isAdminPage]);
+  }, [isAbout, isAdminPage, isReceiptPage]);
 
   // Render admin pages with minimal wrapper
   if (isAdminPage) {
@@ -324,6 +324,19 @@ function MyApp({ Component, pageProps, router }) {
         {/* Page Transition Overlay */}
         <div ref={transitionOverlayRef} className="page-transition-overlay" />
         <Component {...pageProps} />
+        
+        {/* Ensure AlertDialog is available on admin pages */}
+        <AlertDialog
+          isOpen={alertDialog.isOpen}
+          onClose={hideAlert}
+          onConfirm={alertDialog.onConfirm}
+          title={alertDialog.title}
+          message={alertDialog.message}
+          type={alertDialog.type}
+          confirmText={alertDialog.confirmText}
+          cancelText={alertDialog.cancelText}
+          showCancel={alertDialog.showCancel}
+        />
       </SessionProvider>
     );
   }

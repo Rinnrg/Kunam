@@ -1,4 +1,6 @@
 import { useState, useCallback } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 import Image from 'next/image';
 import styles from './MultipleImageUpload.module.scss';
 
@@ -23,6 +25,7 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
       
   const [images, setImages] = useState(initialImages);
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   // Handle new file selection
   const handleFileChange = useCallback((e) => {
@@ -82,36 +85,47 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
   // Remove image
   const removeImage = useCallback((index) => {
     const imageToRemove = images[index];
-    
-    // Revoke object URL if it's a new image
-    if (imageToRemove.isNew && imageToRemove.url) {
-      URL.revokeObjectURL(imageToRemove.url);
-    }
 
-    const updatedImages = images.filter((_, i) => i !== index);
-    
-    // If removed image was thumbnail, set first image as new thumbnail
-    if (imageToRemove.isThumbnail && updatedImages.length > 0) {
-      updatedImages[0].isThumbnail = true;
-    }
+    // Confirm before removing
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Gambar',
+      message: 'Apakah Anda yakin ingin menghapus gambar ini? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        // Revoke object URL if it's a new image
+        if (imageToRemove?.isNew && imageToRemove.url) {
+          URL.revokeObjectURL(imageToRemove.url);
+        }
 
-    setImages(updatedImages);
+        const updatedImages = images.filter((_, i) => i !== index);
 
-    if (onChange) {
-      const thumbnail = updatedImages.find(img => img.isThumbnail);
-      const gallery = updatedImages.filter(img => !img.isThumbnail);
-      onChange({
-        thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
-        gallery: gallery.map(img => img.file || img.url),
-        allImages: updatedImages.map(img => ({
-          url: img.url,
-          file: img.file,
-          isNew: img.isNew,
-          isThumbnail: img.isThumbnail,
-        })),
-      });
-    }
-  }, [images, onChange]);
+        // If removed image was thumbnail, set first image as new thumbnail
+        if (imageToRemove?.isThumbnail && updatedImages.length > 0) {
+          updatedImages[0].isThumbnail = true;
+        }
+
+        setImages(updatedImages);
+
+        if (onChange) {
+          const thumbnail = updatedImages.find(img => img.isThumbnail);
+          const gallery = updatedImages.filter(img => !img.isThumbnail);
+          onChange({
+            thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
+            gallery: gallery.map(img => img.file || img.url),
+            allImages: updatedImages.map(img => ({
+              url: img.url,
+              file: img.file,
+              isNew: img.isNew,
+              isThumbnail: img.isThumbnail,
+            })),
+          });
+        }
+      }
+    });
+  }, [images, onChange, showAlert]);
 
   // Drag and drop handlers
   const handleDragStart = useCallback((index) => {

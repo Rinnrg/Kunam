@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import styles from '../admin.module.scss';
@@ -21,7 +21,7 @@ export default function HomeSectionManager() {
   const [loading, setLoading] = useState(false);
   const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
-  const fetchSections = async () => {
+  const fetchSections = useCallback(async () => {
     try {
       const response = await fetch('/api/admin/home-sections');
       const data = await response.json();
@@ -30,7 +30,7 @@ export default function HomeSectionManager() {
       console.error('Error fetching sections:', error);
       showAlert({ type: 'error', title: 'Gagal', message: 'Gagal mengambil data sections' });
     }
-  };
+  }, [showAlert]);
 
   const resetForm = () => {
     setFormData({
@@ -50,7 +50,7 @@ export default function HomeSectionManager() {
 
   useEffect(() => {
     fetchSections();
-  }, []);
+  }, [fetchSections]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -62,16 +62,26 @@ export default function HomeSectionManager() {
   };
 
   const removeImage = (index) => {
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
-    const newPreviews = previewUrls.filter((_, i) => i !== index);
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Gambar',
+      message: 'Apakah Anda yakin ingin menghapus gambar ini? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        const newFiles = selectedFiles.filter((_, i) => i !== index);
+        const newPreviews = previewUrls.filter((_, i) => i !== index);
 
-    // Revoke blob URL
-    if (previewUrls[index]?.startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrls[index]);
-    }
+        // Revoke blob URL
+        if (previewUrls[index]?.startsWith('blob:')) {
+          URL.revokeObjectURL(previewUrls[index]);
+        }
 
-    setSelectedFiles(newFiles);
-    setPreviewUrls(newPreviews);
+        setSelectedFiles(newFiles);
+        setPreviewUrls(newPreviews);
+      }
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -308,7 +318,15 @@ export default function HomeSectionManager() {
             {editingId && (
               <button
                 type="button"
-                onClick={resetForm}
+                onClick={() => showAlert({
+                  type: 'confirm',
+                  title: 'Batal',
+                  message: 'Apakah Anda yakin ingin membatalkan perubahan? Semua perubahan belum disimpan akan hilang.',
+                  confirmText: 'Ya, Batal',
+                  cancelText: 'Kembali',
+                  showCancel: true,
+                  onConfirm: resetForm
+                })}
                 className={styles.cancelBtn}
               >
                 Batal

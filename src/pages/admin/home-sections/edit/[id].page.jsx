@@ -1,6 +1,8 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from '../../produk/form.module.scss';
@@ -8,6 +10,7 @@ import styles from '../../produk/form.module.scss';
 export default function EditHomeSection() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
   const { id } = router.query;
   const [formData, setFormData] = useState({
     judul: '',
@@ -217,7 +220,7 @@ export default function EditHomeSection() {
           <div className={styles.formActions}>
             <button
               type="button"
-              onClick={() => router.push('/admin')}
+              onClick={() => showAlert({ type: 'confirm', title: 'Batal', message: 'Apakah Anda yakin ingin membatalkan? Semua perubahan belum disimpan akan hilang.', confirmText: 'Ya, Batal', cancelText: 'Kembali', showCancel: true, onConfirm: () => router.push('/admin') })}
               className={styles.cancelButton}
               disabled={isSubmitting}
             >

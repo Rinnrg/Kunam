@@ -1,6 +1,8 @@
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { useStore } from '@src/store';
 // eslint-disable-next-line import/extensions
 import MultipleImageUpload from '@src/components/admin/MultipleImageUpload';
 import ColorSelector from '@src/components/admin/ColorSelector';
@@ -36,6 +38,7 @@ export default function CreateProduk() {
   const [videoPreviews, setVideoPreviews] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
   const [ukuranInputs, setUkuranInputs] = useState([{ id: Date.now(), size: '', qty: '' }]);
+  const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -72,13 +75,25 @@ export default function CreateProduk() {
   };
 
   const removeNewVideo = (index) => {
-    const newFiles = videoFiles.filter((_, i) => i !== index);
-    const newPreviews = videoPreviews.filter((_, i) => i !== index);
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Video',
+      message: 'Apakah Anda yakin ingin menghapus video ini dari preview? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        const newFiles = videoFiles.filter((_, i) => i !== index);
+        const newPreviews = videoPreviews.filter((_, i) => i !== index);
 
-    URL.revokeObjectURL(videoPreviews[index]);
+        if (videoPreviews[index]?.startsWith('blob:')) {
+          URL.revokeObjectURL(videoPreviews[index]);
+        }
 
-    setVideoFiles(newFiles);
-    setVideoPreviews(newPreviews);
+        setVideoFiles(newFiles);
+        setVideoPreviews(newPreviews);
+      }
+    });
   };
 
   const handleUkuranChange = (index, field, value) => {
@@ -102,17 +117,27 @@ export default function CreateProduk() {
   };
 
   const removeUkuranInput = (index) => {
-    const newUkuran = ukuranInputs.filter((_, i) => i !== index);
-    setUkuranInputs(newUkuran);
+    showAlert({
+      type: 'confirm',
+      title: 'Hapus Ukuran',
+      message: 'Apakah Anda yakin ingin menghapus ukuran ini? Perubahan ini belum disimpan.',
+      confirmText: 'Hapus',
+      cancelText: 'Batal',
+      showCancel: true,
+      onConfirm: () => {
+        const newUkuran = ukuranInputs.filter((_, i) => i !== index);
+        setUkuranInputs(newUkuran);
 
-    const ukuranArray = newUkuran
-      .filter((item) => item.size && item.qty)
-      .map((item) => `${item.size}:${item.qty}`);
+        const ukuranArray = newUkuran
+          .filter((item) => item.size && item.qty)
+          .map((item) => `${item.size}:${item.qty}`);
 
-    setFormData((prev) => ({
-      ...prev,
-      ukuran: ukuranArray,
-    }));
+        setFormData((prev) => ({
+          ...prev,
+          ukuran: ukuranArray,
+        }));
+      }
+    });
   };
 
   const getTotalUkuran = () => {
@@ -296,7 +321,7 @@ export default function CreateProduk() {
         { label: 'Tambah Produk', href: null }
       ]} />
       <div className={styles.header}>
-        <button type="button" onClick={() => router.push('/admin')} className={styles.backButton}>
+        <button type="button" onClick={() => showAlert({ type: 'confirm', title: 'Kembali', message: 'Apakah Anda yakin ingin kembali dan membatalkan perubahan? Semua perubahan belum disimpan akan hilang.', confirmText: 'Ya, Kembali', cancelText: 'Tetap di sini', showCancel: true, onConfirm: () => router.push('/admin') })} className={styles.backButton}>
           Kembali ke Dashboard
         </button>
       </div>
@@ -475,8 +500,8 @@ export default function CreateProduk() {
         </div>
 
         <div className={styles.formActions}>
-          <button type="button" onClick={() => router.push('/admin/produk')} className={styles.cancelButton} disabled={isSubmitting}>
-            ❌ Batal
+          <button type="button" onClick={() => showAlert({ type: 'confirm', title: 'Batal', message: 'Apakah Anda yakin ingin membatalkan pembuatan produk? Semua perubahan belum disimpan akan hilang.', confirmText: 'Ya, Batal', cancelText: 'Kembali', showCancel: true, onConfirm: () => router.push('/admin/produk') })} className={styles.cancelButton} disabled={isSubmitting}>
+            Batal
           </button>
           <button type="submit" className={styles.submitButton} disabled={isSubmitting || isUploading}>
             {(() => {
