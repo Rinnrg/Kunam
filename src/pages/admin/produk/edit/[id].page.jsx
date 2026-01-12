@@ -9,6 +9,7 @@ import ColorSelector from '@src/components/admin/ColorSelector';
 import SectionsEditor from '@src/components/admin/SectionsEditor';
 import Breadcrumb from '@src/components/dom/Breadcrumb';
 import styles from '../form.module.scss';
+import { uploadFile } from '@src/lib/image-utils';
 
 export default function EditProduk() {
   const { data: session, status } = useSession();
@@ -312,6 +313,42 @@ export default function EditProduk() {
       const uploadedImageUrls = await uploadImages();
       const uploadedVideoUrls = await uploadVideos();
 
+      // Upload section images (if any new uploads) and normalize sections
+      let processedSections = formData.sections || [];
+      try {
+        processedSections = await Promise.all((formData.sections || []).map(async (section) => {
+          if (Array.isArray(section.gambar) && section.gambar.length > 0) {
+            const newGambar = await Promise.all(section.gambar.map(async (g) => {
+              if (g && g.file) {
+                const url = await uploadFile(g.file);
+                return { url, caption: g.caption || '' };
+              }
+              if (g && g.url) return { url: g.url, caption: g.caption || '' };
+              return null;
+            }));
+
+            return { ...section, gambar: newGambar.filter(Boolean) };
+          }
+
+          if (section.gambar && typeof section.gambar === 'object' && section.gambar.file) {
+            const url = await uploadFile(section.gambar.file);
+            return { ...section, gambar: [{ url, caption: section.gambar.caption || '' }] };
+          }
+          if (section.gambar && typeof section.gambar === 'object' && section.gambar.url) {
+            return { ...section, gambar: [{ url: section.gambar.url, caption: section.gambar.caption || '' }] };
+          }
+          if (section.gambar && typeof section.gambar === 'string') {
+            return { ...section, gambar: [{ url: section.gambar, caption: '' }] };
+          }
+
+          return { ...section, gambar: [] };
+        }));
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.error('Error uploading section images:', err);
+        throw new Error('Error uploading section images');
+      }
+
       // Get existing image URLs (objects with url property or strings)
       const existingImageUrls = productImages.allImages
         .filter(img => !img.isNew)
@@ -349,6 +386,7 @@ export default function EditProduk() {
       // Prepare form data with all media
       const dataToSubmit = {
         ...formData,
+        sections: processedSections,
         thumbnail: thumbnailUrl,
         images: allImages,
         videos: allVideos,

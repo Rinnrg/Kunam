@@ -3,44 +3,132 @@ import { useShallow } from 'zustand/react/shallow';
 import { useStore } from '@src/store';
 import Image from 'next/image';
 import styles from './MultipleImageUpload.module.scss';
+import { compressImageFile, formatBytes, MAX_IMAGE_SIZE_BYTES } from '@src/lib/image-utils';
+import ImageCropDialog from '@src/components/admin/ImageCropDialog';
 
-/**
- * Multiple Image Upload Component
- * Supports:
- * - Thumbnail selection (main image)
- * - Multiple gallery images
- * - Drag and drop reordering
- * - Preview existing and new images
- */
-function MultipleImageUpload({ existingImages = [], images: propImages, onChange }) {
+function MultipleImageUpload({ existingImages = [], images: propImages, onChange, allowCaption = false }) {
   // Initialize from either existingImages (legacy string array) or propImages (new object array)
-  const initialImages = propImages && propImages.length > 0
-    ? propImages
+  const initialImages = (propImages && propImages.length > 0)
+    ? propImages.map((img, index) => ({
+        url: typeof img === 'string' ? img : (img.url || img),
+        isNew: !!img.file,
+        isThumbnail: img.isThumbnail || (index === 0 && !img.isThumbnail),
+        file: img.file || null,
+        caption: img.caption || '',
+      }))
     : existingImages.map((url, index) => ({
         url: typeof url === 'string' ? url : url.url,
         isNew: false,
         isThumbnail: index === 0,
         file: null,
+        caption: '',
       }));
       
   const [images, setImages] = useState(initialImages);
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [cropDialog, setCropDialog] = useState({ isOpen: false, index: null, src: null, fixedAspect: null });
   const [showAlert] = useStore(useShallow((state) => [state.showAlert]));
 
-  // Handle new file selection
-  const handleFileChange = useCallback((e) => {
-    const files = Array.from(e.target.files);
-    
-    const newImages = files.map((file) => ({
+  const openCrop = useCallback((index, fixedAspect = null) => {
+    if (!images[index]) return;
+    setCropDialog({ isOpen: true, index, src: images[index].url, fixedAspect });
+  }, [images]);
+
+  const closeCrop = useCallback(() => setCropDialog({ isOpen: false, index: null, src: null, fixedAspect: null }), []);
+
+  const handleCropDone = useCallback(async (blob) => {
+    const { index } = cropDialog;
+    if (index === null || index === undefined) return;
+
+    const original = images[index];
+    const baseName = (original?.file?.name || `image-${Date.now()}`).replace(/\.[^/.]+$/, '');
+    const name = `${baseName}-cropped.jpg`;
+    const newFile = new File([blob], name, { type: blob.type || 'image/jpeg' });
+
+    // Revoke previous object URL if it was a blob URL
+    if (original?.isNew && original?.url && original.url.startsWith('blob:')) {
+      URL.revokeObjectURL(original.url);
+    }
+
+    const updatedImages = [...images];
+    updatedImages[index] = {
+      ...original,
+      file: newFile,
+      url: URL.createObjectURL(newFile),
+      isNew: true,
+    };
+
+    setImages(updatedImages);
+
+    if (onChange) {
+      const thumbnail = updatedImages.find(img => img.isThumbnail);
+      const gallery = updatedImages.filter(img => !img.isThumbnail);
+      onChange({
+        thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
+        gallery: gallery.map(img => img.file || img.url),
+        allImages: updatedImages.map(img => ({ url: img.url, file: img.file, isNew: img.isNew, isThumbnail: img.isThumbnail, caption: img.caption || '' })),
+      });
+    }
+
+    closeCrop();
+  }, [cropDialog, images, onChange, closeCrop]);
+
+  // Handle new file selection (compress if larger than 1MB)
+  const handleFileChange = useCallback(async (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    let compressedCount = 0;
+    let originalTotal = 0;
+    let compressedTotal = 0;
+
+    const processedFiles = await Promise.all(files.map(async (file) => {
+      originalTotal += file.size;
+
+      try {
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
+          const compressed = await compressImageFile(file, MAX_IMAGE_SIZE_BYTES);
+          if (compressed.size < file.size) {
+            compressedCount += 1;
+            compressedTotal += compressed.size;
+            return compressed;
+          }
+          // compression didn't help
+          compressedTotal += file.size;
+          return file;
+        }
+        compressedTotal += file.size;
+        return file;
+      } catch (err) {
+        // Failed to compress - use original file
+        // eslint-disable-next-line no-console
+        console.error('Compression error:', err);
+        compressedTotal += file.size;
+        return file;
+      }
+    }));
+
+    // Create image objects with object URLs
+    const newImages = processedFiles.map((file) => ({
       url: URL.createObjectURL(file),
       isNew: true,
-      isThumbnail: images.length === 0, // First image if no images exist
+      isThumbnail: images.length === 0 && idx === 0, // only the first new file becomes thumbnail if there were no existing images
       file,
+      caption: '',
     }));
 
     const updatedImages = [...images, ...newImages];
     setImages(updatedImages);
-    
+
+    // If any compression happened, show a single summary alert
+    if (compressedCount > 0) {
+      showAlert({
+        title: 'Gambar terkompres',
+        message: `Berhasil mengkompres ${compressedCount} gambar. Ukuran total: ${formatBytes(originalTotal)} → ${formatBytes(compressedTotal)}.`,
+        type: 'info',
+      });
+    }
+
     // Call onChange with ALL image objects (including isThumbnail flag)
     if (onChange) {
       const thumbnail = updatedImages.find(img => img.isThumbnail);
@@ -53,7 +141,25 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
           file: img.file,
           isNew: img.isNew,
           isThumbnail: img.isThumbnail,
+          caption: img.caption || '',
         })),
+      });
+    }
+  }, [images, onChange, showAlert]);
+
+  // Update caption for an image
+  const updateCaption = useCallback((index, caption) => {
+    const updatedImages = [...images];
+    updatedImages[index] = { ...updatedImages[index], caption };
+    setImages(updatedImages);
+
+    if (onChange) {
+      const thumbnail = updatedImages.find(img => img.isThumbnail);
+      const gallery = updatedImages.filter(img => !img.isThumbnail);
+      onChange({
+        thumbnail: thumbnail ? (thumbnail.file || thumbnail.url) : null,
+        gallery: gallery.map(img => img.file || img.url),
+        allImages: updatedImages.map(img => ({ url: img.url, file: img.file, isNew: img.isNew, isThumbnail: img.isThumbnail, caption: img.caption || '' })),
       });
     }
   }, [images, onChange]);
@@ -215,6 +321,14 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
               </button>
               <button
                 type="button"
+                className={styles.cropBtn}
+                onClick={() => openCrop(index, 3 / 4)}
+                title="Crop image (3:4)"
+              >
+                ✂️
+              </button>
+              <button
+                type="button"
                 className={styles.removeBtn}
                 onClick={() => removeImage(index)}
                 title="Remove image"
@@ -228,6 +342,18 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
               <span className={styles.imageNumber}>#{index + 1}</span>
               {image.isNew && <span className={styles.newBadge}>New</span>}
             </div>
+
+            {/* Caption input (optional) */}
+            {allowCaption && (
+              <div className={styles.captionWrapper}>
+                <input
+                  type="text"
+                  value={image.caption || ''}
+                  onChange={(e) => updateCaption(index, e.target.value)}
+                  placeholder="Caption gambar"
+                />
+              </div>
+            )}
           </div>
         ))}
 
@@ -243,6 +369,15 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
           <div className={styles.uploadIcon}>+</div>
           <span>Add Images</span>
         </label>
+
+        {/* Crop Dialog */}
+        <ImageCropDialog
+          isOpen={cropDialog.isOpen}
+          onClose={closeCrop}
+          imageSrc={cropDialog.src}
+          onCropDone={handleCropDone}
+          fixedAspect={cropDialog.fixedAspect}
+        />
       </div>
 
       {/* Summary */}
