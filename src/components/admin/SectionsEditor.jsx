@@ -151,9 +151,6 @@ export default function SectionsEditor({ sections = [], onChange }) {
       )}
 
       {sectionList.map((section, index) => {
-        const imageUrl = section.gambar ? (typeof section.gambar === 'string' ? section.gambar : section.gambar.url) : null;
-        const imageCaption = section.gambar && typeof section.gambar === 'object' ? section.gambar.caption : '';
-
         return (
           <div key={index} className={styles.sectionItem}>
             <div className={styles.sectionHeader}>

@@ -109,10 +109,10 @@ function MultipleImageUpload({ existingImages = [], images: propImages, onChange
     }));
 
     // Create image objects with object URLs
-    const newImages = processedFiles.map((file) => ({
+    const newImages = processedFiles.map((file, i) => ({
       url: URL.createObjectURL(file),
       isNew: true,
-      isThumbnail: images.length === 0 && idx === 0, // only the first new file becomes thumbnail if there were no existing images
+      isThumbnail: images.length === 0 && i === 0, // only the first new file becomes thumbnail if there were no existing images
       file,
       caption: '',
     }));
