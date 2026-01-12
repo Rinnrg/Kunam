@@ -74,16 +74,33 @@ function WishlistPage() {
   const handleAddToCart = useCallback(
     async (produkId) => {
       try {
-        await fetch('/api/user/cart', {
+        const res = await fetch('/api/user/cart', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ produkId, quantity: 1 }),
         });
-        showAlert({
-          type: 'success',
-          title: 'Ditambahkan ke Keranjang',
-          message: 'Produk berhasil ditambahkan ke keranjang.',
-        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAlert({
+            type: 'error',
+            title: 'Gagal',
+            message: data.message || 'Gagal menambahkan produk ke keranjang.',
+          });
+          return;
+        }
+        if (data.adjusted) {
+          showAlert({
+            type: 'warning',
+            title: 'Jumlah disesuaikan',
+            message: `Jumlah produk disesuaikan ke ${data.cartItem.quantity} karena keterbatasan stok.`,
+          });
+        } else {
+          showAlert({
+            type: 'success',
+            title: 'Ditambahkan ke Keranjang',
+            message: 'Produk berhasil ditambahkan ke keranjang.',
+          });
+        }
         // Optionally remove from wishlist after adding to cart
       } catch (error) {
         console.error('Error adding to cart:', error);

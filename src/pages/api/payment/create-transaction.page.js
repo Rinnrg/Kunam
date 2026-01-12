@@ -42,6 +42,20 @@ export default async function handler(req, res) {
     const productMap = {};
     products.forEach(p => { productMap[p.id] = p; });
 
+    // Validate stock availability before creating the order
+    const invalidItems = [];
+    for (const item of items) {
+      const produk = productMap[item.produkId];
+      if (!produk) continue; // will be caught later
+      if ((produk.stok || 0) < item.quantity) {
+        invalidItems.push({ produkId: item.produkId, requested: item.quantity, available: produk.stok || 0 });
+      }
+    }
+
+    if (invalidItems.length > 0) {
+      return res.status(400).json({ error: 'Beberapa item tidak tersedia dalam jumlah yang diminta', items: invalidItems });
+    }
+
     // Calculate total amount from cart items
     let totalAmount = 0;
     const orderItems = [];

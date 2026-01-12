@@ -258,6 +258,14 @@ function PembayaranPage() {
       const data = await res.json();
 
       if (!res.ok) {
+        if (data?.items && Array.isArray(data.items) && data.items.length > 0) {
+          const msgs = data.items.map(i => `Produk ${i.produkId}: diminta ${i.requested}, tersedia ${i.available}`).join('; ');
+          showAlert({ type: 'error', title: 'Stok Tidak Cukup', message: `Beberapa item tidak tersedia: ${msgs}` });
+          // Ensure user goes back to cart to adjust quantities
+          setIsProcessing(false);
+          router.push('/cart');
+          return;
+        }
         throw new Error(data.error || 'Gagal membuat transaksi');
       }
 

@@ -460,6 +460,11 @@
     &:hover {
       background: #eee;
     }
+
+    &:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
   }
 
   span {
@@ -468,6 +473,22 @@
     min-width: 24px;
     text-align: center;
   }
+}
+
+.stockInfo {
+  margin-top: 0.25rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.outOfStock {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.inStock {
+  color: #333;
+  font-weight: 500;
 }
 
 .removeButton {

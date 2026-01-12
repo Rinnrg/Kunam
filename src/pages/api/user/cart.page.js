@@ -83,6 +83,14 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: 'Produk tidak ditemukan' });
       }
 
+      if (!Number.isInteger(quantity) || quantity < 1) {
+        return res.status(400).json({ message: 'Quantity tidak valid' });
+      }
+
+      if (produk.stok <= 0) {
+        return res.status(400).json({ message: 'Stok produk habis', available: 0 });
+      }
+
       // Check if already in cart with same ukuran and warna
       const existing = await prisma.carts.findFirst({
         where: {
@@ -94,13 +102,17 @@ export default async function handler(req, res) {
       });
 
       let cartItem;
+      let adjusted = false;
 
       if (existing) {
-        // Update quantity
+        const desired = existing.quantity + quantity;
+        const finalQty = Math.min(desired, produk.stok);
+        adjusted = finalQty !== desired;
+
         cartItem = await prisma.carts.update({
           where: { id: existing.id },
           data: {
-            quantity: existing.quantity + quantity,
+            quantity: finalQty,
             updatedAt: new Date(),
           },
           include: {
@@ -108,12 +120,14 @@ export default async function handler(req, res) {
           },
         });
       } else {
-        // Create new cart item
+        const finalQty = Math.min(quantity, produk.stok);
+        adjusted = finalQty !== quantity;
+
         cartItem = await prisma.carts.create({
           data: {
             userId,
             produkId,
-            quantity,
+            quantity: finalQty,
             ukuran: ukuran || null,
             warna: warna || null,
             updatedAt: new Date(),
@@ -127,6 +141,8 @@ export default async function handler(req, res) {
       return res.status(201).json({
         message: 'Berhasil ditambahkan ke keranjang',
         cartItem,
+        adjusted,
+        available: produk.stok,
       });
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -144,18 +160,39 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Cart ID dan quantity wajib diisi' });
       }
 
+      if (!Number.isInteger(quantity) || quantity < 0) {
+        return res.status(400).json({ message: 'Quantity tidak valid' });
+      }
+
+      const cartRecord = await prisma.carts.findUnique({ where: { id: cartId } });
+      if (!cartRecord) {
+        return res.status(404).json({ message: 'Item tidak ditemukan di keranjang' });
+      }
+
+      const produk = await prisma.produk.findUnique({ where: { id: cartRecord.produkId } });
+      if (!produk) {
+        return res.status(404).json({ message: 'Produk tidak ditemukan' });
+      }
+
       if (quantity < 1) {
         // Delete if quantity is 0 or less
-        await prisma.carts.delete({
-          where: { id: cartId },
-        });
+        await prisma.carts.delete({ where: { id: cartId } });
         return res.status(200).json({ message: 'Item dihapus dari keranjang' });
       }
 
+      if (produk.stok <= 0) {
+        // Product out of stock, remove item
+        await prisma.carts.delete({ where: { id: cartId } });
+        return res.status(400).json({ message: 'Stok produk habis', available: 0 });
+      }
+
+      const finalQty = Math.min(quantity, produk.stok);
+      const adjusted = finalQty !== quantity;
+
       const cartItem = await prisma.carts.update({
         where: { id: cartId },
-        data: { 
-          quantity,
+        data: {
+          quantity: finalQty,
           updatedAt: new Date(),
         },
         include: {
@@ -166,6 +203,8 @@ export default async function handler(req, res) {
       return res.status(200).json({
         message: 'Keranjang berhasil diupdate',
         cartItem,
+        adjusted,
+        available: produk.stok,
       });
     } catch (error) {
       // eslint-disable-next-line no-console

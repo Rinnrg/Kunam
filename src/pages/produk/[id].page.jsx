@@ -200,6 +200,14 @@ function ProdukDetailPage({ produk, error }) {
         }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        showAlert({
+          type: 'error',
+          title: 'Gagal',
+          message: data.message || 'Gagal menambahkan ke keranjang.',
+        });
+        return;
+      }
       if (data.cartItem) {
         const existingIndex = cart.findIndex(
           (item) => item.produkId === currentProduk.id && item.ukuran === selectedSize && item.warna === selectedColor
@@ -211,11 +219,19 @@ function ProdukDetailPage({ produk, error }) {
         } else {
           setCart([...cart, data.cartItem]);
         }
-        showAlert({
-          type: 'success',
-          title: 'Ditambahkan ke Keranjang',
-          message: 'Produk berhasil ditambahkan ke keranjang Anda.',
-        });
+        if (data.adjusted) {
+          showAlert({
+            type: 'warning',
+            title: 'Jumlah disesuaikan',
+            message: `Jumlah produk disesuaikan ke ${data.cartItem.quantity} karena keterbatasan stok (sisa ${data.available}).`,
+          });
+        } else {
+          showAlert({
+            type: 'success',
+            title: 'Ditambahkan ke Keranjang',
+            message: 'Produk berhasil ditambahkan ke keranjang Anda.',
+          });
+        }
       }
     } catch (err) {
       console.error('Error adding to cart:', err);

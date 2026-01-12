@@ -155,7 +155,7 @@ function CartPage() {
     }
   }, [wishlist, setWishlist, showAlert]);
 
-  const handleCheckout = useCallback(() => {
+  const handleCheckout = useCallback(async () => {
     if (selectedItems.length === 0) {
       showAlert({
         type: 'error',
@@ -164,16 +164,88 @@ function CartPage() {
       });
       return;
     }
-    
+
     // Get selected cart items
-    const selectedCartItems = cart.filter(item => selectedItems.includes(item.id));
-    
+    let selectedCartItems = cart.filter(item => selectedItems.includes(item.id));
+
+    // Validate stock and adjust if needed
+    let hadAdjustments = false;
+
+    for (const item of selectedCartItems) {
+      if (item.produk?.stok <= 0) {
+        // remove from cart (both server and local)
+        try {
+          await fetch('/api/user/cart', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cartId: item.id }),
+          });
+        } catch (e) {
+          // ignore
+        }
+        hadAdjustments = true;
+      } else if (item.quantity > item.produk.stok) {
+        // adjust down to available stock
+        try {
+          const res = await fetch('/api/user/cart', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cartId: item.id, quantity: item.produk.stok }),
+          });
+          const data = await res.json();
+          if (data.cartItem) {
+            // update local cart
+            setCart(prev => prev.map(it => it.id === data.cartItem.id ? data.cartItem : it));
+            hadAdjustments = true;
+          }
+        } catch (e) {
+          // ignore per-item failure for now
+        }
+      }
+    }
+
+    // Refresh cart from server after adjustments
+    let freshCart = cart;
+    if (hadAdjustments) {
+      try {
+        const res = await fetch('/api/user/cart');
+        const d = await res.json();
+        if (d.cart) {
+          setCart(d.cart);
+          setCartTotal(d.total || 0);
+          freshCart = d.cart;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    // Refresh selected items and cart after adjustments
+    selectedCartItems = freshCart.filter(item => selectedItems.includes(item.id) && item.produk?.stok > 0);
+
+    if (hadAdjustments) {
+      showAlert({
+        type: 'warning',
+        title: 'Beberapa item disesuaikan',
+        message: 'Beberapa item telah disesuaikan atau dihapus karena stok terbatas. Silakan periksa kembali sebelum melanjutkan.',
+      });
+    }
+
+    if (selectedCartItems.length === 0) {
+      showAlert({
+        type: 'error',
+        title: 'Tidak Ada Item',
+        message: 'Tidak ada item yang tersedia untuk checkout.',
+      });
+      return;
+    }
+
     // Store checkout items in localStorage for payment page
     localStorage.setItem('checkoutItems', JSON.stringify(selectedCartItems));
-    
+
     // Navigate to payment page
     router.push('/pembayaran');
-  }, [selectedItems, cart, showAlert, router]);
+  }, [selectedItems, cart, showAlert, router, setCart, setCartTotal]);
 
   const handleUpdateQuantity = useCallback(
     async (cartId, newQuantity) => {
@@ -199,10 +271,33 @@ function CartPage() {
             body: JSON.stringify({ cartId, quantity: newQuantity }),
           });
           const data = await res.json();
+          if (!res.ok) {
+            if (data.available === 0) {
+              // Item was removed server-side due to stock
+              const newCart = cart.filter((item) => item.id !== cartId);
+              setCart(newCart);
+              setCartTotal(calculateTotal(newCart));
+              showAlert({
+                type: 'error',
+                title: 'Stok Habis',
+                message: 'Produk telah dihapus dari keranjang karena stok habis.',
+              });
+              return;
+            }
+            showAlert({ type: 'error', title: 'Gagal', message: data.message || 'Gagal memperbarui jumlah produk.' });
+            return;
+          }
           if (data.cartItem) {
             const newCart = cart.map((item) => (item.id === cartId ? data.cartItem : item));
             setCart(newCart);
             setCartTotal(calculateTotal(newCart));
+            if (data.adjusted) {
+              showAlert({
+                type: 'warning',
+                title: 'Jumlah disesuaikan',
+                message: `Jumlah produk disesuaikan ke ${data.cartItem.quantity} karena keterbatasan stok.`,
+              });
+            }
           }
         }
       } catch (error) {
@@ -298,7 +393,8 @@ function CartPage() {
               {groupedCart().map((group) => {
                 const allVariantsSelected = group.variants.every(v => selectedItems.includes(v.id));
                 const someVariantsSelected = group.variants.some(v => selectedItems.includes(v.id));
-                
+                const isInWishlist = wishlist.some(w => w.produkId === group.produkId);
+
                 const handleSelectGroup = () => {
                   if (allVariantsSelected) {
                     // Unselect all variants
@@ -317,8 +413,6 @@ function CartPage() {
                   }
                 };
                 
-                const isInWishlist = wishlist.some(w => w.produkId === group.produkId);
-                
                 return (
                   <div key={group.produkId} className={`${styles.card} ${allVariantsSelected ? styles.selected : ''}`}>
                     <label className={styles.checkboxContainer}>
@@ -332,7 +426,7 @@ function CartPage() {
                         className={styles.checkbox}
                       />
                     </label>
-                    
+
                     <Link href={`/produk/${group.produkId}`} className={styles.imageContainer}>
                       {group.produk?.gambar && (
                         <Image
@@ -346,15 +440,23 @@ function CartPage() {
                     </Link>
 
                     <div className={styles.info}>
-                      <Link href={`/produk/${group.produkId}`} className={styles.name}>
-                        {group.produk?.nama}
-                      </Link>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Link href={`/produk/${group.produkId}`} className={styles.name}>
+                          {group.produk?.nama}
+                        </Link>
+                        <button type="button" className={`${styles.wishlistButton} ${isInWishlist ? 'active' : ''}`} onClick={() => handleToggleWishlist(group.variants[0])} aria-label="Wishlist">
+                          ♥
+                        </button>
+                      </div>
                       
                       <p className={styles.kategori}>{group.produk?.kategori}</p>
 
                       {/* Display all variants */}
-                      {group.variants.map((item, index) => (
+                      {group.variants.map((item) => (
                         <div key={item.id} className={styles.variantRow}>
+                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                           <input type="checkbox" checked={selectedItems.includes(item.id)} onChange={() => handleSelectItem(item.id)} className={styles.checkbox} />
+                         </div>
                           <div className={styles.variantInfo}>
                             {item.ukuran && <span className={styles.variant}>Size: {item.ukuran}</span>}
                             {item.warna && <span className={styles.variant}>Color: {item.warna}</span>}
@@ -382,10 +484,25 @@ function CartPage() {
                                 −
                               </button>
                               <span>{item.quantity}</span>
-                              <button type="button" onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)} aria-label="Tambah">
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateQuantity(item.id, item.quantity + 1)}
+                                aria-label="Tambah"
+                                disabled={item.quantity >= (item.produk?.stok || 0)}
+                              >
                                 +
                               </button>
                             </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem', alignItems: 'center' }}>
+                            <div className={styles.stockInfo}>
+                              {item.produk?.stok <= 0 ? (
+                                <span className={styles.outOfStock}>Habis</span>
+                              ) : (
+                                <span className={styles.inStock}>Sisa: {item.produk?.stok}</span>
+                              )}
+                            </div>
+                            <button type="button" className={styles.removeLink} onClick={() => handleRemove(item.id)}>Hapus</button>
                           </div>
                         </div>
                       ))}
