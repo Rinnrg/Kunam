@@ -542,22 +542,47 @@ function ProdukDetailPage({ produk, error }) {
                       </span>
                     </div>
                     <div className={clsx(styles.detailContent, { [styles.expanded]: expandedSections[`section-${index}`] !== false })}>
-                      {section.gambar && (
-                        <div className={styles.sectionImage}>
-                          <Image 
-                            src={section.gambar} 
-                            alt={section.judul} 
-                            width={600} 
-                            height={400} 
-                            style={{ width: '100%', height: 'auto' }}
-                          />
-                        </div>
-                      )}
-                      <div className={styles.sectionDescription}>
-                        {section.deskripsi.split('\n').map((paragraph, i) => (
-                          <p key={i}>{paragraph}</p>
-                        ))}
-                      </div>
+                      {/* Render section images as small thumbnails with caption on the right */}
+                      {(() => {
+                        const gambarArray = Array.isArray(section.gambar)
+                          ? section.gambar
+                          : (section.gambar ? (typeof section.gambar === 'string' ? [{ url: section.gambar, caption: '' }] : [section.gambar]) : []);
+
+                        if (gambarArray.length > 0) {
+                          return (
+                            <>
+                              <div className={styles.sectionGalleryItems}>
+                                {gambarArray.map((g, idx) => (
+                                  <div key={idx} className={styles.galleryItem}>
+                                    <div className={styles.itemImage}>
+                                      <Image src={g.url} alt={g.caption || section.judul} width={120} height={120} style={{ objectFit: 'cover' }} />
+                                    </div>
+                                    <div className={styles.itemText}>
+                                      <p>{g.caption || ''}</p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {section.deskripsi && (
+                                <div className={styles.sectionDescriptionBelow}>
+                                  {String(section.deskripsi).split('\n').map((paragraph, i) => (
+                                    <p key={i}>{paragraph}</p>
+                                  ))}
+                                </div>
+                              )}
+                            </>
+                          );
+                        }
+
+                        return (
+                          <div className={styles.sectionDescription}>
+                            {(section.deskripsi || '').split('\n').map((paragraph, i) => (
+                              <p key={i}>{paragraph}</p>
+                            ))}
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
                 ))

@@ -108,6 +108,53 @@
           }
         }
       }
+
+      /* New gallery items style: small image left, text right */
+      .sectionGalleryItems {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1rem;
+        align-items: start;
+        width: 100%;
+      }
+
+      .galleryItem {
+        display: flex;
+        gap: 1rem;
+        align-items: flex-start;
+
+        .itemImage {
+          flex: 0 0 96px;
+          width: 96px;
+          height: 96px;
+          border-radius: 6px;
+          overflow: hidden;
+          background: #f5f5f5;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+          }
+        }
+
+        .itemText {
+          flex: 1;
+
+          p {
+            margin: 0;
+            font-size: 0.95rem;
+            color: #333;
+            line-height: 1.6;
+          }
+        }
+      }
+
+      .sectionDescriptionBelow {
+        margin-top: 0.75rem;
+        p { margin: 0; color: #666; font-size: 0.9rem; }
+      }
     }
   }
 }

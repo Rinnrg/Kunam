@@ -219,7 +219,7 @@
 
   h3 {
     font-size: 0.875rem;
-    font-weight: 500;
+    font-weight: 700; // make section title bold
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin: 0;
@@ -292,12 +292,61 @@
     font-size: 0.875rem;
     line-height: 1.6;
     color: #333;
+    font-weight: 400; // description regular
     margin: 0 0 0.5rem;
 
     &:last-child {
       margin-bottom: 0;
     }
   }
+}
+
+/* Small thumbnail + text layout for section images */
+.sectionGalleryItems {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.galleryItem {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.itemImage {
+  flex: 0 0 96px;
+  width: 96px;
+  height: 96px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #f5f5f5;
+
+  img { width: 100%; height: 100%; object-fit: cover; display: block; }
+}
+
+.itemText {
+  flex: 1; 
+  
+  p { 
+    margin: 0; 
+    color: #333; 
+    font-size: 0.95rem; 
+    line-height: 1.6; 
+    font-weight: 400; // description regular
+  } 
+}
+
+.sectionDescriptionBelow { 
+  margin-top: 0.75rem; 
+  
+  p { 
+    margin: 0; 
+    color: #666; 
+    font-size: 0.9rem; 
+    font-weight: 400; // description regular
+  } 
 }
 
 // ===== RIGHT COLUMN: PRODUCT INFO (STICKY) =====

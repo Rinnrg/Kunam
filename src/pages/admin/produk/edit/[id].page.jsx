@@ -308,6 +308,13 @@ export default function EditProduk() {
 
     setIsSubmitting(true);
 
+    // Validate sections: each section must have a title
+    if (formData.sections && formData.sections.some((s) => !s.judul || !String(s.judul).trim())) {
+      setError('Setiap section harus memiliki judul');
+      setIsSubmitting(false);
+      return;
+    }
+    
     try {
       // Upload new images and videos if any
       const uploadedImageUrls = await uploadImages();
@@ -490,7 +497,7 @@ export default function EditProduk() {
           <label className={styles.label}>
             Deskripsi / Product Sections
             <span className={styles.helpText}>
-              Sections akan ditampilkan sebagai detail produk di bawah gallery foto
+              Sections akan ditampilkan sebagai detail produk di bawah gallery foto. Deskripsi tiap section bersifat opsional.
             </span>
           </label>
           <SectionsEditor

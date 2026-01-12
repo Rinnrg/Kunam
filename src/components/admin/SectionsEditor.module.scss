@@ -197,6 +197,27 @@
           color: #666;
         }
 
+        .sectionTools {
+          margin-top: 0.5rem;
+          display: flex;
+          gap: 0.5rem;
+
+          button {
+            padding: 0.35rem 0.6rem;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+          }
+        }
+
+        .activeTool {
+          background: #007bff;
+          color: #fff;
+          border-color: #007bff;
+        }
+
         .imagePreview {
           margin-top: 0.75rem;
           border: 1px solid #ddd;

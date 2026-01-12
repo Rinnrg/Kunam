@@ -31,10 +31,10 @@ async function updateProduk(req, res, id) {
 
     // Validasi setiap section
     if (sections) {
-      const hasInvalidSection = sections.some((section) => !section.judul || !section.deskripsi);
+      const hasInvalidSection = sections.some((section) => !section.judul);
       if (hasInvalidSection) {
         return res.status(400).json({
-          message: 'Setiap section harus memiliki judul dan deskripsi',
+          message: 'Setiap section harus memiliki judul',
         });
       }
     }

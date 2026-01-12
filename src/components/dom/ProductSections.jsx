@@ -23,46 +23,36 @@ export default function ProductSections({ sections }) {
           ? section.gambar
           : (section.gambar ? (typeof section.gambar === 'string' ? [{ url: section.gambar, caption: '' }] : [section.gambar]) : []);
 
-        const imageUrl = gambarArray.length > 0 ? (gambarArray[0].url || null) : null;
-        const imageCaption = gambarArray.length > 0 ? (gambarArray[0].caption || null) : null;
-
         return (
           <div key={index} className={styles.section}>
             <h3 className={styles.sectionHeading}>{section.judul}</h3>
 
             <div className={styles.sectionContent}>
-              {imageUrl && (
-                <div className={styles.sectionImage}>
-                  <Image
-                    src={imageUrl}
-                    alt={section.judul}
-                    width={300}
-                    height={200}
-                    objectFit="cover"
-                    className={styles.image}
-                  />
+              {gambarArray.length > 0 ? (
+                <div className={styles.sectionGalleryItems}>
+                  {gambarArray.map((g, idx) => (
+                    <div key={idx} className={styles.galleryItem}>
+                      <div className={styles.itemImage}>
+                        <Image src={g.url} alt={g.caption || section.judul} width={96} height={96} style={{ objectFit: 'cover' }} />
+                      </div>
+                      <div className={styles.itemText}>
+                        <p>{g.caption || section.deskripsi || ''}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className={`${styles.sectionDescription}`}>
+                  <p>{section.deskripsi}</p>
                 </div>
               )}
 
-              <div className={`${styles.sectionDescription} ${imageUrl ? styles.withImage : ''}`}>
-                {/* Image caption (appears to the right of the image) */}
-                {imageCaption && (
-                  <div className={styles.imageCaption}>{imageCaption}</div>
-                )}
-
-                <p>{section.deskripsi}</p>
-
-                {/* Thumbnails if there are multiple images in this section */}
-                {gambarArray.length > 1 && (
-                  <div className={styles.sectionGalleryThumbs}>
-                    {gambarArray.map((g, idx) => (
-                      <div key={idx} className={styles.sectionThumb}>
-                        <Image src={g.url} alt={`thumb-${idx}`} width={80} height={60} style={{ objectFit: 'cover' }} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* If there is a general section description and images exist, display it below the items */}
+              {gambarArray.length > 0 && section.deskripsi && (
+                <div className={styles.sectionDescriptionBelow}>
+                  <p>{section.deskripsi}</p>
+                </div>
+              )}
             </div>
           </div>
         );

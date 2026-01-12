@@ -244,6 +244,12 @@ export default function CreateProduk() {
       }
     }
 
+    // Validate sections: each section must have a title
+    if (formData.sections && formData.sections.some((s) => !s.judul || !String(s.judul).trim())) {
+      setError('Setiap section harus memiliki judul');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -424,7 +430,7 @@ export default function CreateProduk() {
           <label className={styles.label}>
             Deskripsi / Product Sections
             <span className={styles.helpText}>
-              Sections akan ditampilkan sebagai detail produk di bawah gallery foto
+              Sections akan ditampilkan sebagai detail produk di bawah gallery foto. Deskripsi tiap section bersifat opsional.
             </span>
           </label>
           <SectionsEditor
